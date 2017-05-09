@@ -26,18 +26,20 @@ def handle(msg):
         date = now.strftime("%m-%d-%Y")
 
     if command_input == '/duca':
-        msg = '🗓️Mensa Duca - %s\n' % date
         payload = {'mensa': 'DUCA', 'da': date, 'a': date}
-        msg += getMenu(payload)
+        msg = getMenu(payload)
 
-        bot.sendMessage(chat_id, msg)
+        bot.sendMessage(chat_id, '🗓️Mensa Duca - {0}\n\n{1}'.format(date,
+                        msg[0]))
+        bot.sendMessage(chat_id, msg[1])
 
     if command_input == '/tridente':
-        msg = '🗓️Mensa Tridente - %s\n' % date
         payload = {'mensa': 'TRIDENTE', 'da': date, 'a': date}
-        msg += getMenu(payload)
+        msg = getMenu(payload)
 
-        bot.sendMessage(chat_id, msg)
+        bot.sendMessage(chat_id, '🗓️Mensa Tridente - {0}\n\n{1}'.format(date,
+                        msg[0]))
+        bot.sendMessage(chat_id, msg[1])
 
     if command_input == '/allergeni':
         bot.sendMessage(chat_id,
@@ -56,8 +58,8 @@ def getMenu(payload):
     r = requests.post("http://menu.ersurb.it/menum/menu.asp", data=payload)
 
     status = False
-    rvp = '\n☀️Pranzo:\n'
-    rvc = '_______________________________\n\n🌙Cena:\n'
+    rvp = '☀️Pranzo:\n'
+    rvc = '🌙Cena:\n'
     rv0 = '\n🍝Primi:\n'
     rv1 = '\n🍖Secondi:\n'
     rv2 = '\n🍟Contorno:\n'
@@ -81,21 +83,21 @@ def getMenu(payload):
                 rv3 = '\n🍨Frutta/Dolce:\n'
 
             if m[1].replace('"', '') == '10':
-                rv0 += m[2].replace('"', '') + '\n'
+                rv0 += ' • ' + m[2].replace('"', '') + '\n'
             elif m[1].replace('"', '') == '20':
-                rv1 += m[2].replace('"', '') + '\n'
+                rv1 += ' • ' + m[2].replace('"', '') + '\n'
             elif m[1].replace('"', '') == '30':
-                rv2 += m[2].replace('"', '') + '\n'
+                rv2 += ' • ' + m[2].replace('"', '') + '\n'
             elif m[1].replace('"', '') == '40':
-                rv3 += m[2].replace('"', '') + '\n'
+                rv3 += ' • ' + m[2].replace('"', '') + '\n'
 
         except:
             pass
 
     rvc += rv0 + rv1 + rv2 + rv3
-    msg = rvp + rvc
+    # msg = rvp + rvc
 
-    return msg
+    return [rvp, rvc]
 
 
 # Main
