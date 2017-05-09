@@ -23,10 +23,12 @@ def handle(msg):
         command_input = command_input.split()[0]
     except:
         now = datetime.datetime.now()
-        date = now.strftime("%m-%d-%Y")
+        date = now.strftime("%d-%m-%Y")
 
     if command_input == '/duca':
-        payload = {'mensa': 'DUCA', 'da': date, 'a': date}
+        date1 = convertDate(date)
+
+        payload = {'mensa': 'DUCA', 'da': date1, 'a': date1}
         msg = getMenu(payload)
 
         bot.sendMessage(chat_id, '🗓️Mensa Duca - {0}\n\n{1}'.format(date,
@@ -34,7 +36,9 @@ def handle(msg):
         bot.sendMessage(chat_id, msg[1])
 
     if command_input == '/tridente':
-        payload = {'mensa': 'TRIDENTE', 'da': date, 'a': date}
+        date1 = convertDate(date)
+
+        payload = {'mensa': 'TRIDENTE', 'da': date1, 'a': date1}
         msg = getMenu(payload)
 
         bot.sendMessage(chat_id, '🗓️Mensa Tridente - {0}\n\n{1}'.format(date,
@@ -90,14 +94,19 @@ def getMenu(payload):
                 rv2 += ' • ' + m[2].replace('"', '') + '\n'
             elif m[1].replace('"', '') == '40':
                 rv3 += ' • ' + m[2].replace('"', '') + '\n'
-
         except:
             pass
 
     rvc += rv0 + rv1 + rv2 + rv3
-    # msg = rvp + rvc
 
     return [rvp, rvc]
+
+
+def convertDate(date):
+    x, y, z = date.split('-')
+    rv = y + '-' + x + '-' + z
+
+    return rv
 
 
 # Main
