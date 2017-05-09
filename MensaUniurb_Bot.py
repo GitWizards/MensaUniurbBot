@@ -43,6 +43,10 @@ def handle(msg):
         bot.sendMessage(chat_id,
                         'http://menu.ersurb.it/menum/Allergeni_legenda.png')
 
+    if command_input == '/credits':
+        bot.sendMessage(chat_id, "https://github.com/Radeox"
+                                 "https://github.com/Fast0n")
+
     if command_input == '/status':
         bot.sendMessage(chat_id, "Running :)")
 
