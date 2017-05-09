@@ -44,7 +44,8 @@ def handle(msg):
                         'http://menu.ersurb.it/menum/Allergeni_legenda.png')
 
     if command_input == '/credits':
-        bot.sendMessage(chat_id, "https://github.com/Radeox"
+        bot.sendMessage(chat_id, "Developed by:\n"
+                                 "https://github.com/Radeox\n"
                                  "https://github.com/Fast0n")
 
     if command_input == '/status':
