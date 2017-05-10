@@ -73,12 +73,21 @@ def getMenu(payload):
 
     for link in soup.find_all('a'):
         try:
+            # Get ID
             app = link.get('onclick')
-            m = re.findall('(".*?")', app)
+            idi = re.findall('(".*?")', app)[1].replace('"', '')
 
-            if m[1].replace('"', '') == '40' and not status:
+            # Get name
+            name = str(re.findall('(">.*?<\/)', str(link)))
+
+            # Remove useless chars
+            name = name.replace('''['">''', '').replace(
+                                "</']", '').replace('\\', '')
+
+            # Check if launch/dinner
+            if idi == '40' and not status:
                 status = True
-            elif m[1].replace('"', '') == '10' and status:
+            elif idi == '10' and status:
                 status = False
                 rvp += rv0 + rv1 + rv2 + rv3
                 rv0 = '\n🍝Primi:\n'
@@ -86,15 +95,18 @@ def getMenu(payload):
                 rv2 = '\n🍟Contorno:\n'
                 rv3 = '\n🍨Frutta/Dolce:\n'
 
-            if m[1].replace('"', '') == '10':
-                rv0 += ' • ' + m[2].replace('"', '') + '\n'
-            elif m[1].replace('"', '') == '20':
-                rv1 += ' • ' + m[2].replace('"', '') + '\n'
-            elif m[1].replace('"', '') == '30':
-                rv2 += ' • ' + m[2].replace('"', '') + '\n'
-            elif m[1].replace('"', '') == '40':
-                rv3 += ' • ' + m[2].replace('"', '') + '\n'
+            # Check plate type
+            if idi == '10':
+                rv0 += ' • ' + name + '\n'
+            elif idi == '20':
+                rv1 += ' • ' + name + '\n'
+            elif idi == '30':
+                rv2 += ' • ' + name + '\n'
+            elif idi == '40':
+                rv3 += ' • ' + name + '\n'
         except:
+            e = sys.exc_info()[0]
+            print("Error: %s" % e)
             pass
 
     rvc += rv0 + rv1 + rv2 + rv3
