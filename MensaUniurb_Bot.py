@@ -30,10 +30,17 @@ def handle(msg):
 
         payload = {'mensa': 'DUCA', 'da': date1, 'a': date1}
         msg = getMenu(payload)
-
-        bot.sendMessage(chat_id, '🗓️Mensa Duca - {0}\n\n{1}'.format(date,
-                        msg[0]))
-        bot.sendMessage(chat_id, msg[1])
+        if msg:
+            bot.sendMessage(chat_id, '🗓️Mensa Duca - {0}\n\n{1}'.format(date,
+                            msg[0]))
+            bot.sendMessage(chat_id, msg[1])
+        else:
+            bot.sendMessage(chat_id, '🗓️Menu Mensa Duca - %s\n\n'
+                                     'Non disponibile.\n\n'
+                                     '⚠️Attenzione⚠️\n'
+                                     'Sabato e domenica il ristorante il /duca'
+                                     ' non è aperto, quindi, non troverete '
+                                     'nessun menù.' % date)
 
     if command_input == '/tridente':
         date1 = convertDate(date)
@@ -41,9 +48,13 @@ def handle(msg):
         payload = {'mensa': 'TRIDENTE', 'da': date1, 'a': date1}
         msg = getMenu(payload)
 
-        bot.sendMessage(chat_id, '🗓️Mensa Tridente - {0}\n\n{1}'.format(date,
-                        msg[0]))
-        bot.sendMessage(chat_id, msg[1])
+        if msg:
+            bot.sendMessage(chat_id, '🗓️Mensa Tridente - {0}\n\n{1}'.format(
+                            date, msg[0]))
+            bot.sendMessage(chat_id, msg[1])
+        else:
+            bot.sendMessage(chat_id, '🗓️Menu Mensa Tridente - %s\n\n'
+                                     'Non disponibile.' % date)
 
     if command_input == '/allergeni':
         bot.sendMessage(chat_id,
@@ -61,6 +72,7 @@ def handle(msg):
 def getMenu(payload):
     r = requests.post("http://menu.ersurb.it/menum/menu.asp", data=payload)
 
+    empty = True
     status = False
     rvp = '☀️Pranzo:\n'
     rvc = '🌙Cena:\n'
@@ -98,12 +110,16 @@ def getMenu(payload):
             # Check plate type
             if idi == '10':
                 rv0 += ' • ' + name + '\n'
+                empty = False
             elif idi == '20':
                 rv1 += ' • ' + name + '\n'
+                empty = False
             elif idi == '30':
                 rv2 += ' • ' + name + '\n'
+                empty = False
             elif idi == '40':
                 rv3 += ' • ' + name + '\n'
+                empty = False
         except:
             e = sys.exc_info()[0]
             print("Error: %s" % e)
@@ -111,7 +127,10 @@ def getMenu(payload):
 
     rvc += rv0 + rv1 + rv2 + rv3
 
-    return [rvp, rvc]
+    if not empty:
+        return [rvp, rvc]
+    else:
+        return
 
 
 def convertDate(date):
