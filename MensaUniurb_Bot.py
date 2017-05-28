@@ -9,12 +9,21 @@ from bs4 import BeautifulSoup
 from settings import token, start_msg
 
 
+# Message handle funtion
 def handle(msg):
     content_type, chat_type, chat_id = telepot.glance(msg)
 
     chat_id = msg['chat']['id']
     command_input = msg['text']
 
+    # Save some statistics on usage
+    try:
+        f = open("log.txt", "a")
+        f.write("{0} - {1}\n".format(chat_id, command_input))
+    except:
+        pass
+
+    # Check which command was submitted
     if command_input == '/start':
         bot.sendMessage(chat_id, start_msg)
 
@@ -69,6 +78,7 @@ def handle(msg):
         bot.sendMessage(chat_id, "Running :)")
 
 
+# Get the menu from the ERSU page
 def getMenu(payload):
     r = requests.post("http://menu.ersurb.it/menum/menu.asp", data=payload)
 
@@ -133,6 +143,7 @@ def getMenu(payload):
         return
 
 
+# Simple function covert MM-DD-YYYY to DD-MM-YYYY
 def convertDate(date):
     x, y, z = date.split('-')
     rv = y + '-' + x + '-' + z
