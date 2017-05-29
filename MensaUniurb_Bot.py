@@ -6,7 +6,7 @@ import re
 import datetime
 from time import sleep
 from bs4 import BeautifulSoup
-from settings import token, start_msg
+from settings import token, start_msg, stats_password
 
 
 # Message handle funtion
@@ -15,13 +15,6 @@ def handle(msg):
 
     chat_id = msg['chat']['id']
     command_input = msg['text']
-
-    # Save some statistics on usage
-    try:
-        f = open("log.txt", "a")
-        f.write("{0} - {1}\n".format(chat_id, command_input))
-    except:
-        pass
 
     # Check which command was submitted
     if command_input == '/start':
@@ -35,6 +28,7 @@ def handle(msg):
         date = now.strftime("%d-%m-%Y")
 
     if command_input == '/duca':
+        printLog("{0} - {1}".format(chat_id, command_input))
         date1 = convertDate(date)
 
         payload = {'mensa': 'DUCA', 'da': date1, 'a': date1}
@@ -52,6 +46,7 @@ def handle(msg):
                                      'nessun menù.' % date)
 
     if command_input == '/tridente':
+        printLog("{0} - {1}".format(chat_id, command_input))
         date1 = convertDate(date)
 
         payload = {'mensa': 'TRIDENTE', 'da': date1, 'a': date1}
@@ -66,16 +61,28 @@ def handle(msg):
                                      'Non disponibile.' % date)
 
     if command_input == '/allergeni':
+        printLog("{0} - {1}".format(chat_id, command_input))
         bot.sendMessage(chat_id,
                         'http://menu.ersurb.it/menum/Allergeni_legenda.png')
 
     if command_input == '/credits':
+        printLog("{0} - {1}".format(chat_id, command_input))
         bot.sendMessage(chat_id, "Developed by:\n"
                                  "https://github.com/Radeox\n"
                                  "https://github.com/Fast0n")
 
-    if command_input == '/status':
-        bot.sendMessage(chat_id, "Running :)")
+    if command_input == '/stats':
+        # Check stats password
+        if date == stats_password:
+            f = open("log.txt", "r")
+            msg = 'Statistics on use:\n'
+
+            for line in f.readlines():
+                msg += line
+
+            bot.sendMessage(chat_id, msg)
+        else:
+            bot.sendMessage(chat_id, "⚠️Password errata!⚠️")
 
 
 # Get the menu from the ERSU page
@@ -143,6 +150,16 @@ def getMenu(payload):
         return
 
 
+# Save some statistics on usage
+def printLog(msg):
+    try:
+        f = open("log.txt", "a")
+        f.write("{0}\n".format(msg))
+    except:
+        print("Error opening log file!")
+        pass
+
+
 # Simple function covert MM-DD-YYYY to DD-MM-YYYY
 def convertDate(date):
     x, y, z = date.split('-')
@@ -174,5 +191,7 @@ try:
 
     while 1:
         sleep(10)
+
 finally:
+    # Remove PID file on exit
     os.unlink(pidfile)

@@ -8,3 +8,5 @@ start_msg = "Benvenuto su @mensauniurb_bot\n"\
             "⚠️Attenzione⚠️\n"\
             "Sabato e domenica il ristorante il /duca non è aperto, quindi, non troverete nessun menù.\n\n"\
             "Il bot è stato creato in modo non ufficiale né ERSU Urbino né UNIURB sono responsabili di tale creazione."
+
+stats_password = 'PASSWORD'
