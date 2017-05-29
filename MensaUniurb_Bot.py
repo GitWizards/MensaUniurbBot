@@ -93,7 +93,7 @@ def getMenu(payload):
 
     soup = BeautifulSoup(r.text, 'html.parser')
 
-    for link in soup.find_all('a'):
+    for link in soup.find_all('a')[1:]:
         try:
             # Get ID
             app = link.get('onclick')
