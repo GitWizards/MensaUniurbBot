@@ -74,13 +74,17 @@ def handle(msg):
     if command_input == '/stats':
         # Check stats password
         if date == stats_password:
-            f = open("log.txt", "r")
-            msg = 'Statistics on use:\n'
+            try:
+                f = open("log.txt", "r")
+                msg = 'Statistics on use:\n'
 
-            for line in f.readlines():
-                msg += line
+                for line in f.readlines():
+                    msg += line
 
-            bot.sendMessage(chat_id, msg)
+                bot.sendMessage(chat_id, msg)
+            finally:
+                f.close()
+
         else:
             bot.sendMessage(chat_id, "⚠️Password errata!⚠️")
 
@@ -155,9 +159,9 @@ def printLog(msg):
     try:
         f = open("log.txt", "a")
         f.write("{0}\n".format(msg))
-    except:
+    finally:
         print("Error opening log file!")
-        pass
+        f.close()
 
 
 # Simple function covert MM-DD-YYYY to DD-MM-YYYY
