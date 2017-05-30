@@ -159,8 +159,9 @@ def printLog(msg):
     try:
         f = open("log.txt", "a")
         f.write("{0}\n".format(msg))
-    finally:
+    except:
         print("Error opening log file!")
+    finally:
         f.close()
 
 
