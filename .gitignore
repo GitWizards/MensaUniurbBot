@@ -3,3 +3,4 @@ settings.py
 *.pyc
 *.swp
 log.txt
+users.txt

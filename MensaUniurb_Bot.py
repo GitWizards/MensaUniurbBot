@@ -79,11 +79,20 @@ def handle(msg):
                 msg = 'Statistics on use:\n'
 
                 for line in f.readlines():
+                    # Check if this user is known
+                    tmp = getUserName(line.split()[0])
+
+                    # Replace with name if exists
+                    if tmp is not '':
+                        line = line.replace(line.split()[0], tmp)
+
+                    # Finally get messagge
                     msg += line
 
                 bot.sendMessage(chat_id, msg)
-            finally:
                 f.close()
+            except FileNotFoundError:
+                pass
 
         else:
             bot.sendMessage(chat_id, "⚠️Password errata!⚠️")
@@ -159,10 +168,27 @@ def printLog(msg):
     try:
         f = open("log.txt", "a")
         f.write("{0}\n".format(msg))
+        f.close()
     except:
         print("Error opening log file!")
-    finally:
+
+
+# Replace known users in stats
+def getUserName(chat_id):
+    rv = ''
+
+    try:
+        f = open("users.txt")
+
+        for line in f.readlines():
+            if line.split()[0] == chat_id:
+                rv = line.split()[1]
+
         f.close()
+    except FileNotFoundError:
+        pass
+
+    return rv
 
 
 # Simple function covert MM-DD-YYYY to DD-MM-YYYY
