@@ -87,7 +87,7 @@ def handle(msg):
 
                     # Replace with name if exists
                     if tmp is not '':
-                        line = line.replace(line.split()[0], tmp)
+                        line = line.replace(line.split()[1], tmp)
 
                     # Finally get messagge
                     msg += line
