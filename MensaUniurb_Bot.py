@@ -5,6 +5,8 @@ import requests
 import re
 import datetime
 import calendar
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from time import sleep
 from bs4 import BeautifulSoup
