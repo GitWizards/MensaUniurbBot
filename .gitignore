@@ -1,6 +1,7 @@
 __pycache__
 settings.py
-*.pyc
-*.swp
 log.txt
 users.txt
+plot.png
+*.pyc
+*.swp

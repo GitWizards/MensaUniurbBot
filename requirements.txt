@@ -1,3 +1,4 @@
 telepot
 requests
+matplotlib
 bs4

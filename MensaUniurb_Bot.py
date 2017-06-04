@@ -4,6 +4,8 @@ import telepot
 import requests
 import re
 import datetime
+import calendar
+import matplotlib.pyplot as plt
 from time import sleep
 from bs4 import BeautifulSoup
 from settings import token, start_msg, stats_password
@@ -65,11 +67,64 @@ def handle(msg):
         bot.sendMessage(chat_id,
                         'http://menu.ersurb.it/menum/Allergeni_legenda.png')
 
-    if command_input == '/credits':
+    if command_input == '/crediti':
         printLog("{0} - {1}".format(chat_id, command_input))
         bot.sendMessage(chat_id, "Developed by:\n"
                                  "https://github.com/Radeox\n"
                                  "https://github.com/Fast0n")
+
+    if command_input == '/statistiche':
+        try:
+            f = open("log.txt", "r")
+
+            # Get current month days
+            now = datetime.datetime.now()
+            days = calendar.monthrange(now.year, now.month)[1]
+
+            # Create month array
+            month_counters = []
+            radius = []
+
+            for i in range(days):
+                month_counters.append(0)
+                radius.append(1)
+
+            # Read input file
+            for line in f.readlines():
+                date = line.split()[4]
+                day, month, year = date.split('/')
+
+                if int(year) == now.year and int(month) == now.month:
+                    month_counters[int(day)] += 1
+
+            # Clear plot
+            plt.clf()
+
+            # Add titles
+            plt.title("Statistiche d'uso {0}/{1}".format(month, year))
+            plt.xlabel('Giorni del mese')
+            plt.ylabel('Utilizzi')
+
+            # Set grid
+            plt.grid()
+
+            # Add plots
+            plt.plot(month_counters, color='#0099ff', linewidth=2.5)
+            plt.plot(month_counters, 'o', color='#0099ff')
+            plt.fill(radius, month_counters)
+            x = range(days)
+            plt.fill_between(x, month_counters, 0, color='#99d6ff')
+
+            # Save
+            plt.savefig('plot.png')
+            f = open('plot.png', 'rb')
+
+            # Send to user
+            bot.sendPhoto(chat_id, f)
+
+            f.close()
+        except FileNotFoundError:
+            pass
 
     if command_input == '/stats':
         # Check stats password
@@ -174,7 +229,7 @@ def printLog(msg):
         now = datetime.datetime.now()
         date = now.strftime("%H:%M %d/%m/%Y")
 
-        f.write("{0} [{1}]\n".format(msg, date))
+        f.write("{0} {1}\n".format(msg, date))
         f.close()
     except:
         print("Error opening log file!")
