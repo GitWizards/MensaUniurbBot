@@ -78,7 +78,10 @@ def handle(msg):
                 f = open("log.txt", "r")
                 msg = 'Statistics on use:\n'
 
-                for line in f.readlines():
+                for counter, line in enumerate(f.readlines(), start=1):
+                    # Add counter
+                    line = str(counter) + ') ' + line
+
                     # Check if this user is known
                     tmp = getUserName(line.split()[0])
 
@@ -167,7 +170,11 @@ def getMenu(payload):
 def printLog(msg):
     try:
         f = open("log.txt", "a")
-        f.write("{0}\n".format(msg))
+
+        now = datetime.datetime.now()
+        date = now.strftime("%H:%M %d/%m/%Y")
+
+        f.write("{0} [{1}]\n".format(msg, date))
         f.close()
     except:
         print("Error opening log file!")
