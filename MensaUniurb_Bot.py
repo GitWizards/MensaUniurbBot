@@ -83,7 +83,7 @@ def handle(msg):
                     line = str(counter) + ') ' + line
 
                     # Check if this user is known
-                    tmp = getUserName(line.split()[0])
+                    tmp = getUserName(line.split()[1])
 
                     # Replace with name if exists
                     if tmp is not '':
