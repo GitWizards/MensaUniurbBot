@@ -104,7 +104,7 @@ def handle(msg):
                 day, month, year = date.split('/')
 
                 if int(year) == now.year and int(month) == now.month:
-                    month_counters[int(day) + 1] += 1
+                    month_counters[int(day)] += 1
 
             # Clear plot
             plt.clf()
