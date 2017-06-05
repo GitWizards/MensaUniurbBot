@@ -5,12 +5,13 @@ import requests
 import re
 import datetime
 import calendar
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
 from time import sleep
 from bs4 import BeautifulSoup
 from settings import token, start_msg, stats_password
+
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 
 # Message handle funtion
@@ -41,6 +42,8 @@ def handle(msg):
             bot.sendMessage(chat_id, '🗓️Mensa Duca - {0}\n\n{1}'.format(date,
                             msg[0]))
             bot.sendMessage(chat_id, msg[1])
+            bot.sendMessage(chat_id,
+                            "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
         else:
             bot.sendMessage(chat_id, '🗓️Menu Mensa Duca - %s\n\n'
                                      'Non disponibile.\n\n'
@@ -60,6 +63,8 @@ def handle(msg):
             bot.sendMessage(chat_id, '🗓️Mensa Tridente - {0}\n\n{1}'.format(
                             date, msg[0]))
             bot.sendMessage(chat_id, msg[1])
+            bot.sendMessage(chat_id,
+                            "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
         else:
             bot.sendMessage(chat_id, '🗓️Menu Mensa Tridente - %s\n\n'
                                      'Non disponibile.' % date)
@@ -83,6 +88,7 @@ def handle(msg):
             # Get current month days
             now = datetime.datetime.now()
             days = calendar.monthrange(now.year, now.month)[1]
+            days += 1
 
             # Create month array
             month_counters = []
@@ -98,7 +104,7 @@ def handle(msg):
                 day, month, year = date.split('/')
 
                 if int(year) == now.year and int(month) == now.month:
-                    month_counters[int(day)] += 1
+                    month_counters[int(day) + 1] += 1
 
             # Clear plot
             plt.clf()
@@ -106,6 +112,7 @@ def handle(msg):
             # Add titles
             plt.title("Statistiche d'uso {0}/{1}".format(month, year))
             plt.xlabel('Giorni del mese')
+            plt.xlim([1, days])
             plt.ylabel('Utilizzi')
 
             # Set grid
@@ -156,7 +163,7 @@ def handle(msg):
                 pass
 
         else:
-            bot.sendMessage(chat_id, "⚠️Password errata!⚠️")
+            bot.sendMessage(chat_id, "⚠️ Password errata! ⚠️")
 
 
 # Get the menu from the ERSU page
