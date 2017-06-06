@@ -76,9 +76,16 @@ def handle(msg):
 
     if command_input == '/crediti':
         printLog("{0} - {1}".format(chat_id, command_input))
-        bot.sendMessage(chat_id, "Developed by:\n"
+        bot.sendMessage(chat_id, "Sviluppato da:\n"
                                  "https://github.com/Radeox\n"
                                  "https://github.com/Fast0n")
+
+    if command_input == '/dona':
+        printLog("{0} - {1}".format(chat_id, command_input))
+        bot.sendMessage(chat_id, "🍺Se sei soddisfatto offri una birra agli "
+                                 "sviluppatori:🍺\n"
+                                 "https://www.gitcheese.com/donate/"
+                                 "users/9751015/repos/90749559")
 
     if command_input == '/statistiche':
         try:
