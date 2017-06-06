@@ -82,7 +82,6 @@ def handle(msg):
 
     if command_input == '/statistiche':
         try:
-            printLog("{0} - {1}".format(chat_id, command_input))
             f = open("log.txt", "r")
 
             # Get current month days
