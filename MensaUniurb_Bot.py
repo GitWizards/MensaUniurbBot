@@ -8,6 +8,7 @@ import calendar
 from time import sleep
 from bs4 import BeautifulSoup
 from settings import token, start_msg, stats_password
+from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 
 import matplotlib
 matplotlib.use('Agg')
@@ -82,10 +83,11 @@ def handle(msg):
 
     if command_input == '/dona':
         printLog("{0} - {1}".format(chat_id, command_input))
-        bot.sendMessage(chat_id, "🍺Se sei soddisfatto offri una birra agli "
-                                 "sviluppatori:🍺\n"
-                                 "https://www.gitcheese.com/donate/"
-                                 "users/9751015/repos/90749559")
+        keyboard = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text='Dona', url='https://www.gitcheese.com/donate/users/9751015/repos/90749559')],
+        ])
+        bot.sendMessage(chat_id, "🍺 Se sei soddisfatto offri una birra \n"
+                                 " agli sviluppatori 🍺\n", reply_markup=keyboard)
 
     if command_input == '/statistiche':
         try:
