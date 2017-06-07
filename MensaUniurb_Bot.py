@@ -27,6 +27,7 @@ def handle(msg):
         bot.sendMessage(chat_id, start_msg)
 
     try:
+        news = command_input.split()[2:]
         date = command_input.split()[1]
         command_input = command_input.split()[0]
     except:
@@ -84,7 +85,9 @@ def handle(msg):
     if command_input == '/dona':
         printLog("{0} - {1}".format(chat_id, command_input))
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text='Dona', url='https://www.gitcheese.com/donate/users/9751015/repos/90749559')],
+            [InlineKeyboardButton(text='Dona',
+                                  url='https://www.gitcheese.com/donate/\
+                                  users/9751015/repos/90749559')],
         ])
         bot.sendMessage(chat_id, "🍺 Se sei soddisfatto offri una birra agli"
                                  " sviluppatori 🍺\n", reply_markup=keyboard)
@@ -155,13 +158,6 @@ def handle(msg):
                     # Add counter
                     line = str(counter) + ') ' + line
 
-                    # Check if this user is known
-                    tmp = getUserName(line.split()[1])
-
-                    # Replace with name if exists
-                    if tmp is not '':
-                        line = line.replace(line.split()[1], tmp)
-
                     # Telegram bots cant send more
                     # than 4000 characters in 1 message
                     if (counter % 100) == 0:
@@ -171,7 +167,7 @@ def handle(msg):
                     else:
                         msg += line
 
-                # Send what is left 
+                # Send what is left
                 if msg is not '':
                     bot.sendMessage(chat_id, msg)
 
@@ -180,6 +176,27 @@ def handle(msg):
                 print("Log file not found")
                 pass
 
+        else:
+            bot.sendMessage(chat_id, "⚠️ Password errata! ⚠️")
+
+    if command_input == '/sendnews':
+        # Check stats password
+        if date == stats_password:
+            # Regenrate user list
+            f = open("log.txt", "r")
+
+            for user in f.readlines():
+                registerClientID(user.split()[0])
+
+            msg = ''
+
+            # Concat message
+            for s in news:
+                s = str(s).replace('<br>', '\n')
+                msg += s + ' '
+
+            # Send to all users
+            sendToAll(msg)
         else:
             bot.sendMessage(chat_id, "⚠️ Password errata! ⚠️")
 
@@ -249,6 +266,42 @@ def getMenu(payload):
         return
 
 
+# Register the client
+def registerClientID(chat_id):
+    try:
+        f = open("users.txt", "r+")
+    except IOError:
+        f = open("users.txt", "w")
+        f.write(str(chat_id) + '\n')
+        f.close()
+        return True
+
+    insert = 1
+
+    for client in f:
+        if client.replace('\n', '') == str(chat_id):
+            insert = 0
+
+    if insert:
+        f.write(str(chat_id) + '\n')
+        f.close()
+        return True
+
+    f.close()
+    return False
+
+
+# Send the msg to all registred clients
+def sendToAll(msg):
+    try:
+        f = open("users.txt", "r")
+    except IOError:
+        return
+
+    for client in f.readlines():
+        bot.sendMessage(client, msg)
+
+
 # Save some statistics on usage
 def printLog(msg):
     try:
@@ -261,24 +314,6 @@ def printLog(msg):
         f.close()
     except:
         print("Error opening log file!")
-
-
-# Replace known users in stats
-def getUserName(chat_id):
-    rv = ''
-
-    try:
-        f = open("users.txt")
-
-        for line in f.readlines():
-            if line.split()[0] == chat_id:
-                rv = line.split()[1]
-
-        f.close()
-    except FileNotFoundError:
-        pass
-
-    return rv
 
 
 # Simple function covert MM-DD-YYYY to DD-MM-YYYY
