@@ -86,8 +86,8 @@ def handle(msg):
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text='Dona', url='https://www.gitcheese.com/donate/users/9751015/repos/90749559')],
         ])
-        bot.sendMessage(chat_id, "🍺 Se sei soddisfatto offri una birra \n"
-                                 " agli sviluppatori 🍺\n", reply_markup=keyboard)
+        bot.sendMessage(chat_id, "🍺 Se sei soddisfatto offri una birra agli"
+                                 " sviluppatori 🍺\n", reply_markup=keyboard)
 
     if command_input == '/statistiche':
         try:
