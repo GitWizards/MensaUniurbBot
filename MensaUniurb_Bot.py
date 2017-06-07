@@ -160,12 +160,22 @@ def handle(msg):
                     if tmp is not '':
                         line = line.replace(line.split()[1], tmp)
 
-                    # Finally get messagge
-                    msg += line
+                    # Telegram bots cant send more
+                    # than 4000 characters in 1 message
+                    if (counter % 100) == 0:
+                        bot.sendMessage(chat_id, msg)
+                        msg = ''
+                        msg += line
+                    else:
+                        msg += line
 
-                bot.sendMessage(chat_id, msg)
+                # Send what is left 
+                if msg is not '':
+                    bot.sendMessage(chat_id, msg)
+
                 f.close()
             except FileNotFoundError:
+                print("Log file not found")
                 pass
 
         else:
