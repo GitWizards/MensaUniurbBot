@@ -86,7 +86,8 @@ def handle(msg):
         printLog("{0} - {1}".format(chat_id, command_input))
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text='Dona',
-                                  url='https://www.gitcheese.com/donate/users/9751015/repos/90749559')],
+                                  url='https://www.gitcheese.com/donate/'
+                                      'users/9751015/repos/90749559')],
         ])
         bot.sendMessage(chat_id, "🍺 Se sei soddisfatto offri una birra agli"
                                  " sviluppatori 🍺\n", reply_markup=keyboard)
@@ -150,25 +151,20 @@ def handle(msg):
         # Check stats password
         if date == stats_password:
             try:
-                f = open("log.txt", "r")
-                msg = 'Statistics on use:\n'
+                msg = 'Ultime 100 richieste:\n'
 
-                for counter, line in enumerate(f.readlines(), start=1):
-                    # Add counter
-                    line = str(counter) + ') ' + line
+                # Get number of lines
+                num_lines = sum(1 for line in open('log.txt'))
 
-                    # Telegram bots cant send more
-                    # than 4000 characters in 1 message
-                    if (counter % 100) == 0:
-                        bot.sendMessage(chat_id, msg)
-                        msg = ''
-                        msg += line
-                    else:
-                        msg += line
+                # Get last lines
+                with open("log.txt", "r") as f:
+                    lines = list(f)[-100:]
 
-                # Send what is left
-                if msg is not '':
-                    bot.sendMessage(chat_id, msg)
+                for line in lines:
+                    msg += line
+
+                msg += '\nRichieste totali: {0}'.format(num_lines)
+                bot.sendMessage(chat_id, msg)
 
                 f.close()
             except FileNotFoundError:
