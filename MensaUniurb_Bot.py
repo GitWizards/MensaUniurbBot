@@ -154,7 +154,15 @@ def handle(msg):
                 msg = 'Ultime 100 richieste:\n'
 
                 # Get number of lines
-                num_lines = sum(1 for line in open('log.txt'))
+                num_lines = sum(1 for line in open("log.txt"))
+
+                # Get user list
+                f = open("log.txt", "r")
+
+                for user in f.readlines():
+                    registerClientID(user.split()[0])
+
+                num_users = sum(1 for line in open("users.txt"))
 
                 # Get last lines
                 with open("log.txt", "r") as f:
@@ -163,7 +171,8 @@ def handle(msg):
                 for line in lines:
                     msg += line
 
-                msg += '\nRichieste totali: {0}'.format(num_lines)
+                msg += '\nRichieste totali: {0}\n'.format(num_lines)
+                msg += 'Utenti totali: {0}'.format(num_users)
                 bot.sendMessage(chat_id, msg)
 
                 f.close()
