@@ -308,8 +308,11 @@ def sendToAll(msg):
     except IOError:
         return
 
-    for client in f.readlines():
-        bot.sendMessage(client, msg)
+    try:
+        for client in f.readlines():
+            bot.sendMessage(client, msg)
+    except:
+        pass
 
     f.close()
 
