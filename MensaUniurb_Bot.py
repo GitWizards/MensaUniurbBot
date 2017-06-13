@@ -71,6 +71,12 @@ def handle(msg):
             bot.sendMessage(chat_id, '🗓️Menu Mensa Tridente - %s\n\n'
                                      'Non disponibile.' % date)
 
+    if command_input == '/prezzi':
+        printLog("{0} - {1}".format(chat_id, command_input))
+        f = open('price_list.png', 'rb')
+        bot.sendPhoto(chat_id, f)
+        f.close()
+
     if command_input == '/allergeni':
         printLog("{0} - {1}".format(chat_id, command_input))
         bot.sendMessage(chat_id,
@@ -304,6 +310,8 @@ def sendToAll(msg):
 
     for client in f.readlines():
         bot.sendMessage(client, msg)
+
+    f.close()
 
 
 # Save some statistics on usage
