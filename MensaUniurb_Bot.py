@@ -17,10 +17,17 @@ import matplotlib.pyplot as plt
 
 # Message handle funtion
 def handle(msg):
+    # Init variables
+    content_type = ''
+    command_input = ''
+
     content_type, chat_type, chat_id = telepot.glance(msg)
 
-    chat_id = msg['chat']['id']
-    command_input = msg['text']
+    if content_type == 'text':
+        chat_id = msg['chat']['id']
+        command_input = msg['text']
+    elif content_type == 'photo':
+        command_input = msg['caption']
 
     # Check which command was submitted
     if command_input == '/start':
@@ -198,15 +205,23 @@ def handle(msg):
             for user in f.readlines():
                 registerClientID(user.split()[0])
 
-            msg = ''
+            if content_type == 'text':
+                msg = ''
 
-            # Concat message
-            for s in news:
-                s = str(s).replace('<br>', '\n')
-                msg += s + ' '
+                # Concat message
+                for s in news:
+                    s = str(s).replace('<br>', '\n')
+                    msg += s + ' '
 
-            # Send to all users
-            sendToAll(msg)
+                # Send to all users
+                sendMsgToAll(msg)
+
+            elif content_type == 'photo':
+                msg = msg['photo'][-1]['file_id']
+
+                # Send to all users
+                sendPhotoToAll(msg)
+
         else:
             bot.sendMessage(chat_id, "⚠️ Password errata! ⚠️")
 
@@ -302,7 +317,7 @@ def registerClientID(chat_id):
 
 
 # Send the msg to all registred clients
-def sendToAll(msg):
+def sendMsgToAll(msg):
     try:
         f = open("users.txt", "r")
     except IOError:
@@ -311,6 +326,22 @@ def sendToAll(msg):
     for client in f.readlines():
         try:
             bot.sendMessage(client, msg)
+        except:
+            continue
+
+    f.close()
+
+
+# Send the msg to all registred clients
+def sendPhotoToAll(photo):
+    try:
+        f = open("users.txt", "r")
+    except IOError:
+        return
+
+    for client in f.readlines():
+        try:
+            bot.sendPhoto(client, photo)
         except:
             continue
 
