@@ -43,7 +43,7 @@ def handle(msg):
         date = now.strftime("%d-%m-%Y")
 
     if command_input == '/duca':
-        printLog("{0} - {1}".format(chat_id, command_input))
+        printLog("{0} - {1}".format(chat_id, command_input), "log.txt")
         date1 = convertDate(date)
 
         payload = {'mensa': 'DUCA', 'da': date1, 'a': date1}
@@ -63,7 +63,7 @@ def handle(msg):
                                      'nessun menù.' % date)
 
     if command_input == '/tridente':
-        printLog("{0} - {1}".format(chat_id, command_input))
+        printLog("{0} - {1}".format(chat_id, command_input), "log.txt")
         date1 = convertDate(date)
 
         payload = {'mensa': 'TRIDENTE', 'da': date1, 'a': date1}
@@ -80,24 +80,24 @@ def handle(msg):
                                      'Non disponibile.' % date)
 
     if command_input == '/prezzi':
-        printLog("{0} - {1}".format(chat_id, command_input))
+        printLog("{0} - {1}".format(chat_id, command_input), "log.txt")
         f = open('price_list.png', 'rb')
         bot.sendPhoto(chat_id, f)
         f.close()
 
     if command_input == '/allergeni':
-        printLog("{0} - {1}".format(chat_id, command_input))
+        printLog("{0} - {1}".format(chat_id, command_input), "log.txt")
         bot.sendMessage(chat_id,
                         'http://menu.ersurb.it/menum/Allergeni_legenda.png')
 
     if command_input == '/crediti':
-        printLog("{0} - {1}".format(chat_id, command_input))
+        printLog("{0} - {1}".format(chat_id, command_input), "log.txt")
         bot.sendMessage(chat_id, "Sviluppato da:\n"
                                  "https://github.com/Radeox\n"
                                  "https://github.com/Fast0n")
 
     if command_input == '/dona':
-        printLog("{0} - {1}".format(chat_id, command_input))
+        printLog("{0} - {1}".format(chat_id, command_input), "log.txt")
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text='Dona',
                                   url='https://www.gitcheese.com/donate/'
@@ -350,9 +350,9 @@ def sendPhotoToAll(photo):
 
 
 # Save some statistics on usage
-def printLog(msg):
+def printLog(msg, log_file):
     try:
-        f = open("log.txt", "a")
+        f = open(log_file, "a")
 
         now = datetime.datetime.now()
         date = now.strftime("%H:%M %d/%m/%Y")
