@@ -24,6 +24,12 @@ def handle(msg):
 
     content_type, chat_type, chat_id = telepot.glance(msg)
 
+    # Some logging
+    printLog("{0} {1} ({2})".format(msg['chat']['first_name'],
+             msg['chat']['last_name'],
+             msg['chat']['username']),
+             "user_list.txt")
+
     if content_type == 'text':
         chat_id = msg['chat']['id']
         command_input = msg['text']
@@ -187,6 +193,26 @@ def handle(msg):
 
                 msg += '\nRichieste totali: {0}\n'.format(num_lines)
                 msg += 'Utenti totali: {0}'.format(num_users)
+                bot.sendMessage(chat_id, msg)
+
+                f.close()
+            except FileNotFoundError:
+                print("Log file not found")
+                pass
+
+    if command_input == '/users':
+        # Check stats password
+        if date == stats_password:
+            try:
+                # Get last lines
+                msg = 'Ultime 100 persone:\n'
+
+                with open("user_list.txt", "r") as f:
+                    lines = list(f)[-100:]
+
+                for line in lines:
+                    msg += line
+
                 bot.sendMessage(chat_id, msg)
 
                 f.close()
