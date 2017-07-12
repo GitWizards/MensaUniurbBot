@@ -229,7 +229,7 @@ def handle(msg):
                     lines = list(f)[-100:]
 
                 for line in lines:
-                    msg += line
+                    msg += '* ' + line
 
                 bot.sendMessage(chat_id, msg)
 
