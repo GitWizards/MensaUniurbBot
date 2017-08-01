@@ -103,8 +103,8 @@ def handle(msg):
                  msg['chat']['last_name'],
                  msg['chat']['username']),
                  "user_list.txt")
-        bot.sendMessage(chat_id,
-                        'http://menu.ersurb.it/menum/Allergeni_legenda.png')
+        bot.sendPhoto(chat_id,
+                      'http://menu.ersurb.it/menum/Allergeni_legenda.png')
 
     if command_input == '/crediti':
         printLog("{0} - {1}".format(chat_id, command_input), "log.txt")
