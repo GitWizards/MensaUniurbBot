@@ -1,15 +1,15 @@
 #!/usr/bin/python3.6
 import os
 import sys
-import telepot
-import requests
-import re
-import datetime
 import calendar
+import re
+import requests
+import telepot
 from time import sleep
+from datetime import datetime
 from bs4 import BeautifulSoup
-from settings import token, start_msg, stats_password
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
+from settings import token, start_msg, stats_password
 
 import matplotlib
 matplotlib.use('Agg')
@@ -39,7 +39,7 @@ def handle(msg):
         date = command_input.split()[1]
         command_input = command_input.split()[0]
     except:
-        now = datetime.datetime.now()
+        now = datetime.now()
         date = now.strftime("%d-%m-%Y")
 
     if command_input == '/duca':
@@ -111,7 +111,7 @@ def handle(msg):
             f = open("log.txt", "r")
 
             # Get current month days
-            now = datetime.datetime.now()
+            now = datetime.now()
             days = calendar.monthrange(now.year, now.month)[1]
             days += 1
 
@@ -224,8 +224,10 @@ def handle(msg):
             bot.sendMessage(chat_id, "⚠️ Password errata! ⚠️")
 
 
-# Get the menu from the ERSU page
 def get_menu(payload):
+    """
+    Get the menu from the ERSU page
+    """
     r = requests.post("http://menu.ersurb.it/menum/menu.asp", data=payload)
 
     empty = True
@@ -289,45 +291,49 @@ def get_menu(payload):
         return
 
 
-# Register the client
 def register_user(chat_id):
-    try:
-        f = open("users.txt", "r+")
-    except IOError:
-        f = open("users.txt", "w")
-        f.write(str(chat_id) + '\n')
-        f.close()
-        return True
-
+    """
+    Register given user to receive news
+    """
     insert = 1
 
-    for client in f:
-        if client.replace('\n', '') == str(chat_id):
-            insert = 0
+    try:
+        f = open("users.txt", "r+")
+
+        for user in f.readlines():
+            if user.replace('\n', '') == str(chat_id):
+                insert = 0
+
+    except IOError:
+        f = open("users.txt", "w")
 
     if insert:
         f.write(str(chat_id) + '\n')
-        f.close()
-        return True
 
     f.close()
-    return False
+
+    return insert
 
 
 # Send the msg to all registred clients
 def send_msg_all(msg):
+    """ 
+    Send given message to all users
+    """
     try:
         f = open("users.txt", "r")
     except IOError:
-        return
+        return 0
 
-    for client in f.readlines():
+    for user in f.readlines():
         try:
-            bot.sendMessage(client, msg)
+            bot.sendMessage(user, msg)
         except:
             continue
 
     f.close()
+
+    return 1
 
 
 # Send the msg to all registred clients
@@ -335,23 +341,27 @@ def send_photo_all(photo):
     try:
         f = open("users.txt", "r")
     except IOError:
-        return
+        return 0
 
-    for client in f.readlines():
+    for user in f.readlines():
         try:
-            bot.sendPhoto(client, photo)
+            bot.sendPhoto(user, photo)
         except:
             continue
 
     f.close()
 
+    return 1
 
-# Save some statistics on usage
+
 def print_log(msg, log_file):
+    """
+    Write to 'log_file' adding current date
+    """
     try:
         f = open(log_file, "a")
 
-        now = datetime.datetime.now()
+        now = datetime.now()
         date = now.strftime("%H:%M %d/%m/%Y")
 
         f.write("{0} {1}\n".format(msg, date))
@@ -360,8 +370,10 @@ def print_log(msg, log_file):
         print("Error opening log file!")
 
 
-# Simple function covert MM-DD-YYYY to DD-MM-YYYY
 def convert_date(date):
+    """
+    Covert MM-DD-YYYY to DD-MM-YYYY
+    """
     x, y, z = date.split('-')
     rv = y + '-' + x + '-' + z
 
