@@ -44,10 +44,6 @@ def handle(msg):
 
     if command_input == '/duca':
         print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
-        print_log("{0} {1} ({2})".format(msg['chat']['first_name'],
-                 msg['chat']['last_name'],
-                 msg['chat']['username']),
-                 "user_list.txt")
         date1 = convert_date(date)
 
         payload = {'mensa': 'DUCA', 'da': date1, 'a': date1}
@@ -68,10 +64,6 @@ def handle(msg):
 
     if command_input == '/tridente':
         print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
-        print_log("{0} {1} ({2})".format(msg['chat']['first_name'],
-                 msg['chat']['last_name'],
-                 msg['chat']['username']),
-                 "user_list.txt")
         date1 = convert_date(date)
 
         payload = {'mensa': 'TRIDENTE', 'da': date1, 'a': date1}
@@ -89,39 +81,23 @@ def handle(msg):
 
     if command_input == '/prezzi':
         print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
-        print_log("{0} {1} ({2})".format(msg['chat']['first_name'],
-                 msg['chat']['last_name'],
-                 msg['chat']['username']),
-                 "user_list.txt")
         f = open('price_list.png', 'rb')
         bot.sendPhoto(chat_id, f)
         f.close()
 
     if command_input == '/allergeni':
         print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
-        print_log("{0} {1} ({2})".format(msg['chat']['first_name'],
-                 msg['chat']['last_name'],
-                 msg['chat']['username']),
-                 "user_list.txt")
         bot.sendPhoto(chat_id,
                       'http://menu.ersurb.it/menum/Allergeni_legenda.png')
 
     if command_input == '/crediti':
         print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
-        print_log("{0} {1} ({2})".format(msg['chat']['first_name'],
-                 msg['chat']['last_name'],
-                 msg['chat']['username']),
-                 "user_list.txt")
         bot.sendMessage(chat_id, "Sviluppato da:\n"
                                  "https://github.com/Radeox\n"
                                  "https://github.com/Fast0n")
 
     if command_input == '/dona':
         print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
-        print_log("{0} {1} ({2})".format(msg['chat']['first_name'],
-                 msg['chat']['last_name'],
-                 msg['chat']['username']),
-                 "user_list.txt")
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text='Dona',
                                   url='https://www.gitcheese.com/donate/'
@@ -217,29 +193,6 @@ def handle(msg):
             except FileNotFoundError:
                 print("Log file not found")
                 pass
-
-    if command_input == '/users':
-        # Check stats password
-        if date == stats_password:
-            try:
-                # Get last lines
-                msg = 'Ultime 100 persone:\n'
-
-                with open("user_list.txt", "r") as f:
-                    lines = list(f)[-100:]
-
-                for line in lines:
-                    msg += '* ' + line
-
-                bot.sendMessage(chat_id, msg)
-
-                f.close()
-            except FileNotFoundError:
-                print("Log file not found")
-                pass
-
-        else:
-            bot.sendMessage(chat_id, "⚠️ Password errata! ⚠️")
 
     if command_input == '/sendnews':
         # Check stats password
@@ -430,6 +383,7 @@ if os.path.isfile(pidfile):
 # Create PID file
 f = open(pidfile, 'w')
 f.write(pid)
+f.close()
 
 # Start working
 try:
