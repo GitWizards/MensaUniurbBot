@@ -43,15 +43,15 @@ def handle(msg):
         date = now.strftime("%d-%m-%Y")
 
     if command_input == '/duca':
-        printLog("{0} - {1}".format(chat_id, command_input), "log.txt")
-        printLog("{0} {1} ({2})".format(msg['chat']['first_name'],
+        print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
+        print_log("{0} {1} ({2})".format(msg['chat']['first_name'],
                  msg['chat']['last_name'],
                  msg['chat']['username']),
                  "user_list.txt")
-        date1 = convertDate(date)
+        date1 = convert_date(date)
 
         payload = {'mensa': 'DUCA', 'da': date1, 'a': date1}
-        msg = getMenu(payload)
+        msg = get_menu(payload)
         if msg:
             bot.sendMessage(chat_id, '🗓️Mensa Duca - {0}\n\n{1}'.format(date,
                             msg[0]))
@@ -67,15 +67,15 @@ def handle(msg):
                                      'nessun menù.' % date)
 
     if command_input == '/tridente':
-        printLog("{0} - {1}".format(chat_id, command_input), "log.txt")
-        printLog("{0} {1} ({2})".format(msg['chat']['first_name'],
+        print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
+        print_log("{0} {1} ({2})".format(msg['chat']['first_name'],
                  msg['chat']['last_name'],
                  msg['chat']['username']),
                  "user_list.txt")
-        date1 = convertDate(date)
+        date1 = convert_date(date)
 
         payload = {'mensa': 'TRIDENTE', 'da': date1, 'a': date1}
-        msg = getMenu(payload)
+        msg = get_menu(payload)
 
         if msg:
             bot.sendMessage(chat_id, '🗓️Mensa Tridente - {0}\n\n{1}'.format(
@@ -88,8 +88,8 @@ def handle(msg):
                                      'Non disponibile.' % date)
 
     if command_input == '/prezzi':
-        printLog("{0} - {1}".format(chat_id, command_input), "log.txt")
-        printLog("{0} {1} ({2})".format(msg['chat']['first_name'],
+        print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
+        print_log("{0} {1} ({2})".format(msg['chat']['first_name'],
                  msg['chat']['last_name'],
                  msg['chat']['username']),
                  "user_list.txt")
@@ -98,8 +98,8 @@ def handle(msg):
         f.close()
 
     if command_input == '/allergeni':
-        printLog("{0} - {1}".format(chat_id, command_input), "log.txt")
-        printLog("{0} {1} ({2})".format(msg['chat']['first_name'],
+        print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
+        print_log("{0} {1} ({2})".format(msg['chat']['first_name'],
                  msg['chat']['last_name'],
                  msg['chat']['username']),
                  "user_list.txt")
@@ -107,8 +107,8 @@ def handle(msg):
                       'http://menu.ersurb.it/menum/Allergeni_legenda.png')
 
     if command_input == '/crediti':
-        printLog("{0} - {1}".format(chat_id, command_input), "log.txt")
-        printLog("{0} {1} ({2})".format(msg['chat']['first_name'],
+        print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
+        print_log("{0} {1} ({2})".format(msg['chat']['first_name'],
                  msg['chat']['last_name'],
                  msg['chat']['username']),
                  "user_list.txt")
@@ -117,8 +117,8 @@ def handle(msg):
                                  "https://github.com/Fast0n")
 
     if command_input == '/dona':
-        printLog("{0} - {1}".format(chat_id, command_input), "log.txt")
-        printLog("{0} {1} ({2})".format(msg['chat']['first_name'],
+        print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
+        print_log("{0} {1} ({2})".format(msg['chat']['first_name'],
                  msg['chat']['last_name'],
                  msg['chat']['username']),
                  "user_list.txt")
@@ -198,7 +198,7 @@ def handle(msg):
                 f = open("log.txt", "r")
 
                 for user in f.readlines():
-                    registerClientID(user.split()[0])
+                    register_user(user.split()[0])
 
                 num_users = sum(1 for line in open("users.txt"))
 
@@ -248,7 +248,7 @@ def handle(msg):
             f = open("log.txt", "r")
 
             for user in f.readlines():
-                registerClientID(user.split()[0])
+                register_user(user.split()[0])
 
             if content_type == 'text':
                 msg = ''
@@ -259,20 +259,20 @@ def handle(msg):
                     msg += s + ' '
 
                 # Send to all users
-                sendMsgToAll(msg)
+                send_msg_all(msg)
 
             elif content_type == 'photo':
                 msg = msg['photo'][-1]['file_id']
 
                 # Send to all users
-                sendPhotoToAll(msg)
+                send_photo_all(msg)
 
         else:
             bot.sendMessage(chat_id, "⚠️ Password errata! ⚠️")
 
 
 # Get the menu from the ERSU page
-def getMenu(payload):
+def get_menu(payload):
     r = requests.post("http://menu.ersurb.it/menum/menu.asp", data=payload)
 
     empty = True
@@ -337,7 +337,7 @@ def getMenu(payload):
 
 
 # Register the client
-def registerClientID(chat_id):
+def register_user(chat_id):
     try:
         f = open("users.txt", "r+")
     except IOError:
@@ -362,7 +362,7 @@ def registerClientID(chat_id):
 
 
 # Send the msg to all registred clients
-def sendMsgToAll(msg):
+def send_msg_all(msg):
     try:
         f = open("users.txt", "r")
     except IOError:
@@ -378,7 +378,7 @@ def sendMsgToAll(msg):
 
 
 # Send the msg to all registred clients
-def sendPhotoToAll(photo):
+def send_photo_all(photo):
     try:
         f = open("users.txt", "r")
     except IOError:
@@ -394,7 +394,7 @@ def sendPhotoToAll(photo):
 
 
 # Save some statistics on usage
-def printLog(msg, log_file):
+def print_log(msg, log_file):
     try:
         f = open(log_file, "a")
 
@@ -408,7 +408,7 @@ def printLog(msg, log_file):
 
 
 # Simple function covert MM-DD-YYYY to DD-MM-YYYY
-def convertDate(date):
+def convert_date(date):
     x, y, z = date.split('-')
     rv = y + '-' + x + '-' + z
 
