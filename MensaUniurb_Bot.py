@@ -199,11 +199,13 @@ def handle(msg):
     if command_input == '/sendnews':
         # Check stats password
         if date == stats_password:
-            # Regenrate user list
+            # Regenerate user list
             f = open("log.txt", "r")
 
             for user in f.readlines():
                 register_user(user.split()[0])
+
+            f.close()
 
             if content_type == 'text':
                 msg = ''
