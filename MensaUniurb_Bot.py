@@ -87,8 +87,7 @@ def handle(msg):
 
     if command_input == '/allergeni':
         print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
-        bot.sendPhoto(chat_id,
-                      'http://menu.ersurb.it/menum/Allergeni_legenda.png')
+        bot.sendPhoto(chat_id, 'http://menu.ersurb.it/menum/Allergeni_legenda.png')
 
     if command_input == '/crediti':
         print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
@@ -105,8 +104,7 @@ def handle(msg):
                                   url='https://www.gitcheese.com/donate/'
                                       'users/9751015/repos/90749559')],
         ])
-        bot.sendMessage(chat_id, "🍺 Se sei soddisfatto offri una birra agli"
-                                 " sviluppatori 🍺\n", reply_markup=keyboard)
+        bot.sendMessage(chat_id, "🍺 Se sei soddisfatto offri una birra agli sviluppatori 🍺\n", reply_markup=keyboard)
 
     if command_input == '/statistiche':
         try:
@@ -255,8 +253,7 @@ def get_menu(payload):
             name = str(re.findall('(">.*?<\/)', str(link)))
 
             # Remove useless chars
-            name = name.replace('''['">''', '').replace(
-                                "</']", '').replace('\\', '')
+            name = name.replace('''['">''', '').replace("</']", '').replace('\\', '')
 
             # Check if launch/dinner
             if idi == '40' and not status:
