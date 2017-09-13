@@ -92,7 +92,9 @@ def handle(msg):
 
     if command_input == '/crediti':
         print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
-        bot.sendMessage(chat_id, "Sviluppato da:\n"
+        bot.sendMessage(chat_id, "Codice sorgente:\n"
+                                 "https://github.com/Radeox/MensaUniurb_Bot\n\n"
+                                 "Sviluppato da:\n"
                                  "https://github.com/Radeox\n"
                                  "https://github.com/Fast0n")
 
