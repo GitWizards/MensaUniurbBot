@@ -1,5 +1,7 @@
 # Mensa Uniurb Bot #
 
+![Uniurb](http://informatica.uniurb.it/assets/logo_sti_new.png)
+
 Semplice Bot Telegram per la visualizzazione del menù della mensa offerta dall'ERSU di Urbino. 
 
 Ora gli studenti di Uniurb, ma anche altri, potranno controllare in tempo reale il menu settimanale della mensa con un semplice messaggio.
