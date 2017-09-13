@@ -1,8 +1,7 @@
 __pycache__
 settings.py
-log.txt
-user_list.txt
 users.txt
+log.txt
 plot.png
 *.pyc
 *.swp
