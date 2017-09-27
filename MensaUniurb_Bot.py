@@ -25,7 +25,6 @@ def handle(msg):
     content_type, chat_type, chat_id = telepot.glance(msg)
 
     if content_type == 'text':
-        chat_id = msg['chat']['id']
         command_input = msg['text']
     elif content_type == 'photo':
         command_input = msg['caption']
