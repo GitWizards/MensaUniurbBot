@@ -40,15 +40,13 @@ def handle(msg):
 
     content_type, chat_type, chat_id = telepot.glance(msg)
 
+    # Check what type of content was sent
     if content_type == 'text':
         command_input = msg['text']
     elif content_type == 'photo':
         command_input = msg['caption']
 
-    # Check which command was submitted
-    if command_input == '/start':
-        bot.sendMessage(chat_id, start_msg)
-
+    # Split commands
     try:
         news = command_input.split()[2:]
         date = command_input.split()[1]
@@ -57,18 +55,24 @@ def handle(msg):
         now = datetime.now()
         date = now.strftime("%d-%m-%Y")
 
+    # Check which command was submitted
+    if command_input == '/start':
+        bot.sendMessage(chat_id, start_msg)
+
+    # Send menu for DUCA
     if command_input == '/duca':
         print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
         date1 = convert_date(date)
 
+        # Get menu
         payload = {'mensa': 'DUCA', 'da': date1, 'a': date1}
         msg = get_menu(payload)
+
+        # If menu exist send it
         if msg:
-            bot.sendMessage(chat_id, '🗓️Mensa Duca - {0}\n\n{1}'.format(date,
-                            msg[0]))
+            bot.sendMessage(chat_id, '🗓️Mensa Duca - {0}\n\n{1}'.format(date, msg[0]))
             bot.sendMessage(chat_id, msg[1])
-            bot.sendMessage(chat_id,
-                            "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
+            bot.sendMessage(chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
         else:
             bot.sendMessage(chat_id, '🗓️Menu Mensa Duca - %s\n\n'
                                      'Non disponibile.\n\n'
@@ -76,34 +80,37 @@ def handle(msg):
                                      'Sabato e domenica il ristorante il /duca'
                                      ' non è aperto, quindi, non troverete '
                                      'nessun menù.' % date)
-
+    # Send menu for TRIDENTE
     if command_input == '/tridente':
         print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
         date1 = convert_date(date)
 
+        # Get menu
         payload = {'mensa': 'TRIDENTE', 'da': date1, 'a': date1}
         msg = get_menu(payload)
 
+        # If menu exist send it
         if msg:
-            bot.sendMessage(chat_id, '🗓️Mensa Tridente - {0}\n\n{1}'.format(
-                            date, msg[0]))
+            bot.sendMessage(chat_id, '🗓️Mensa Tridente - {0}\n\n{1}'.format(date, msg[0]))
             bot.sendMessage(chat_id, msg[1])
-            bot.sendMessage(chat_id,
-                            "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
+            bot.sendMessage(chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
         else:
             bot.sendMessage(chat_id, '🗓️Menu Mensa Tridente - %s\n\n'
                                      'Non disponibile.' % date)
 
+    # Send prices table
     if command_input == '/prezzi':
         print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
         f = open('price_list.png', 'rb')
         bot.sendPhoto(chat_id, f)
         f.close()
 
+    # Send allergy table
     if command_input == '/allergeni':
         print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
         bot.sendPhoto(chat_id, 'http://menu.ersurb.it/menum/Allergeni_legenda.png')
 
+    # Send credits
     if command_input == '/crediti':
         print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
         bot.sendMessage(chat_id, "Codice sorgente:\n"
@@ -112,6 +119,7 @@ def handle(msg):
                                  "https://github.com/Radeox\n"
                                  "https://github.com/Fast0n")
 
+    # Send 'donate' link
     if command_input == '/dona':
         print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
@@ -121,6 +129,7 @@ def handle(msg):
         ])
         bot.sendMessage(chat_id, "🍺 Se sei soddisfatto offri una birra agli sviluppatori 🍺\n", reply_markup=keyboard)
 
+    # Send statistics about daily use
     if command_input == '/statistiche':
         try:
             f = open("log.txt", "r")
@@ -176,8 +185,9 @@ def handle(msg):
         except FileNotFoundError:
             pass
 
+    # Send more detailed statistics - Password required
     if command_input == '/stats':
-        # Check stats password
+        # Check password
         if date == stats_password:
             try:
                 msg = 'Ultime 100 richieste:\n'
@@ -209,6 +219,7 @@ def handle(msg):
                 print("Log file not found")
                 pass
 
+    # Send news to all registred users - Password required
     if command_input == '/sendnews':
         # Check stats password
         if date == stats_password:
@@ -413,6 +424,9 @@ if os.path.isfile(PIDFILE):
 with open(PIDFILE, 'w') as f: 
     f.write(PID)
     f.close()
+
+# Variables
+USER_STATE = {}
 
 # Start working
 try:
