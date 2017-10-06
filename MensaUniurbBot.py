@@ -75,12 +75,8 @@ def handle(msg):
             bot.sendMessage(chat_id, msg[1])
             bot.sendMessage(chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
         else:
-            bot.sendMessage(chat_id, '🗓️Menu Mensa Duca - %s\n\n'
-                                     'Non disponibile.\n\n'
-                                     '⚠️Attenzione⚠️\n'
-                                     'Sabato e domenica il ristorante il /duca'
-                                     ' non è aperto, quindi, non troverete '
-                                     'nessun menù.' % date)
+            bot.sendMessage(chat_id, CLOSED_MSG.format('Duca', date, DUCA_HOURS), parse_mode="Markdown")
+
     # Send menu for TRIDENTE
     if command_input == '/tridente':
         print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
@@ -96,8 +92,7 @@ def handle(msg):
             bot.sendMessage(chat_id, msg[1])
             bot.sendMessage(chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
         else:
-            bot.sendMessage(chat_id, '🗓️Menu Mensa Tridente - %s\n\n'
-                                     'Non disponibile.' % date)
+            bot.sendMessage(chat_id, CLOSED_MSG.format('Tridente', date, TRIDENTE_HOURS), parse_mode="Markdown")
 
     # Send prices table
     if command_input == '/prezzi':
