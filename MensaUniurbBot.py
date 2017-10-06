@@ -21,7 +21,8 @@ from bs4 import BeautifulSoup
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 
 # Dev settings
-from settings import token, start_msg, stats_password
+from settings import TOKEN, STATS_PASSWORD
+from messages import *
 
 import matplotlib
 matplotlib.use('Agg')
@@ -57,7 +58,7 @@ def handle(msg):
 
     # Check which command was submitted
     if command_input == '/start':
-        bot.sendMessage(chat_id, start_msg)
+        bot.sendMessage(chat_id, START_MSG, parse_mode='Markdown')
 
     # Send menu for DUCA
     if command_input == '/duca':
@@ -114,7 +115,7 @@ def handle(msg):
     if command_input == '/crediti':
         print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
         bot.sendMessage(chat_id, "Codice sorgente:\n"
-                                 "https://github.com/Radeox/MensaUniurb_Bot\n\n"
+                                 "https://github.com/Radeox/MensaUniurbBot\n\n"
                                  "Sviluppato da:\n"
                                  "https://github.com/Radeox\n"
                                  "https://github.com/Fast0n")
@@ -124,10 +125,15 @@ def handle(msg):
         print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text='Dona',
-                                  url='https://www.gitcheese.com/donate/'
-                                      'users/9751015/repos/90749559')],
-        ])
+                                  url='https://www.gitcheese.com/donate/users/9751015/repos/90749559')],
+            ])
         bot.sendMessage(chat_id, "🍺 Se sei soddisfatto offri una birra agli sviluppatori 🍺\n", reply_markup=keyboard)
+
+    # Send opening hours
+    if command_input == '/orari':
+        bot.sendMessage(chat_id, "🍝*Duca*\n{0}\n\n*🍖Tridente*\n{1}\n\n🍟*Campus\n*{2}".format(DUCA_HOURS,
+                                                                                          TRIDENTE_HOURS,
+                                                                                          CAMPUS_HOURS), parse_mode="Markdown")
 
     # Send statistics about daily use
     if command_input == '/statistiche':
@@ -188,7 +194,7 @@ def handle(msg):
     # Send more detailed statistics - Password required
     if command_input == '/stats':
         # Check password
-        if date == stats_password:
+        if date == STATS_PASSWORD:
             try:
                 msg = 'Ultime 100 richieste:\n'
 
@@ -222,7 +228,7 @@ def handle(msg):
     # Send news to all registred users - Password required
     if command_input == '/sendnews':
         # Check stats password
-        if date == stats_password:
+        if date == STATS_PASSWORD:
             # Regenerate user list
             f = open("log.txt", "r")
 
@@ -406,7 +412,7 @@ def convert_date(date):
     """
 
     y, x, z = date.split('-')
-    
+
     return "{0}-{1}-{2}".format(x, y, z)
 
 
@@ -432,7 +438,7 @@ USER_STATE = {}
 
 # Start working
 try:
-    bot = telepot.Bot(token)
+    bot = telepot.Bot(TOKEN)
     bot.message_loop(handle)
 
     while 1:
