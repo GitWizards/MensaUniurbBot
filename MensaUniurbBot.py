@@ -405,7 +405,9 @@ def convert_date(date):
     Covert MM-DD-YYYY to DD-MM-YYYY
     """
 
-    return "{1}-{0}-{2}" % date.split('-')
+    y, x, z = date.split('-')
+    
+    return "{0}-{1}-{2}".format(x, y, z)
 
 
 # Main
