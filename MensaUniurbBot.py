@@ -35,10 +35,6 @@ def handle(msg):
     This function handle all incoming messages
     """
 
-    # Init variables
-    content_type = ''
-    command_input = ''
-
     content_type, chat_type, chat_id = telepot.glance(msg)
 
     # Check what type of content was sent
