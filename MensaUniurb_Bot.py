@@ -1,14 +1,26 @@
+"""
+MensaUniurb - Telegram Bot
+
+Author: Radeox (dawid.weglarz95@gmail.com)
+        Fast0n (theplayergame97@gmail.com)
+"""
+
 #!/usr/bin/python3.6
 import os
 import sys
-import calendar
-import re
-import requests
-import telepot
+
 from time import sleep
 from datetime import datetime
+
+import re
+import requests
+import calendar
+import telepot
+
 from bs4 import BeautifulSoup
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
+
+# Dev settings
 from settings import token, start_msg, stats_password
 
 import matplotlib
@@ -18,6 +30,10 @@ import matplotlib.pyplot as plt
 
 # Message handle funtion
 def handle(msg):
+    """
+    This function handle all incoming messages
+    """
+
     # Init variables
     content_type = ''
     command_input = ''
@@ -338,6 +354,9 @@ def send_msg_all(msg):
 
 # Send the msg to all registred clients
 def send_photo_all(photo):
+    """
+    Send given photo to all users
+    """
     try:
         f = open("users.txt", "r")
     except IOError:
@@ -381,11 +400,11 @@ def convert_date(date):
 
 
 # Main
-print("Starting UnimensaBot...")
+print("Starting MensaUniurb_Bot...")
 
 # PID file
 pid = str(os.getpid())
-pidfile = "/tmp/unimensabot.pid"
+pidfile = "/tmp/mensauniurbbot.pid"
 
 # Check if PID exist
 if os.path.isfile(pidfile):
