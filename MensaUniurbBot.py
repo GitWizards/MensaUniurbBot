@@ -400,7 +400,7 @@ def convert_date(date):
 
 
 # Main
-print("Starting MensaUniurb_Bot...")
+print("Starting MensaUniurbBot...")
 
 # PID file
 pid = str(os.getpid())
