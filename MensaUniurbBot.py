@@ -393,28 +393,26 @@ def convert_date(date):
     """
     Covert MM-DD-YYYY to DD-MM-YYYY
     """
-    x, y, z = date.split('-')
-    rv = y + '-' + x + '-' + z
 
-    return rv
+    return "{1}-{0}-{2}" % date.split('-')
 
 
 # Main
 print("Starting MensaUniurbBot...")
 
 # PID file
-pid = str(os.getpid())
-pidfile = "/tmp/mensauniurbbot.pid"
+PID = str(os.getpid())
+PIDFILE = "/tmp/mensauniurbbot.pid"
 
 # Check if PID exist
-if os.path.isfile(pidfile):
-    print("%s already exists, exiting!" % pidfile)
+if os.path.isfile(PIDFILE):
+    print("%s already exists, exiting!" % PIDFILE)
     sys.exit()
 
 # Create PID file
-f = open(pidfile, 'w')
-f.write(pid)
-f.close()
+with open(PIDFILE, 'w') as f: 
+    f.write(PID)
+    f.close()
 
 # Start working
 try:
@@ -426,4 +424,4 @@ try:
 
 finally:
     # Remove PID file on exit
-    os.unlink(pidfile)
+    os.unlink(PIDFILE)
