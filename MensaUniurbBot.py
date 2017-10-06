@@ -122,6 +122,7 @@ def handle(msg):
 
     # Send opening hours
     if command_input == '/orari':
+        print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
         bot.sendMessage(chat_id, "🍝*Duca*\n{0}\n\n*🍖Tridente*\n{1}\n\n🍟*Campus\n*{2}".format(DUCA_HOURS,
                                                                                           TRIDENTE_HOURS,
                                                                                           CAMPUS_HOURS), parse_mode="Markdown")
