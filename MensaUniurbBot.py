@@ -21,7 +21,7 @@ from bs4 import BeautifulSoup
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 
 # Dev settings
-from settings import TOKEN, STATS_PASSWORD
+from settings import TOKEN, PASSWORD
 from messages import *
 
 import matplotlib
@@ -36,192 +36,215 @@ def handle(msg):
     """
 
     content_type, chat_type, chat_id = telepot.glance(msg)
+    
+    # Check user state
+    try:
+        USER_STATE[chat_id]
+    except:
+        USER_STATE[chat_id] = 0
 
     # Check what type of content was sent
     if content_type == 'text':
         command_input = msg['text']
-    elif content_type == 'photo':
-        command_input = msg['caption']
 
-    # Split commands
-    try:
-        news = command_input.split()[2:]
-        date = command_input.split()[1]
-        command_input = command_input.split()[0]
-    except:
-        now = datetime.now()
-        date = now.strftime("%d-%m-%Y")
-
-    # Check which command was submitted
-    if command_input == '/start':
-        bot.sendMessage(chat_id, START_MSG, parse_mode='Markdown')
-
-    # Send menu for DUCA
-    if command_input == '/duca':
-        print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
-        date1 = convert_date(date)
-
-        # Get menu
-        payload = {'mensa': 'DUCA', 'da': date1, 'a': date1}
-        msg = get_menu(payload)
-
-        # If menu exist send it
-        if msg:
-            bot.sendMessage(chat_id, '🗓️Mensa Duca - {0}\n\n{1}'.format(date, msg[0]))
-            bot.sendMessage(chat_id, msg[1])
-            bot.sendMessage(chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
-        else:
-            bot.sendMessage(chat_id, CLOSED_MSG.format('Duca', date, DUCA_HOURS), parse_mode="Markdown")
-
-    # Send menu for TRIDENTE
-    if command_input == '/tridente':
-        print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
-        date1 = convert_date(date)
-
-        # Get menu
-        payload = {'mensa': 'TRIDENTE', 'da': date1, 'a': date1}
-        msg = get_menu(payload)
-
-        # If menu exist send it
-        if msg:
-            bot.sendMessage(chat_id, '🗓️Mensa Tridente - {0}\n\n{1}'.format(date, msg[0]))
-            bot.sendMessage(chat_id, msg[1])
-            bot.sendMessage(chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
-        else:
-            bot.sendMessage(chat_id, CLOSED_MSG.format('Tridente', date, TRIDENTE_HOURS), parse_mode="Markdown")
-
-    # Send prices table
-    if command_input == '/prezzi':
-        print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
-        f = open('price_list.png', 'rb')
-        bot.sendPhoto(chat_id, f)
-        f.close()
-
-    # Send allergy table
-    if command_input == '/allergeni':
-        print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
-        bot.sendPhoto(chat_id, 'http://menu.ersurb.it/menum/Allergeni_legenda.png')
-
-    # Send credits
-    if command_input == '/crediti':
-        print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
-        bot.sendMessage(chat_id, "Codice sorgente:\n"
-                                 "https://github.com/Radeox/MensaUniurbBot\n\n"
-                                 "Sviluppato da:\n"
-                                 "https://github.com/Radeox\n"
-                                 "https://github.com/Fast0n")
-
-    # Send 'donate' link
-    if command_input == '/dona':
-        print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
-        keyboard = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text='Dona',
-                                  url='https://www.gitcheese.com/donate/users/9751015/repos/90749559')],
-            ])
-        bot.sendMessage(chat_id, "🍺 Se sei soddisfatto offri una birra agli sviluppatori 🍺\n", reply_markup=keyboard)
-
-    # Send opening hours
-    if command_input == '/orari':
-        print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
-        bot.sendMessage(chat_id, "🍝*Duca*\n{0}\n\n*🍖Tridente*\n{1}\n\n🍟*Campus\n*{2}".format(DUCA_HOURS,
-                                                                                          TRIDENTE_HOURS,
-                                                                                          CAMPUS_HOURS), parse_mode="Markdown")
-
-    # Send statistics about daily use
-    if command_input == '/statistiche':
+        # Split command
         try:
-            f = open("log.txt", "r")
-
-            # Get current month days
+            date = command_input.split()[1]
+            command_input = command_input.split()[0]
+        except:
             now = datetime.now()
-            days = calendar.monthrange(now.year, now.month)[1]
-            days += 1
+            date = now.strftime("%d-%m-%Y")
 
-            # Create month array
-            month_counters = []
-            radius = []
+        # Send start message
+        if command_input == '/start':
+            bot.sendMessage(chat_id, START_MSG, parse_mode='Markdown')
 
-            for i in range(days):
-                month_counters.append(0)
-                radius.append(1)
+        # Send menu for DUCA
+        elif command_input == '/duca':
+            print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
+            date1 = convert_date(date)
 
-            # Read input file
-            for line in f.readlines():
-                date = line.split()[4]
-                day, month, year = date.split('/')
+            # Get menu
+            payload = {'mensa': 'DUCA', 'da': date1, 'a': date1}
+            msg = get_menu(payload)
 
-                if int(year) == now.year and int(month) == now.month:
-                    month_counters[int(day)] += 1
+            # If menu exist send it
+            if msg:
+                bot.sendMessage(chat_id, '🗓️Mensa Duca - {0}\n\n{1}'.format(date, msg[0]))
+                bot.sendMessage(chat_id, msg[1])
+                bot.sendMessage(chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
+            else:
+                bot.sendMessage(chat_id, CLOSED_MSG.format('Duca', date, DUCA_HOURS), parse_mode="Markdown")
 
-            # Clear plot
-            plt.clf()
+        # Send menu for TRIDENTE
+        elif command_input == '/tridente':
+            print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
+            date1 = convert_date(date)
 
-            # Add titles
-            plt.title("Statistiche d'uso {0}/{1}".format(month, year))
-            plt.xlabel('Giorni del mese')
-            plt.xlim([1, days])
-            plt.ylabel('Utilizzi')
+            # Get menu
+            payload = {'mensa': 'TRIDENTE', 'da': date1, 'a': date1}
+            msg = get_menu(payload)
 
-            # Set grid
-            plt.grid()
+            # If menu exist send it
+            if msg:
+                bot.sendMessage(chat_id, '🗓️Mensa Tridente - {0}\n\n{1}'.format(date, msg[0]))
+                bot.sendMessage(chat_id, msg[1])
+                bot.sendMessage(chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
+            else:
+                bot.sendMessage(chat_id, CLOSED_MSG.format('Tridente', date, TRIDENTE_HOURS), parse_mode="Markdown")
 
-            # Add plots
-            plt.plot(month_counters, color='#0099ff', linewidth=2.5)
-            plt.plot(month_counters, 'o', color='#0099ff')
-            plt.fill(radius, month_counters)
-            x = range(days)
-            plt.fill_between(x, month_counters, 0, color='#99d6ff')
-
-            # Save
-            plt.savefig('plot.png')
-            f = open('plot.png', 'rb')
-
-            # Send to user
+        # Send prices table
+        elif command_input == '/prezzi':
+            print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
+            f = open('price_list.png', 'rb')
             bot.sendPhoto(chat_id, f)
-
             f.close()
-        except FileNotFoundError:
-            pass
 
-    # Send more detailed statistics - Password required
-    if command_input == '/stats':
-        # Check password
-        if date == STATS_PASSWORD:
+        # Send allergy table
+        elif command_input == '/allergeni':
+            print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
+            bot.sendPhoto(chat_id, 'http://menu.ersurb.it/menum/Allergeni_legenda.png')
+
+        # Send credits
+        elif command_input == '/crediti':
+            print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
+            bot.sendMessage(chat_id, "Codice sorgente:\n"
+                                    "https://github.com/Radeox/MensaUniurbBot\n\n"
+                                    "Sviluppato da:\n"
+                                    "https://github.com/Radeox\n"
+                                    "https://github.com/Fast0n")
+
+        # Send 'donate' link
+        elif command_input == '/dona':
+            print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
+            keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text='Dona',
+                                      url='https://www.gitcheese.com/donate/users/9751015/repos/90749559')],
+                ])
+            bot.sendMessage(chat_id, "🍺 Se sei soddisfatto offri una birra agli sviluppatori 🍺", reply_markup=keyboard)
+
+        # Send opening hours
+        elif command_input == '/orari':
+            print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
+            bot.sendMessage(chat_id, "🍝*Duca*\n{0}\n\n*🍖Tridente*\n{1}\n\n🍟*Campus\n*{2}".format(DUCA_HOURS,
+                                                                                            TRIDENTE_HOURS,
+                                                                                            CAMPUS_HOURS), parse_mode="Markdown")
+
+        # Send statistics about daily use
+        elif command_input == '/statistiche':
             try:
-                msg = 'Ultime 100 richieste:\n'
-
-                # Get number of lines
-                num_lines = sum(1 for line in open("log.txt"))
-
-                # Get user list
                 f = open("log.txt", "r")
 
-                for user in f.readlines():
-                    register_user(user.split()[0])
+                # Get current month days
+                now = datetime.now()
+                days = calendar.monthrange(now.year, now.month)[1]
+                days += 1
 
-                num_users = sum(1 for line in open("users.txt"))
+                # Create month array
+                month_counters = []
+                radius = []
 
-                # Get last lines
-                with open("log.txt", "r") as f:
-                    lines = list(f)[-100:]
+                for i in range(days):
+                    month_counters.append(0)
+                    radius.append(1)
 
-                for line in lines:
-                    msg += line
+                # Read input file
+                for line in f.readlines():
+                    date = line.split()[4]
+                    day, month, year = date.split('/')
 
-                msg += '\nRichieste totali: {0}\n'.format(num_lines)
-                msg += 'Utenti totali: {0}'.format(num_users)
-                bot.sendMessage(chat_id, msg)
+                    if int(year) == now.year and int(month) == now.month:
+                        month_counters[int(day)] += 1
+
+                # Clear plot
+                plt.clf()
+
+                # Add titles
+                plt.title("Statistiche d'uso {0}/{1}".format(month, year))
+                plt.xlabel('Giorni del mese')
+                plt.xlim([1, days])
+                plt.ylabel('Utilizzi')
+
+                # Set grid
+                plt.grid()
+
+                # Add plots
+                plt.plot(month_counters, color='#0099ff', linewidth=2.5)
+                plt.plot(month_counters, 'o', color='#0099ff')
+                plt.fill(radius, month_counters)
+                x = range(days)
+                plt.fill_between(x, month_counters, 0, color='#99d6ff')
+
+                # Save
+                plt.savefig('plot.png')
+                f = open('plot.png', 'rb')
+
+                # Send to user
+                bot.sendPhoto(chat_id, f)
 
                 f.close()
             except FileNotFoundError:
-                print("Log file not found")
                 pass
 
-    # Send news to all registred users - Password required
-    if command_input == '/sendnews':
-        # Check stats password
-        if date == STATS_PASSWORD:
-            # Regenerate user list
+        # Send more detailed statistics - Password required - 1
+        elif command_input == '/stats':
+            USER_STATE[chat_id] = 1
+            bot.sendMessage(chat_id, "*Inserisci la password*", parse_mode="Markdown")
+
+        # Send more detailed statistics - Password required - 2
+        elif USER_STATE[chat_id] == 1:
+            if command_input == PASSWORD:
+                try:
+                    msg = 'Ultime 100 richieste:\n'
+
+                    # Get number of lines
+                    num_lines = sum(1 for line in open("log.txt"))
+
+                    # Get user list
+                    f = open("log.txt", "r")
+
+                    for user in f.readlines():
+                        register_user(user.split()[0])
+
+                    num_users = sum(1 for line in open("users.txt"))
+
+                    # Get last lines
+                    with open("log.txt", "r") as f:
+                        lines = list(f)[-100:]
+
+                    for line in lines:
+                        msg += line
+
+                    msg += '\nRichieste totali: {0}\n'.format(num_lines)
+                    msg += 'Utenti totali: {0}'.format(num_users)
+                    bot.sendMessage(chat_id, msg)
+
+                    f.close()
+                except FileNotFoundError:
+                    print("Log file not found")
+
+            else:
+                bot.sendMessage(chat_id, "*Password Errata*", parse_mode="Markdown")
+
+            # Return to initial state
+            USER_STATE[chat_id] = 0
+
+        # Send news to all registred users - Password required - 1
+        elif command_input == '/sendnews':
+            USER_STATE[chat_id] = 2
+            bot.sendMessage(chat_id, "*Inserisci la password*", parse_mode="Markdown")
+
+        # Send news to all registred users - Password required - 2
+        elif USER_STATE[chat_id] == 2:
+            if command_input == PASSWORD:
+                USER_STATE[chat_id] = 3
+                bot.sendMessage(chat_id, "*Invia un messaggio o una foto con caption\n(Markdown non supportato con foto)*", parse_mode="Markdown")
+            else:
+                USER_STATE[chat_id] = 0
+                bot.sendMessage(chat_id, "*Password Errata*", parse_mode="Markdown")
+
+        # Send news to all registred users - Password required - 3
+        elif USER_STATE[chat_id] == 3:
             f = open("log.txt", "r")
 
             for user in f.readlines():
@@ -229,25 +252,27 @@ def handle(msg):
 
             f.close()
 
-            if content_type == 'text':
-                msg = ''
+            # Send to all users
+            send_msg_all(command_input)
 
-                # Concat message
-                for s in news:
-                    s = str(s).replace('<br>', '\n')
-                    msg += s + ' '
+            USER_STATE[chat_id] = 0
 
-                # Send to all users
-                send_msg_all(msg)
+    # Send news to all registred users - Password required - 3
+    elif content_type == 'photo' and USER_STATE[chat_id] == 3:
+        f = open("log.txt", "r")
 
-            elif content_type == 'photo':
-                msg = msg['photo'][-1]['file_id']
+        for user in f.readlines():
+            register_user(user.split()[0])
 
-                # Send to all users
-                send_photo_all(msg)
+        f.close()
 
-        else:
-            bot.sendMessage(chat_id, "⚠️ Password errata! ⚠️")
+        caption = msg['caption']
+        msg = msg['photo'][-1]['file_id']
+
+        # Send to all users
+        send_photo_all(msg, caption)
+
+        USER_STATE[chat_id] = 0
 
 
 def get_menu(payload):
@@ -306,7 +331,6 @@ def get_menu(payload):
         except:
             e = sys.exc_info()[0]
             print("Error: %s" % e)
-            pass
 
     rvc += rv0 + rv1 + rv2 + rv3
 
@@ -352,7 +376,7 @@ def send_msg_all(msg):
 
     for user in f.readlines():
         try:
-            bot.sendMessage(user, msg)
+            bot.sendMessage(user, msg, parse_mode="Markdown")
         except:
             continue
 
@@ -362,7 +386,7 @@ def send_msg_all(msg):
 
 
 # Send the msg to all registred clients
-def send_photo_all(photo):
+def send_photo_all(photo, caption):
     """
     Send given photo to all users
     """
@@ -373,7 +397,7 @@ def send_photo_all(photo):
 
     for user in f.readlines():
         try:
-            bot.sendPhoto(user, photo)
+            bot.sendPhoto(user, photo, caption=caption)
         except:
             continue
 
