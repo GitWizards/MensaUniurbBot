@@ -50,6 +50,7 @@ def handle(msg):
         # Split command
         try:
             date = command_input.split()[1]
+            command_input_original = command_input
             command_input = command_input.split()[0]
         except:
             now = datetime.now()
@@ -281,7 +282,7 @@ def handle(msg):
             f.close()
 
             # Send to all users
-            send_msg_all(command_input)
+            send_msg_all(command_input_original)
 
             USER_STATE[chat_id] = 0
 
@@ -395,7 +396,7 @@ def register_user(chat_id):
 
 # Send the msg to all registred clients
 def send_msg_all(msg):
-    """ 
+    """
     Send given message to all users
     """
     try:
