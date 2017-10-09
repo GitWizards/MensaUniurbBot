@@ -135,21 +135,16 @@ def handle(msg):
         # Send credits
         elif command_input == '/crediti':
             print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
-            bot.sendMessage(chat_id, "Codice sorgente:\n"
-                            "https://github.com/Radeox/MensaUniurbBot\n\n"
-                            "Sviluppato da:\n"
-                            "https://github.com/Radeox\n"
-                            "https://github.com/Fast0n")
-
-        # Send 'donate' link
-        elif command_input == '/dona':
-            print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
             keyboard = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text='Dona',
                                       url='https://www.gitcheese.com/donate/users/9751015/repos/90749559')],
             ])
-            bot.sendMessage(
-                chat_id, "🍺 Se sei soddisfatto offri una birra agli sviluppatori 🍺", reply_markup=keyboard)
+            bot.sendMessage(chat_id, "Codice sorgente:\n"
+                            "https://github.com/Radeox/MensaUniurbBot\n\n"
+                            "Sviluppato da:\n"
+                            "https://github.com/Radeox\n"
+                            "https://github.com/Fast0n\n\n"
+                            "🍺 Se sei soddisfatto offri una birra agli sviluppatori 🍺", reply_markup=keyboard)
 
         # Send opening hours
         elif command_input == '/orari':
@@ -497,4 +492,3 @@ try:
 finally:
     # Remove PID file on exit
     os.unlink(PIDFILE)
-    
