@@ -1,6 +1,6 @@
 # Message send when user 'start' the bot
 START_MSG = "*Benvenuto su @MensaUniurbBot*\n"\
-            "Qui troverai il menù offerto dal ERSU per i studenti di Uniurb sia per il ristorante /duca che il /tridente\n."\
+            "Qui troverai il menù offerto dal ERSU per i studenti di Uniurb \nsia per il ristorante /duca che il /tridente.\n"\
             "Per cercare in modo selettivo il menù per data scrivere es. /duca 31-12-17.\n\n"\
             "_Il bot è stato creato in modo non ufficiale né ERSU Urbino né UNIURB sono responsabili in alcun modo._"
 
