@@ -134,7 +134,7 @@ def handle(msg):
                 chat_id, 'http://menu.ersurb.it/menum/Allergeni_legenda.png')
 
         # Send credits
-        elif command_input == '/crediti':
+        elif command_input == '/info':
             print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
             keyboard = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text='Dona',
