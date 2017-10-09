@@ -118,7 +118,7 @@ def handle(msg):
                     chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
             else:
                 bot.sendMessage(chat_id, CLOSED_MSG.format(
-                    'Sogesta', date, TRIDENTE_HOURS), parse_mode="Markdown")
+                    'Sogesta', date, SOGESTA_HOURS), parse_mode="Markdown")
 
         # Send prices table
         elif command_input == '/prezzi':
@@ -295,7 +295,12 @@ def handle(msg):
 
         f.close()
 
-        caption = msg['caption']
+        # Check if caption exist
+        try:
+            caption = msg['caption']
+        except KeyError:
+            caption = None
+
         msg = msg['photo'][-1]['file_id']
 
         # Send to all users
