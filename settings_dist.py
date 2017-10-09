@@ -2,4 +2,4 @@
 TOKEN = 'TOKEN'
 
 # Password required for special operations
-STATS_PASSWORD = 'PASSWORD'
+PASSWORD = 'PASSWORD'
