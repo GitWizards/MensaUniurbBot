@@ -36,7 +36,7 @@ def handle(msg):
     """
 
     content_type, chat_type, chat_id = telepot.glance(msg)
-    
+
     # Check user state
     try:
         USER_STATE[chat_id]
@@ -70,11 +70,14 @@ def handle(msg):
 
             # If menu exist send it
             if msg:
-                bot.sendMessage(chat_id, '🗓️Mensa Duca - {0}\n\n{1}'.format(date, msg[0]))
+                bot.sendMessage(
+                    chat_id, '🗓️Mensa Duca - {0}\n\n{1}'.format(date, msg[0]))
                 bot.sendMessage(chat_id, msg[1])
-                bot.sendMessage(chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
+                bot.sendMessage(
+                    chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
             else:
-                bot.sendMessage(chat_id, CLOSED_MSG.format('Duca', date, DUCA_HOURS), parse_mode="Markdown")
+                bot.sendMessage(chat_id, CLOSED_MSG.format(
+                    'Duca', date, DUCA_HOURS), parse_mode="Markdown")
 
         # Send menu for TRIDENTE
         elif command_input == '/tridente':
@@ -87,11 +90,34 @@ def handle(msg):
 
             # If menu exist send it
             if msg:
-                bot.sendMessage(chat_id, '🗓️Mensa Tridente - {0}\n\n{1}'.format(date, msg[0]))
+                bot.sendMessage(
+                    chat_id, '🗓️Mensa Tridente - {0}\n\n{1}'.format(date, msg[0]))
                 bot.sendMessage(chat_id, msg[1])
-                bot.sendMessage(chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
+                bot.sendMessage(
+                    chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
             else:
-                bot.sendMessage(chat_id, CLOSED_MSG.format('Tridente', date, TRIDENTE_HOURS), parse_mode="Markdown")
+                bot.sendMessage(chat_id, CLOSED_MSG.format(
+                    'Tridente', date, TRIDENTE_HOURS), parse_mode="Markdown")
+
+        # Send menu for Sogesta
+        elif command_input == '/sogesta':
+            print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
+            date1 = convert_date(date)
+
+            # Get menu
+            payload = {'mensa': 'TRIDENTE', 'da': date1, 'a': date1}
+            msg = get_menu(payload)
+
+            # If menu exist send it
+            if msg:
+                bot.sendMessage(
+                    chat_id, '🗓️Mensa Sogesta - {0}\n\n{1}'.format(date, msg[0]))
+                bot.sendMessage(chat_id, msg[1])
+                bot.sendMessage(
+                    chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
+            else:
+                bot.sendMessage(chat_id, CLOSED_MSG.format(
+                    'Sogesta', date, TRIDENTE_HOURS), parse_mode="Markdown")
 
         # Send prices table
         elif command_input == '/prezzi':
@@ -103,16 +129,17 @@ def handle(msg):
         # Send allergy table
         elif command_input == '/allergeni':
             print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
-            bot.sendPhoto(chat_id, 'http://menu.ersurb.it/menum/Allergeni_legenda.png')
+            bot.sendPhoto(
+                chat_id, 'http://menu.ersurb.it/menum/Allergeni_legenda.png')
 
         # Send credits
         elif command_input == '/crediti':
             print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
             bot.sendMessage(chat_id, "Codice sorgente:\n"
-                                    "https://github.com/Radeox/MensaUniurbBot\n\n"
-                                    "Sviluppato da:\n"
-                                    "https://github.com/Radeox\n"
-                                    "https://github.com/Fast0n")
+                            "https://github.com/Radeox/MensaUniurbBot\n\n"
+                            "Sviluppato da:\n"
+                            "https://github.com/Radeox\n"
+                            "https://github.com/Fast0n")
 
         # Send 'donate' link
         elif command_input == '/dona':
@@ -120,15 +147,16 @@ def handle(msg):
             keyboard = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text='Dona',
                                       url='https://www.gitcheese.com/donate/users/9751015/repos/90749559')],
-                ])
-            bot.sendMessage(chat_id, "🍺 Se sei soddisfatto offri una birra agli sviluppatori 🍺", reply_markup=keyboard)
+            ])
+            bot.sendMessage(
+                chat_id, "🍺 Se sei soddisfatto offri una birra agli sviluppatori 🍺", reply_markup=keyboard)
 
         # Send opening hours
         elif command_input == '/orari':
             print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
             bot.sendMessage(chat_id, "🍝*Duca*\n{0}\n\n*🍖Tridente*\n{1}\n\n🍟*Campus\n*{2}".format(DUCA_HOURS,
-                                                                                            TRIDENTE_HOURS,
-                                                                                            CAMPUS_HOURS), parse_mode="Markdown")
+                                                                                                    TRIDENTE_HOURS,
+                                                                                                    CAMPUS_HOURS), parse_mode="Markdown")
 
         # Send statistics about daily use
         elif command_input == '/statistiche':
@@ -189,7 +217,8 @@ def handle(msg):
         # Send more detailed statistics - Password required - 1
         elif command_input == '/stats':
             USER_STATE[chat_id] = 1
-            bot.sendMessage(chat_id, "*Inserisci la password*", parse_mode="Markdown")
+            bot.sendMessage(chat_id, "*Inserisci la password*",
+                            parse_mode="Markdown")
 
         # Send more detailed statistics - Password required - 2
         elif USER_STATE[chat_id] == 1:
@@ -224,7 +253,8 @@ def handle(msg):
                     print("Log file not found")
 
             else:
-                bot.sendMessage(chat_id, "*Password Errata*", parse_mode="Markdown")
+                bot.sendMessage(chat_id, "*Password Errata*",
+                                parse_mode="Markdown")
 
             # Return to initial state
             USER_STATE[chat_id] = 0
@@ -232,16 +262,19 @@ def handle(msg):
         # Send news to all registred users - Password required - 1
         elif command_input == '/sendnews':
             USER_STATE[chat_id] = 2
-            bot.sendMessage(chat_id, "*Inserisci la password*", parse_mode="Markdown")
+            bot.sendMessage(chat_id, "*Inserisci la password*",
+                            parse_mode="Markdown")
 
         # Send news to all registred users - Password required - 2
         elif USER_STATE[chat_id] == 2:
             if command_input == PASSWORD:
                 USER_STATE[chat_id] = 3
-                bot.sendMessage(chat_id, "*Invia un messaggio o una foto con caption\n(Markdown non supportato con foto)*", parse_mode="Markdown")
+                bot.sendMessage(
+                    chat_id, "*Invia un messaggio o una foto con caption\n(Markdown non supportato con foto)*", parse_mode="Markdown")
             else:
                 USER_STATE[chat_id] = 0
-                bot.sendMessage(chat_id, "*Password Errata*", parse_mode="Markdown")
+                bot.sendMessage(chat_id, "*Password Errata*",
+                                parse_mode="Markdown")
 
         # Send news to all registred users - Password required - 3
         elif USER_STATE[chat_id] == 3:
@@ -302,7 +335,8 @@ def get_menu(payload):
             name = str(re.findall('(">.*?<\/)', str(link)))
 
             # Remove useless chars
-            name = name.replace('''['">''', '').replace("</']", '').replace('\\', '')
+            name = name.replace('''['">''', '').replace(
+                "</']", '').replace('\\', '')
 
             # Check if launch/dinner
             if idi == '40' and not status:
@@ -445,7 +479,7 @@ if os.path.isfile(PIDFILE):
     sys.exit()
 
 # Create PID file
-with open(PIDFILE, 'w') as f: 
+with open(PIDFILE, 'w') as f:
     f.write(PID)
     f.close()
 
@@ -463,3 +497,4 @@ try:
 finally:
     # Remove PID file on exit
     os.unlink(PIDFILE)
+    
