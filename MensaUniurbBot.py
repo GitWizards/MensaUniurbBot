@@ -218,7 +218,7 @@ def handle(msg):
 
         # Send more detailed statistics - Password required - 2
         elif USER_STATE[chat_id] == 1:
-            if command_input == PASSWORD:
+            if command_input.lower() == PASSWORD:
                 try:
                     msg = 'Ultime 100 richieste:\n'
 
@@ -263,7 +263,7 @@ def handle(msg):
 
         # Send news to all registred users - Password required - 2
         elif USER_STATE[chat_id] == 2:
-            if command_input == PASSWORD:
+            if command_input.lower() == PASSWORD:
                 USER_STATE[chat_id] = 3
                 bot.sendMessage(
                     chat_id, "*Invia un messaggio o una foto con caption\n(Markdown non supportato con foto)*", parse_mode="Markdown")
