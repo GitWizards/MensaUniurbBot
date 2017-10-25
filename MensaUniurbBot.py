@@ -11,6 +11,7 @@ import sys
 
 from time import sleep
 from datetime import datetime
+from random import randint
 
 import re
 import requests
@@ -74,8 +75,16 @@ def handle(msg):
                 bot.sendMessage(
                     chat_id, '🗓️Mensa Duca - {0}\n\n{1}'.format(date, msg[0]))
                 bot.sendMessage(chat_id, msg[1])
-                bot.sendMessage(
-                    chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
+                if randint(1,5) == 3:
+                    bot.sendMessage(
+                        chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️\n\n"+\
+                        "💙 Aiutaci a sostenere le spese di @MensaUniurb\_Bot. "+\
+                        "[Dona 2€](https://www.gitcheese.com/donate/users/9751015/repos/90749559), oppure "+\
+                        "[dona 5€](https://www.gitcheese.com/donate/users/9751015/repos/90749559).", parse_mode='Markdown')
+                else:
+                    bot.sendMessage(
+                        chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
+
             else:
                 bot.sendMessage(chat_id, CLOSED_MSG.format(
                     'Duca', date, DUCA_HOURS), parse_mode="Markdown")
@@ -94,8 +103,15 @@ def handle(msg):
                 bot.sendMessage(
                     chat_id, '🗓️Mensa Tridente - {0}\n\n{1}'.format(date, msg[0]))
                 bot.sendMessage(chat_id, msg[1])
-                bot.sendMessage(
-                    chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
+                if randint(1,5) == 3:
+                    bot.sendMessage(
+                        chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️\n\n"+\
+                        "💙 Aiutaci a sostenere le spese di @MensaUniurb\_Bot. "+\
+                        "[Dona 2€](https://www.gitcheese.com/donate/users/9751015/repos/90749559), oppure "+\
+                        "[dona 5€](https://www.gitcheese.com/donate/users/9751015/repos/90749559).", parse_mode='Markdown')
+                else:
+                    bot.sendMessage(
+                        chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
             else:
                 bot.sendMessage(chat_id, CLOSED_MSG.format(
                     'Tridente', date, TRIDENTE_HOURS), parse_mode="Markdown")
@@ -114,8 +130,15 @@ def handle(msg):
                 bot.sendMessage(
                     chat_id, '🗓️Mensa Sogesta - {0}\n\n{1}'.format(date, msg[0]))
                 bot.sendMessage(chat_id, msg[1])
-                bot.sendMessage(
-                    chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
+                if randint(1,5) == 3:
+                    bot.sendMessage(
+                        chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️\n\n"+\
+                        "💙 Aiutaci a sostenere le spese di @MensaUniurb\_Bot. "+\
+                        "[Dona 2€](https://www.gitcheese.com/donate/users/9751015/repos/90749559), oppure "+\
+                        "[dona 5€](https://www.gitcheese.com/donate/users/9751015/repos/90749559).", parse_mode='Markdown')
+                else:
+                    bot.sendMessage(
+                        chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
             else:
                 bot.sendMessage(chat_id, CLOSED_MSG.format(
                     'Sogesta', date, SOGESTA_HOURS), parse_mode="Markdown")
@@ -151,8 +174,8 @@ def handle(msg):
         elif command_input == '/orari':
             print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
             bot.sendMessage(chat_id, "🍝*Duca*\n{0}\n\n*🍖Tridente*\n{1}\n\n🍟*Sogesta\n*{2}".format(DUCA_HOURS,
-                                                                                                    TRIDENTE_HOURS,
-                                                                                                    SOGESTA_HOURS), parse_mode="Markdown")
+                                                                                                     TRIDENTE_HOURS,
+                                                                                                     SOGESTA_HOURS), parse_mode="Markdown")
 
         # Send statistics about daily use
         elif command_input == '/statistiche':
