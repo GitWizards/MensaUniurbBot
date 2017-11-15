@@ -11,6 +11,7 @@ import sys
 
 from time import sleep
 from datetime import datetime
+from random import randint
 
 import calendar
 import re
@@ -82,11 +83,48 @@ def handle(msg):
 
             # If menu exist send it
             if msg:
-                bot.sendMessage(chat_id, '🗓️Mensa Duca - {0}\n\n{1}'.format(date, msg[0]))
-                bot.sendMessage(chat_id, msg[1])
-                bot.sendMessage(chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
+                bot.sendMessage(
+                    chat_id, '🗓️Mensa Duca - {0}\n\n{1}'.format(date, msg[0]), parse_mode="Markdown")
+                bot.sendMessage(chat_id, msg[1], parse_mode="Markdown")
+                if randint(1, 5) == 3:
+                    bot.sendMessage(
+                        chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️\n\n" +
+                        "💙 Aiutaci a sostenere le spese di @MensaUniurb\_Bot. " +
+                        "[Dona 2€](https://www.gitcheese.com/donate/users/9751015/repos/90749559), oppure " +
+                        "[dona 5€](https://www.gitcheese.com/donate/users/9751015/repos/90749559).", parse_mode='Markdown')
+                else:
+                    bot.sendMessage(
+                        chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
+
             else:
                 bot.sendMessage(chat_id, CLOSED_MSG.format('Duca', date, DUCA_HOURS), parse_mode="Markdown")
+
+        # Send menu for CIBUS DUCA
+        elif command_input == '/cibusduca':
+            print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
+            date1 = convert_date(date)
+
+            # Get menu
+            payload = {'mensa': 'CIBUS', 'da': date1, 'a': date1}
+            msg = get_menu(payload)
+
+            # If menu exist send it
+            if msg:
+                bot.sendMessage(
+                    chat_id, '🗓️Mensa Cibus Duca - {0}\n\n{1}'.format(date, msg[1].replace('🌙Cena:\n\n', '').replace('\n🍟Contorno:\n', '')), parse_mode="Markdown")
+                if randint(1, 5) == 3:
+                    bot.sendMessage(
+                        chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️\n\n" +
+                        "💙 Aiutaci a sostenere le spese di @MensaUniurb\_Bot. " +
+                        "[Dona 2€](https://www.gitcheese.com/donate/users/9751015/repos/90749559), oppure " +
+                        "[dona 5€](https://www.gitcheese.com/donate/users/9751015/repos/90749559).", parse_mode='Markdown')
+                else:
+                    bot.sendMessage(
+                        chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
+
+            else:
+                bot.sendMessage(chat_id, CLOSED_MSG.format(
+                    'Cibus Duca', date, DUCA_HOURS), parse_mode="Markdown")
 
         # Send menu for TRIDENTE
         elif command_input == '/tridente':
@@ -99,11 +137,49 @@ def handle(msg):
 
             # If menu exist send it
             if msg:
-                bot.sendMessage(chat_id, '🗓️Mensa Tridente - {0}\n\n{1}'.format(date, msg[0]))
-                bot.sendMessage(chat_id, msg[1])
-                bot.sendMessage(chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
+                bot.sendMessage(
+                    chat_id, '🗓️Mensa Tridente - {0}\n\n{1}'.format(date, msg[0]), parse_mode="Markdown")
+                bot.sendMessage(chat_id, msg[1], parse_mode="Markdown")
+                if randint(1, 5) == 3:
+                    bot.sendMessage(
+                        chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️\n\n" +
+                        "💙 Aiutaci a sostenere le spese di @MensaUniurb\_Bot. " +
+                        "[Dona 2€](https://www.gitcheese.com/donate/users/9751015/repos/90749559), oppure " +
+                        "[dona 5€](https://www.gitcheese.com/donate/users/9751015/repos/90749559).", parse_mode='Markdown')
+                else:
+                    bot.sendMessage(
+                        chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
             else:
                 bot.sendMessage(chat_id, CLOSED_MSG.format('Tridente', date, TRIDENTE_HOURS), parse_mode="Markdown")
+
+        # Send menu for CIBUS TRIDENTE
+        elif command_input == '/cibustridente':
+            print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
+            date1 = convert_date(date)
+
+            # Get menu
+            payload = {'mensa': 'CIBUSTR', 'da': date1, 'a': date1}
+            msg = get_menu(payload)
+
+            # If menu exist send it
+            if msg:
+                bot.sendMessage(
+                    chat_id, '🗓️Mensa Cibus Tridente - {0}\n\n{1}'.format(date, msg[0].replace('\n🍟Contorno:\n', '')), parse_mode="Markdown")
+                bot.sendMessage(chat_id, msg[1].replace(
+                    '\n🍟Contorno:\n', ''), parse_mode="Markdown")
+                if randint(1, 5) == 3:
+                    bot.sendMessage(
+                        chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️\n\n" +
+                        "💙 Aiutaci a sostenere le spese di @MensaUniurb\_Bot. " +
+                        "[Dona 2€](https://www.gitcheese.com/donate/users/9751015/repos/90749559), oppure " +
+                        "[dona 5€](https://www.gitcheese.com/donate/users/9751015/repos/90749559).", parse_mode='Markdown')
+                else:
+                    bot.sendMessage(
+                        chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
+
+            else:
+                bot.sendMessage(chat_id, CLOSED_MSG.format(
+                    'Cibus Tridente', date, TRIDENTE_HOURS), parse_mode="Markdown")
 
         # Send menu for Sogesta
         elif command_input == '/sogesta':
@@ -117,10 +193,17 @@ def handle(msg):
             # If menu exist send it
             if msg:
                 bot.sendMessage(
-                    chat_id, '🗓️Mensa Sogesta - {0}\n\n{1}'.format(date, msg[0]))
-                bot.sendMessage(chat_id, msg[1])
-                bot.sendMessage(
-                    chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
+                    chat_id, '🗓️Mensa Sogesta - {0}\n\n{1}'.format(date, msg[0]), parse_mode="Markdown")
+                bot.sendMessage(chat_id, msg[1], parse_mode="Markdown")
+                if randint(1, 5) == 3:
+                    bot.sendMessage(
+                        chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️\n\n" +
+                        "💙 Aiutaci a sostenere le spese di @MensaUniurb\_Bot. " +
+                        "[Dona 2€](https://www.gitcheese.com/donate/users/9751015/repos/90749559), oppure " +
+                        "[dona 5€](https://www.gitcheese.com/donate/users/9751015/repos/90749559).", parse_mode='Markdown')
+                else:
+                    bot.sendMessage(
+                        chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
             else:
                 bot.sendMessage(chat_id, CLOSED_MSG.format(
                     'Sogesta', date, SOGESTA_HOURS), parse_mode="Markdown")
@@ -185,7 +268,7 @@ def handle(msg):
 
         # Send news to all registred users - Password required - 2
         elif USER_STATE[chat_id] == 2:
-            if command_input == PASSWORD:
+            if command_input.lower() == PASSWORD:
                 USER_STATE[chat_id] = 3
                 bot.sendMessage(chat_id, 
                                 "*Invia un messaggio o una foto con caption\n(Markdown non supportato con foto)*",
@@ -245,7 +328,14 @@ def get_menu(payload):
 
             # Remove useless chars
             name = name.replace('''['">''', '').replace(
-                "</']", '').replace('\\', '')
+                "</']", '').replace('\\', '').replace('*', '_*_')
+
+            # Replace HTML 'Strong' with Markdown 'bold text'
+            if "<strong> " in name:
+                name = name.replace('<strong> ', '*')
+                bt = '*'
+            else:
+                bt = ''
 
             # Check if launch/dinner
             if idi == '40' and not status:
@@ -258,18 +348,21 @@ def get_menu(payload):
                 rv2 = '\n🍟Contorno:\n'
                 rv3 = '\n🍨Frutta/Dolce:\n'
 
+            # Capitalized menus
+            name = name[:1].title() + name[1:].lower()
+            
             # Check plate type
             if idi == '10':
-                rv0 += ' • ' + name + '\n'
+                rv0 += ' • ' + name + bt + '\n'
                 empty = False
             elif idi == '20':
-                rv1 += ' • ' + name + '\n'
+                rv1 += ' • ' + name + bt + '\n'
                 empty = False
             elif idi == '30':
-                rv2 += ' • ' + name + '\n'
+                rv2 += ' • ' + name + bt + '\n'
                 empty = False
             elif idi == '40':
-                rv3 += ' • ' + name + '\n'
+                rv3 += ' • ' + name + bt + '\n'
                 empty = False
         except:
             e = sys.exc_info()[0]
