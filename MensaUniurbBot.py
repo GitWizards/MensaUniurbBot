@@ -101,7 +101,7 @@ def handle(msg):
             # If menu exist send it
             if msg:
                 bot.sendMessage(
-                    chat_id, '🗓️Mensa Cibus Duca - {0}\n\n{1}'.format(date, msg[1].replace('\n🍟Contorno:\n', '').title()), parse_mode="Markdown")
+                    chat_id, '🗓️Mensa Cibus Duca - {0}\n\n{1}'.format(date, msg[1].replace('🌙Cena:\n\n', '').replace('\n🍟Contorno:\n', '')), parse_mode="Markdown")
                 if randint(1, 5) == 3:
                     bot.sendMessage(
                         chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️\n\n" +
@@ -114,7 +114,7 @@ def handle(msg):
 
             else:
                 bot.sendMessage(chat_id, CLOSED_MSG.format(
-                    'Duca', date, DUCA_HOURS), parse_mode="Markdown")
+                    'Cibus Duca', date, DUCA_HOURS), parse_mode="Markdown")
 
         # Send menu for TRIDENTE
         elif command_input == '/tridente':
@@ -155,9 +155,9 @@ def handle(msg):
             # If menu exist send it
             if msg:
                 bot.sendMessage(
-                    chat_id, '🗓️Mensa Cibus Tridente - {0}\n\n{1}'.format(date, msg[0].replace('\n🍟Contorno:\n', '').title()), parse_mode="Markdown")
+                    chat_id, '🗓️Mensa Cibus Tridente - {0}\n\n{1}'.format(date, msg[0].replace('\n🍟Contorno:\n', '')), parse_mode="Markdown")
                 bot.sendMessage(chat_id, msg[1].replace(
-                    '\n🍟Contorno:\n', '').title(), parse_mode="Markdown")
+                    '\n🍟Contorno:\n', ''), parse_mode="Markdown")
                 if randint(1, 5) == 3:
                     bot.sendMessage(
                         chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️\n\n" +
@@ -170,7 +170,7 @@ def handle(msg):
 
             else:
                 bot.sendMessage(chat_id, CLOSED_MSG.format(
-                    'Duca', date, DUCA_HOURS), parse_mode="Markdown")
+                    'Cibus Tridente', date, TRIDENTE_HOURS), parse_mode="Markdown")
 
         # Send menu for Sogesta
         elif command_input == '/sogesta':
