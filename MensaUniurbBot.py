@@ -73,8 +73,8 @@ def handle(msg):
             # If menu exist send it
             if msg:
                 bot.sendMessage(
-                    chat_id, '🗓️Mensa Duca - {0}\n\n{1}'.format(date, msg[0]))
-                bot.sendMessage(chat_id, msg[1])
+                    chat_id, '🗓️Mensa Duca - {0}\n\n{1}'.format(date, msg[0]), parse_mode="Markdown")
+                bot.sendMessage(chat_id, msg[1], parse_mode="Markdown")
                 if randint(1,5) == 3:
                     bot.sendMessage(
                         chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️\n\n"+\
@@ -101,8 +101,8 @@ def handle(msg):
             # If menu exist send it
             if msg:
                 bot.sendMessage(
-                    chat_id, '🗓️Mensa Tridente - {0}\n\n{1}'.format(date, msg[0]))
-                bot.sendMessage(chat_id, msg[1])
+                    chat_id, '🗓️Mensa Tridente - {0}\n\n{1}'.format(date, msg[0]), parse_mode="Markdown")
+                bot.sendMessage(chat_id, msg[1], parse_mode="Markdown")
                 if randint(1,5) == 3:
                     bot.sendMessage(
                         chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️\n\n"+\
@@ -128,8 +128,8 @@ def handle(msg):
             # If menu exist send it
             if msg:
                 bot.sendMessage(
-                    chat_id, '🗓️Mensa Sogesta - {0}\n\n{1}'.format(date, msg[0]))
-                bot.sendMessage(chat_id, msg[1])
+                    chat_id, '🗓️Mensa Sogesta - {0}\n\n{1}'.format(date, msg[0]), parse_mode="Markdown")
+                bot.sendMessage(chat_id, msg[1], parse_mode="Markdown")
                 if randint(1,5) == 3:
                     bot.sendMessage(
                         chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️\n\n"+\
@@ -360,7 +360,14 @@ def get_menu(payload):
 
             # Remove useless chars
             name = name.replace('''['">''', '').replace(
-                "</']", '').replace('\\', '')
+                "</']", '').replace('\\', '').replace('*','_*_')
+
+            # Replace HTML 'Strong' with Markdown 'bold text'
+            if "<strong> " in name:
+                name = name.replace('<strong> ','*')
+                bt = '*'
+            else:
+                bt = ''
 
             # Check if launch/dinner
             if idi == '40' and not status:
@@ -375,16 +382,16 @@ def get_menu(payload):
 
             # Check plate type
             if idi == '10':
-                rv0 += ' • ' + name + '\n'
+                rv0 += ' • ' + name + bt +'\n'
                 empty = False
             elif idi == '20':
-                rv1 += ' • ' + name + '\n'
+                rv1 += ' • ' + name + bt +'\n'
                 empty = False
             elif idi == '30':
-                rv2 += ' • ' + name + '\n'
+                rv2 += ' • ' + name + bt +'\n'
                 empty = False
             elif idi == '40':
-                rv3 += ' • ' + name + '\n'
+                rv3 += ' • ' + name + bt +'\n'
                 empty = False
         except:
             e = sys.exc_info()[0]
