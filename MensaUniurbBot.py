@@ -22,7 +22,7 @@ import telepot
 from bs4 import BeautifulSoup
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 
-from settings import TOKEN, PASSWORD
+from settings import TOKEN, PASSWORD, ADMIN
 from messages import *
 
 import matplotlib
@@ -66,11 +66,11 @@ def handle(msg):
 
             try:
                 username = msg['chat']['username']
-                full_name += msg['chat']['first_name'] 
-                full_name += ' ' +  msg['chat']['last_name']
+                full_name += msg['chat']['first_name']
+                full_name += ' ' + msg['chat']['last_name']
             except KeyError:
                 pass
-                
+
             register_user(chat_id, username, full_name)
 
         # Send menu for DUCA
@@ -98,7 +98,8 @@ def handle(msg):
                         chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
 
             else:
-                bot.sendMessage(chat_id, CLOSED_MSG.format('Duca', date, DUCA_HOURS), parse_mode="Markdown")
+                bot.sendMessage(chat_id, CLOSED_MSG.format(
+                    'Duca', date, DUCA_HOURS), parse_mode="Markdown")
 
         # Send menu for CIBUS DUCA
         elif command_input == '/cibusduca':
@@ -151,7 +152,8 @@ def handle(msg):
                     bot.sendMessage(
                         chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
             else:
-                bot.sendMessage(chat_id, CLOSED_MSG.format('Tridente', date, TRIDENTE_HOURS), parse_mode="Markdown")
+                bot.sendMessage(chat_id, CLOSED_MSG.format(
+                    'Tridente', date, TRIDENTE_HOURS), parse_mode="Markdown")
 
         # Send menu for CIBUS TRIDENTE
         elif command_input == '/cibustridente':
@@ -220,7 +222,8 @@ def handle(msg):
         # Send allergy table
         elif command_input == '/allergeni':
             register_request(chat_id, command_input)
-            bot.sendPhoto(chat_id, 'http://menu.ersurb.it/menum/Allergeni_legenda.png')
+            bot.sendPhoto(
+                chat_id, 'http://menu.ersurb.it/menum/Allergeni_legenda.png')
 
         # Send credits
         elif command_input == '/info':
@@ -251,7 +254,7 @@ def handle(msg):
             year = int(now.strftime("%Y"))
             month = int(now.strftime("%m"))
 
-            # Get graph 
+            # Get graph
             fname = get_month_graph(year, month)
 
             with open(fname, 'rb') as f:
@@ -272,12 +275,13 @@ def handle(msg):
         elif USER_STATE[chat_id] == 2:
             if command_input.lower() == PASSWORD:
                 USER_STATE[chat_id] = 3
-                bot.sendMessage(chat_id, 
+                bot.sendMessage(chat_id,
                                 "*Invia un messaggio o una foto con caption\n(Markdown non supportato con foto)*",
                                 parse_mode="Markdown")
             else:
                 USER_STATE[chat_id] = 0
-                bot.sendMessage(chat_id, "*Password Errata*", parse_mode="Markdown")
+                bot.sendMessage(chat_id, "*Password Errata*",
+                                parse_mode="Markdown")
 
         # Send news to all registred users - Password required - 3
         elif USER_STATE[chat_id] == 3:
@@ -285,6 +289,23 @@ def handle(msg):
 
             # Send to all users
             send_msg_all(command_input_original)
+
+        # Send report to admin
+        if command_input == '/report' and USER_STATE[chat_id] == 0:
+            bot.sendMessage(chat_id, 'Scrivi il tuo problema e invia')
+            USER_STATE[chat_id] = 1
+
+        if command_input != '/report' and USER_STATE[chat_id] == 1:
+            try:
+                message = "Messaggio inviato da " + str(chat_id) + ":\n" + command_input_original
+                bot.sendMessage(chat_id, 'Il messaggio "_' + command_input_original +
+                                '"_ è stato inviato con successo', parse_mode="Markdown")
+            except:
+                message = "Messaggio inviato da " + str(chat_id) + ":\n" + command_input
+                bot.sendMessage(chat_id, 'Il messaggio "_' + command_input +
+                                '"_ è stato inviato con successo', parse_mode="Markdown")
+            send_msg_report(message)
+            USER_STATE[chat_id] = 0
 
     # Send news to all registred users - Password required - 3
     elif content_type == 'photo' and USER_STATE[chat_id] == 3:
@@ -352,7 +373,7 @@ def get_menu(payload):
 
             # Capitalized menus
             name = name[:1].title() + name[1:].lower()
-            
+
             # Check plate type
             if idi == '10':
                 rv0 += ' • ' + name + bt + '\n'
@@ -376,6 +397,7 @@ def get_menu(payload):
         return [rvp, rvc]
     else:
         return
+
 
 def get_month_graph(year, month):
     """
@@ -424,6 +446,18 @@ def get_month_graph(year, month):
 
 
 # Telegram related functions
+def send_msg_report(msg):
+    """
+    Send given message to all users
+    """
+    for user in ADMIN:
+        try:
+            bot.sendMessage(user, msg, parse_mode="Markdown")
+        except:
+            continue
+
+    return 1
+
 def send_msg_all(msg):
     """
     Send given message to all users
@@ -436,7 +470,6 @@ def send_msg_all(msg):
 
     return 1
 
-# Send the msg to all registred clients
 def send_photo_all(photo, caption):
     """
     Send given photo to all users
@@ -485,6 +518,7 @@ def register_user(chat_id, username, name):
 
     return 1
 
+
 def register_request(chat_id, request):
     """
     Store in database request made by users
@@ -529,6 +563,7 @@ def get_user_list():
     conn.close()
     return users
 
+
 def get_total_requests():
     """
     Get total number of requests made by users
@@ -544,6 +579,7 @@ def get_total_requests():
     # Close connection to DB
     conn.close()
     return total_requests
+
 
 def get_total_users():
     """
@@ -561,6 +597,7 @@ def get_total_users():
     conn.close()
     return total_users
 
+
 def get_use_in_day(date):
     """
     Return the number of request in given DATE (YYYY-MM-DD)
@@ -569,7 +606,8 @@ def get_use_in_day(date):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
-    query = 'SELECT count(*) FROM request WHERE date BETWEEN "{0} 00:00:00" AND "{0} 23:59:59"'.format(date)
+    query = 'SELECT count(*) FROM request WHERE date BETWEEN "{0} 00:00:00" AND "{0} 23:59:59"'.format(
+        date)
     cursor.execute(query)
     day_uses = cursor.fetchone()[0]
 
