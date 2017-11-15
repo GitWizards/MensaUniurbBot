@@ -12,15 +12,15 @@ import sys
 from time import sleep
 from datetime import datetime
 
-import re
-import requests
 import calendar
+import re
+import sqlite3
+import requests
 import telepot
 
 from bs4 import BeautifulSoup
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 
-# Dev settings
 from settings import TOKEN, PASSWORD
 from messages import *
 
@@ -34,13 +34,12 @@ def handle(msg):
     """
     This function handle all incoming messages
     """
-
     content_type, chat_type, chat_id = telepot.glance(msg)
 
     # Check user state
     try:
         USER_STATE[chat_id]
-    except:
+    except KeyError:
         USER_STATE[chat_id] = 0
 
     # Check what type of content was sent
@@ -55,14 +54,26 @@ def handle(msg):
         except:
             now = datetime.now()
             date = now.strftime("%d-%m-%Y")
-
         # Send start message
         if command_input == '/start':
             bot.sendMessage(chat_id, START_MSG, parse_mode='Markdown')
 
+            # Try to save username and name
+            username = ""
+            full_name = ""
+
+            try:
+                username = msg['chat']['username']
+                full_name += msg['chat']['first_name'] 
+                full_name += ' ' +  msg['chat']['last_name']
+            except KeyError:
+                pass
+                
+            register_user(chat_id, username, full_name)
+
         # Send menu for DUCA
         elif command_input == '/duca':
-            print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
+            register_request(chat_id, command_input)
             date1 = convert_date(date)
 
             # Get menu
@@ -71,18 +82,15 @@ def handle(msg):
 
             # If menu exist send it
             if msg:
-                bot.sendMessage(
-                    chat_id, '🗓️Mensa Duca - {0}\n\n{1}'.format(date, msg[0]))
+                bot.sendMessage(chat_id, '🗓️Mensa Duca - {0}\n\n{1}'.format(date, msg[0]))
                 bot.sendMessage(chat_id, msg[1])
-                bot.sendMessage(
-                    chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
+                bot.sendMessage(chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
             else:
-                bot.sendMessage(chat_id, CLOSED_MSG.format(
-                    'Duca', date, DUCA_HOURS), parse_mode="Markdown")
+                bot.sendMessage(chat_id, CLOSED_MSG.format('Duca', date, DUCA_HOURS), parse_mode="Markdown")
 
         # Send menu for TRIDENTE
         elif command_input == '/tridente':
-            print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
+            register_request(chat_id, command_input)
             date1 = convert_date(date)
 
             # Get menu
@@ -91,18 +99,15 @@ def handle(msg):
 
             # If menu exist send it
             if msg:
-                bot.sendMessage(
-                    chat_id, '🗓️Mensa Tridente - {0}\n\n{1}'.format(date, msg[0]))
+                bot.sendMessage(chat_id, '🗓️Mensa Tridente - {0}\n\n{1}'.format(date, msg[0]))
                 bot.sendMessage(chat_id, msg[1])
-                bot.sendMessage(
-                    chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
+                bot.sendMessage(chat_id, "⚠️ Il menù potrebbe subire delle variazioni ⚠️")
             else:
-                bot.sendMessage(chat_id, CLOSED_MSG.format(
-                    'Tridente', date, TRIDENTE_HOURS), parse_mode="Markdown")
+                bot.sendMessage(chat_id, CLOSED_MSG.format('Tridente', date, TRIDENTE_HOURS), parse_mode="Markdown")
 
         # Send menu for Sogesta
         elif command_input == '/sogesta':
-            print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
+            register_request(chat_id, command_input)
             date1 = convert_date(date)
 
             # Get menu
@@ -122,20 +127,19 @@ def handle(msg):
 
         # Send prices table
         elif command_input == '/prezzi':
-            print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
-            f = open('price_list.png', 'rb')
-            bot.sendPhoto(chat_id, f)
-            f.close()
+            with open('price_list.png', 'rb') as f:
+                bot.sendPhoto(chat_id, f)
+                f.close()
+            register_request(chat_id, command_input)
 
         # Send allergy table
         elif command_input == '/allergeni':
-            print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
-            bot.sendPhoto(
-                chat_id, 'http://menu.ersurb.it/menum/Allergeni_legenda.png')
+            bot.sendPhoto(chat_id, 'http://menu.ersurb.it/menum/Allergeni_legenda.png')
+            register_request(chat_id, command_input)
 
         # Send credits
         elif command_input == '/info':
-            print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
+            register_request(chat_id, command_input)
             keyboard = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text='Dona',
                                       url='https://www.gitcheese.com/donate/users/9751015/repos/90749559')],
@@ -149,111 +153,29 @@ def handle(msg):
 
         # Send opening hours
         elif command_input == '/orari':
-            print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
-            bot.sendMessage(chat_id, "🍝*Duca*\n{0}\n\n*🍖Tridente*\n{1}\n\n🍟*Sogesta\n*{2}".format(DUCA_HOURS,
-                                                                                                    TRIDENTE_HOURS,
-                                                                                                    SOGESTA_HOURS), parse_mode="Markdown")
-
-        # Send statistics about daily use
-        elif command_input == '/statistiche':
-            try:
-                f = open("log.txt", "r")
-
-                # Get current month days
-                now = datetime.now()
-                days = calendar.monthrange(now.year, now.month)[1]
-                days += 1
-
-                # Create month array
-                month_counters = []
-                radius = []
-
-                for i in range(days):
-                    month_counters.append(0)
-                    radius.append(1)
-
-                # Read input file
-                for line in f.readlines():
-                    date = line.split()[4]
-                    day, month, year = date.split('/')
-
-                    if int(year) == now.year and int(month) == now.month:
-                        month_counters[int(day)] += 1
-
-                # Clear plot
-                plt.clf()
-
-                # Add titles
-                plt.title("Statistiche d'uso {0}/{1}".format(month, year))
-                plt.xlabel('Giorni del mese')
-                plt.xlim([1, days])
-                plt.ylabel('Utilizzi')
-
-                # Set grid
-                plt.grid()
-
-                # Add plots
-                plt.plot(month_counters, color='#0099ff', linewidth=2.5)
-                plt.plot(month_counters, 'o', color='#0099ff')
-                plt.fill(radius, month_counters)
-                x = range(days)
-                plt.fill_between(x, month_counters, 0, color='#99d6ff')
-
-                # Save
-                plt.savefig('plot.png')
-                f = open('plot.png', 'rb')
-
-                # Send to user
-                bot.sendPhoto(chat_id, f)
-
-                f.close()
-            except FileNotFoundError:
-                pass
-
-        # Send more detailed statistics - Password required - 1
-        elif command_input == '/stats':
-            USER_STATE[chat_id] = 1
-            bot.sendMessage(chat_id, "*Inserisci la password*",
+            bot.sendMessage(chat_id,
+                            "🍝*Duca*\n{0}\n\n*🍖Tridente*\n{1}\n\n🍟*Sogesta\n*{2}".format(DUCA_HOURS,
+                                                                                            TRIDENTE_HOURS,
+                                                                                            SOGESTA_HOURS),
                             parse_mode="Markdown")
+            register_request(chat_id, command_input)
 
-        # Send more detailed statistics - Password required - 2
-        elif USER_STATE[chat_id] == 1:
-            if command_input == PASSWORD:
-                try:
-                    msg = 'Ultime 100 richieste:\n'
+        # Send statistics about monthly use
+        elif command_input == '/statistiche':
+            now = datetime.now()
+            year = int(now.strftime("%Y"))
+            month = int(now.strftime("%m"))
 
-                    # Get number of lines
-                    num_lines = sum(1 for line in open("log.txt"))
+            # Get graph 
+            fname = get_month_graph(year, month)
 
-                    # Get user list
-                    f = open("log.txt", "r")
+            with open(fname, 'rb') as f:
+                # Get caption
+                caption = ("Utenti totali: {0}\n"
+                           "Richieste totali: {1}".format(get_total_users(), get_total_requests()))
 
-                    for user in f.readlines():
-                        register_user(user.split()[0])
-
-                    num_users = sum(1 for line in open("users.txt"))
-
-                    # Get last lines
-                    with open("log.txt", "r") as f:
-                        lines = list(f)[-100:]
-
-                    for line in lines:
-                        msg += line
-
-                    msg += '\nRichieste totali: {0}\n'.format(num_lines)
-                    msg += 'Utenti totali: {0}'.format(num_users)
-                    bot.sendMessage(chat_id, msg)
-
-                    f.close()
-                except FileNotFoundError:
-                    print("Log file not found")
-
-            else:
-                bot.sendMessage(chat_id, "*Password Errata*",
-                                parse_mode="Markdown")
-
-            # Return to initial state
-            USER_STATE[chat_id] = 0
+                bot.sendPhoto(chat_id, f, caption)
+                f.close()
 
         # Send news to all registred users - Password required - 1
         elif command_input == '/sendnews':
@@ -265,36 +187,22 @@ def handle(msg):
         elif USER_STATE[chat_id] == 2:
             if command_input == PASSWORD:
                 USER_STATE[chat_id] = 3
-                bot.sendMessage(
-                    chat_id, "*Invia un messaggio o una foto con caption\n(Markdown non supportato con foto)*", parse_mode="Markdown")
+                bot.sendMessage(chat_id, 
+                                "*Invia un messaggio o una foto con caption\n(Markdown non supportato con foto)*",
+                                parse_mode="Markdown")
             else:
                 USER_STATE[chat_id] = 0
-                bot.sendMessage(chat_id, "*Password Errata*",
-                                parse_mode="Markdown")
+                bot.sendMessage(chat_id, "*Password Errata*", parse_mode="Markdown")
 
         # Send news to all registred users - Password required - 3
         elif USER_STATE[chat_id] == 3:
-            f = open("log.txt", "r")
-
-            for user in f.readlines():
-                register_user(user.split()[0])
-
-            f.close()
+            USER_STATE[chat_id] = 0
 
             # Send to all users
             send_msg_all(command_input_original)
 
-            USER_STATE[chat_id] = 0
-
     # Send news to all registred users - Password required - 3
     elif content_type == 'photo' and USER_STATE[chat_id] == 3:
-        f = open("log.txt", "r")
-
-        for user in f.readlines():
-            register_user(user.split()[0])
-
-        f.close()
-
         # Check if caption exist
         try:
             caption = msg['caption']
@@ -303,10 +211,10 @@ def handle(msg):
 
         msg = msg['photo'][-1]['file_id']
 
+        USER_STATE[chat_id] = 0
+
         # Send to all users
         send_photo_all(msg, caption)
-
-        USER_STATE[chat_id] = 0
 
 
 def get_menu(payload):
@@ -374,89 +282,81 @@ def get_menu(payload):
     else:
         return
 
-
-def register_user(chat_id):
+def get_month_graph(year, month):
     """
-    Register given user to receive news
+    Return the uses graph of given month
     """
-    insert = 1
-
+    # Ensure storage directory exists
     try:
-        f = open("users.txt", "r+")
+        os.mkdir('plots')
+    except FileExistsError:
+        pass
 
-        for user in f.readlines():
-            if user.replace('\n', '') == str(chat_id):
-                insert = 0
+    # Get current month days
+    date = "{0}-{1}-".format(year, month)
+    days_month = 1 + calendar.monthrange(year, month)[1]
 
-    except IOError:
-        f = open("users.txt", "w")
+    # Create month array
+    month_counters = [0] * days_month
+    radius = [1] * days_month
 
-    if insert:
-        f.write(str(chat_id) + '\n')
+    for day in enumerate(month_counters[1:]):
+        month_counters[day[0]] = get_use_in_day(date + str(day[0]).zfill(2))
 
-    f.close()
+    # Clear plot
+    plt.clf()
 
-    return insert
+    # Add titles
+    plt.title("Statistiche d'uso {0}/{1}".format(month, year))
+    plt.xlabel("Giorni del mese")
+    plt.xlim([1, days_month])
+    plt.ylabel("Utilizzi")
+
+    # Set grid
+    plt.grid()
+
+    # Add plots
+    plt.plot(month_counters, color='#0099ff', linewidth=2.5)
+    plt.plot(month_counters, 'o', color='#5e97f6')
+    plt.fill(radius, month_counters)
+    plt.fill_between(range(days_month), month_counters, 0, color='#99d6ff')
+
+    # Save it!
+    fname = 'plots/{0}_{1}.png'.format(year, month)
+    plt.savefig(fname)
+
+    return fname
 
 
-# Send the msg to all registred clients
+# Telegram related functions
 def send_msg_all(msg):
     """
     Send given message to all users
     """
-    try:
-        f = open("users.txt", "r")
-    except IOError:
-        return 0
-
-    for user in f.readlines():
+    for user in get_user_list():
         try:
             bot.sendMessage(user, msg, parse_mode="Markdown")
         except:
             continue
 
-    f.close()
-
     return 1
-
 
 # Send the msg to all registred clients
 def send_photo_all(photo, caption):
     """
     Send given photo to all users
     """
-    try:
-        f = open("users.txt", "r")
-    except IOError:
-        return 0
+    users = get_user_list()
 
-    for user in f.readlines():
+    for user in users:
         try:
             bot.sendPhoto(user, photo, caption=caption)
         except:
             continue
 
-    f.close()
-
     return 1
 
-
-def print_log(msg, log_file):
-    """
-    Write to 'log_file' adding current date
-    """
-    try:
-        f = open(log_file, "a")
-
-        now = datetime.now()
-        date = now.strftime("%H:%M %d/%m/%Y")
-
-        f.write("{0} {1}\n".format(msg, date))
-        f.close()
-    except:
-        print("Error opening log file!")
-
-
+# Utility functions
 def convert_date(date):
     """
     Covert MM-DD-YYYY to DD-MM-YYYY
@@ -467,8 +367,127 @@ def convert_date(date):
     return "{0}-{1}-{2}".format(x, y, z)
 
 
+## Query funtions ##
+def register_user(chat_id, username, name):
+    """
+    Register given user to receive news and statistics
+    """
+    # Open connection to DB
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    try:
+        query = ('INSERT INTO user(chat_id, name, username) '
+                 'VALUES({0}, "{1}", "{2}")'.format(chat_id, name, username))
+
+        cursor.execute(query)
+        conn.commit()
+    except sqlite3.IntegrityError:
+        return 0
+    finally:
+        # Close connection to DB
+        conn.close()
+
+    return 1
+
+def register_request(chat_id, request):
+    """
+    Store in database request made by users
+    """
+    # Open connection to DB
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    # Get current date
+    now = datetime.now()
+    date = now.strftime("%Y-%m-%d %H:%M:%S")
+
+    # Get ID
+    query = ('SELECT id FROM action WHERE name == "%s"' % request)
+    cursor.execute(query)
+    action_id = cursor.fetchone()[0]
+
+    query = ('INSERT INTO request(date, user, action) '
+             'VALUES("{0}", {1}, {2})'.format(date, chat_id, action_id))
+
+    cursor.execute(query)
+    conn.commit()
+
+    # Close connection to DB
+    conn.close()
+    return 1
+
+def get_user_list():
+    """
+    Return the list of registred users chat_id
+    """
+    users = []
+
+    # Open connection to DB
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    for user in cursor.execute('SELECT chat_id FROM user'):
+        users.append(user[0])
+
+    # Close connection to DB
+    conn.close()
+    return users
+
+def get_total_requests():
+    """
+    Get total number of requests made by users
+    """
+    # Open connection to DB
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    query = 'SELECT count(*) FROM request'
+    cursor.execute(query)
+    total_requests = cursor.fetchone()[0]
+
+    # Close connection to DB
+    conn.close()
+    return total_requests
+
+def get_total_users():
+    """
+    Get total number of registered users
+    """
+    # Open connection to DB
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    query = 'SELECT count(*) FROM user'
+    cursor.execute(query)
+    total_users = cursor.fetchone()[0]
+
+    # Close connection to DB
+    conn.close()
+    return total_users
+
+def get_use_in_day(date):
+    """
+    Return the number of request in given DATE (YYYY-MM-DD)
+    """
+    # Open connection to DB
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    query = 'SELECT count(*) FROM request WHERE date BETWEEN "{0} 00:00:00" AND "{0} 23:59:59"'.format(date)
+    cursor.execute(query)
+    day_uses = cursor.fetchone()[0]
+
+    # Close connection to DB
+    conn.close()
+    return day_uses
+
+
 # Main
 print("Starting MensaUniurbBot...")
+
+# Database name
+DB_NAME = 'mensauniurb.db'
 
 # PID file
 PID = str(os.getpid())
@@ -494,7 +513,6 @@ try:
 
     while 1:
         sleep(10)
-
 finally:
     # Remove PID file on exit
     os.unlink(PIDFILE)
