@@ -284,7 +284,7 @@ def handle(msg):
             USER_STATE[chat_id] = 0
 
             # Send to all users
-            send_msg_all(command_input)
+            send_msg_all(command_input_original)
 
     # Send news to all registred users - Password required - 3
     elif content_type == 'photo' and USER_STATE[chat_id] == 3:
