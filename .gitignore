@@ -1,7 +1,8 @@
 __pycache__
-settings.py
-users.txt
-log.txt
-plot.png
 *.pyc
 *.swp
+.vscode
+
+settings.py
+mensauniurb.db
+plots
