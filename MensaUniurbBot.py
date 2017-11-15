@@ -55,6 +55,7 @@ def handle(msg):
         except:
             now = datetime.now()
             date = now.strftime("%d-%m-%Y")
+
         # Send start message
         if command_input == '/start':
             bot.sendMessage(chat_id, START_MSG, parse_mode='Markdown')
@@ -101,7 +102,7 @@ def handle(msg):
 
         # Send menu for CIBUS DUCA
         elif command_input == '/cibusduca':
-            print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
+            register_request(chat_id, command_input)
             date1 = convert_date(date)
 
             # Get menu
@@ -154,7 +155,7 @@ def handle(msg):
 
         # Send menu for CIBUS TRIDENTE
         elif command_input == '/cibustridente':
-            print_log("{0} - {1}".format(chat_id, command_input), "log.txt")
+            register_request(chat_id, command_input)
             date1 = convert_date(date)
 
             # Get menu
@@ -210,15 +211,16 @@ def handle(msg):
 
         # Send prices table
         elif command_input == '/prezzi':
+            register_request(chat_id, command_input)
+
             with open('price_list.png', 'rb') as f:
                 bot.sendPhoto(chat_id, f)
                 f.close()
-            register_request(chat_id, command_input)
 
         # Send allergy table
         elif command_input == '/allergeni':
-            bot.sendPhoto(chat_id, 'http://menu.ersurb.it/menum/Allergeni_legenda.png')
             register_request(chat_id, command_input)
+            bot.sendPhoto(chat_id, 'http://menu.ersurb.it/menum/Allergeni_legenda.png')
 
         # Send credits
         elif command_input == '/info':
@@ -236,12 +238,12 @@ def handle(msg):
 
         # Send opening hours
         elif command_input == '/orari':
+            register_request(chat_id, command_input)
             bot.sendMessage(chat_id,
                             "🍝*Duca*\n{0}\n\n*🍖Tridente*\n{1}\n\n🍟*Sogesta\n*{2}".format(DUCA_HOURS,
                                                                                             TRIDENTE_HOURS,
                                                                                             SOGESTA_HOURS),
                             parse_mode="Markdown")
-            register_request(chat_id, command_input)
 
         # Send statistics about monthly use
         elif command_input == '/statistiche':
@@ -282,7 +284,7 @@ def handle(msg):
             USER_STATE[chat_id] = 0
 
             # Send to all users
-            send_msg_all(command_input_original)
+            send_msg_all(command_input)
 
     # Send news to all registred users - Password required - 3
     elif content_type == 'photo' and USER_STATE[chat_id] == 3:
