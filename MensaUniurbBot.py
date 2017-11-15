@@ -436,6 +436,9 @@ def get_menu(payload):
                 rv2 = '\n🍟Contorno:\n'
                 rv3 = '\n🍨Frutta/Dolce:\n'
 
+            # Capitalized menus
+            name = name[:1].title() + name[1:].lower()
+            
             # Check plate type
             if idi == '10':
                 rv0 += ' • ' + name + bt + '\n'
