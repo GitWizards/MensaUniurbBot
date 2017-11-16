@@ -269,7 +269,7 @@ def handle(msg):
             USER_STATE[chat_id] = 0
 
             # Sent to admins
-            msg = "Messaggio inviato da {0}:\n{1}".format(chat_id, command_input)
+            msg = "Messaggio inviato da {0}:\n_{1}_".format(chat_id, command_input)
             send_msg_report(msg)
 
             # Send to user
@@ -319,8 +319,9 @@ def get_menu_message(kitchen, date, meal):
     core_msg = get_menu(payload)
 
     # If menu exist send it
-    try:
-        msg = "🗓️*Mensa {0}*\n{1}".format(cn[kitchen], core_msg[cm[meal]])
+
+    if core_msg[cm[meal]] != "":
+        msg = "🗓️*Menu Mensa {0}*\n\n{1}".format(cn[kitchen], core_msg[cm[meal]])
         msg += "\n⚠️ Il menù potrebbe subire delle variazioni ⚠️"
 
         # Random spam
@@ -328,7 +329,7 @@ def get_menu_message(kitchen, date, meal):
             msg += ("\n\n💙 Aiutaci a sostenere le spese di @MensaUniurb\_Bot.\n"
                     "[Dona 2€](https://www.gitcheese.com/donate/users/9751015/repos/90749559) oppure "
                     "[dona 5€](https://www.gitcheese.com/donate/users/9751015/repos/90749559).")
-    except TypeError:
+    else:
         msg = CLOSED_MSG.format(cn[kitchen], ch[kitchen])
 
     return msg
@@ -339,75 +340,67 @@ def get_menu(payload):
     """
     r = requests.post("http://menu.ersurb.it/menum/menu.asp", data=payload)
 
-    empty = True
-    status = False
-    rvp = ""
-    rvc = ""
-
-    rv0 = '\n🍝Primi:\n'
-    rv1 = '\n🍖Secondi:\n'
-    rv2 = '\n🍟Contorno:\n'
-    rv3 = '\n🍨Frutta/Dolce:\n'
+    last = False
+    msg_lunch = ""
+    msg_dinner = ""
+    p = ['', '', '', '']
 
     soup = BeautifulSoup(r.text, 'html.parser')
 
     for link in soup.find_all('a')[1:]:
-        try:
-            # Get ID
-            app = link.get('onclick')
-            idi = re.findall('(".*?")', app)[1].replace('"', '')
+        app = link.get('onclick').replace('showModal', '')
 
-            # Get name
-            name = str(re.findall('(">.*?<\/)', str(link)))
+        # Get ID
+        idi = app.split()[1]
+        idi = idi.replace('"', '').replace(',', '')
 
-            # Remove useless chars
-            name = name.replace('''['">''', '').replace("</']", '')
-            name = name.replace('\\', '').replace('*', 'X')
+        # Get name
+        name = app.split(', ')[2]
+        name = name.replace('"', '').replace(');', '')
 
-            # Replace HTML 'Strong' with Markdown 'bold text'
-            if "<strong> " in name:
-                name = name.replace('<strong> ', '*')
-                bt = '*'
-            else:
-                bt = ''
+        # Remove useless chars
+        name = name.replace('*', 'X')
 
-            # Check if lunch/dinner
-            if idi == '40' and not status:
-                status = True
-            elif idi == '10' and status:
-                status = False
-                rvp += rv0 + rv1 + rv2 + rv3
-                rv0 = '\n🍝Primi:\n'
-                rv1 = '\n🍖Secondi:\n'
-                rv2 = '\n🍟Contorno:\n'
-                rv3 = '\n🍨Frutta/Dolce:\n'
+        # Capitalized entries
+        name = name.capitalize()
 
-            # Capitalized entries
-            name = name.capitalize()
+        # Check if lunch/dinner
+        if idi == '40':
+            last = True
+        elif idi == '10' and last:
+            if p[0]:
+                msg_lunch += "🍝Primi:\n%s\n" % p[0]
+            if p[1]:
+                msg_lunch += "🍖Secondi:\n%s\n" % p[1]
+            if p[2]:
+                msg_lunch += "🍟Contorno:\n%s\n" % p[2]
+            if p[3]:
+                msg_lunch += "🍨Frutta/Dolce:\n%s" % p[3]
 
-            # Check plate type
-            if idi == '10':
-                rv0 += ' • ' + name + bt + '\n'
-                empty = False
-            elif idi == '20':
-                rv1 += ' • ' + name + bt + '\n'
-                empty = False
-            elif idi == '30':
-                rv2 += ' • ' + name + bt + '\n'
-                empty = False
-            elif idi == '40':
-                rv3 += ' • ' + name + bt + '\n'
-                empty = False
-        except:
-            pass
+            # Reset accumulation vars
+            p = ['', '', '', '']
+            last = False
 
-    rvc += rv0 + rv1 + rv2 + rv3
+        # Check type
+        if idi == '10':
+            p[0] += ' • {0}\n'.format(name)
+        elif idi == '20':
+            p[1] += ' • {0}\n'.format(name)
+        elif idi == '30':
+            p[2] += ' • {0}\n'.format(name)
+        elif idi == '40':
+            p[3] += ' • {0}\n'.format(name)
 
-    if not empty:
-        return [rvp, rvc]
-    else:
-        return
+    if p[0]:
+        msg_dinner += "🍝Primi:\n%s\n" % p[0]
+    if p[1]:
+        msg_dinner += "🍖Secondi:\n%s\n" % p[1]
+    if p[2]:
+        msg_dinner += "🍟Contorno:\n%s\n" % p[2]
+    if p[3]:
+        msg_dinner += "🍨Frutta/Dolce:\n%s" % p[3]
 
+    return [msg_lunch, msg_dinner]
 
 def get_month_graph(year, month):
     """
