@@ -305,8 +305,8 @@ def get_menu_message(kitchen, date, meal):
          }
 
     cn = {
-            'Cibus': 'Cibus-Duca',
-            'CibusTr': 'Cibus-Tridente',
+            'Cibus': 'Cibus Duca',
+            'CibusTr': 'Cibus Tridente',
             'Duca': 'Duca',
             'Tridente': 'Tridente',
             'Sogesta': 'Sogesta'
