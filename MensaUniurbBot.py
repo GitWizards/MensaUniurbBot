@@ -23,7 +23,7 @@ import telepot
 from bs4 import BeautifulSoup
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
 
-from settings import TOKEN, PASSWORD
+from settings import TOKEN, PASSWORD, ADMIN
 from messages import *
 
 import matplotlib
@@ -58,11 +58,11 @@ def handle(msg):
 
             try:
                 username = msg['chat']['username']
-                full_name += msg['chat']['first_name'] 
-                full_name += ' ' +  msg['chat']['last_name']
+                full_name += msg['chat']['first_name']
+                full_name += ' ' + msg['chat']['last_name']
             except KeyError:
                 pass
-                
+
             register_user(chat_id, username, full_name)
 
         # Get menu
@@ -75,22 +75,25 @@ def handle(msg):
             entries = []
             p_entries = []
 
-            kit = {
+            ck = {
                     '/duca' : 'Duca',
                     '/tridente' : 'Tridente',
                     '/sogesta' : 'Sogesta',
                     '/cibustridente' : 'CibusTr',
                     '/cibusduca' : 'Cibus'
                   }
-            KITCHEN_VAR[chat_id] = kit[command_input]
 
-            # Get current day
-            now = datetime.now()
+            # Init a dict to save temporaries for this action
+            TEMP[chat_id] = {}
+            TEMP[chat_id]['kitchen'] = ck[command_input]
 
             # Set locale to get day names
             locale.setlocale(locale.LC_TIME, 'it_IT.UTF-8')
 
+            # Get current day
+            now = datetime.now()
             entries.append(['Oggi'])
+
             for day in range(1, 8):
                 date = now + timedelta(day) 
                 p_entries.append(date.strftime("%A %d/%m"))
@@ -118,14 +121,15 @@ def handle(msg):
                 d, m = command_input.split()[1].split('/')
                 y = now.strftime('%Y')
                 date = ("{0}-{1}-{2}".format(m, d, y))
-            DATE_VAR[chat_id] = date
+
+            TEMP[chat_id]['date'] = date
 
             # Cibus can't choose
-            if KITCHEN_VAR[chat_id] == 'Cibus' or KITCHEN_VAR[chat_id] == 'CibusTr':
+            if TEMP[chat_id]['kitchen'] == 'Cibus' or TEMP[chat_id]['kitchen'] == 'CibusTr':
                 USER_STATE[chat_id] = 0
 
                 # Finally send menu
-                msg = get_menu_message(KITCHEN_VAR[chat_id], DATE_VAR[chat_id], 'Cena')
+                msg = get_menu_message(TEMP[chat_id]['kitchen'], TEMP[chat_id]['date'], 'Cena')
                 bot.sendMessage(chat_id, msg, parse_mode="Markdown", reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
             else:
                 # Users choose lunch or dinner
@@ -136,7 +140,7 @@ def handle(msg):
             USER_STATE[chat_id] = 0
 
             # Finally send menu
-            msg = get_menu_message(KITCHEN_VAR[chat_id], DATE_VAR[chat_id], command_input)
+            msg = get_menu_message(TEMP[chat_id]['kitchen'], TEMP[chat_id]['date'], command_input)
             bot.sendMessage(chat_id, msg, parse_mode="Markdown", reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
 
         # Send prices table
@@ -158,7 +162,7 @@ def handle(msg):
             keyboard = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text='Dona',
                                       url='https://www.gitcheese.com/donate/users/9751015/repos/90749559')],
-            ])
+                ])
             bot.sendMessage(chat_id, "Codice sorgente:\n"
                                      "https://github.com/Radeox/MensaUniurbBot\n\n"
                                      "Sviluppato da:\n"
@@ -170,7 +174,8 @@ def handle(msg):
         elif command_input == '/orari':
             register_request(chat_id, command_input)
             bot.sendMessage(chat_id, "🍝*Duca*\n{0}\n\n*🍖Tridente*\n{1}\n\n"
-                                     "🍟*Sogesta\n*{2}".format(DUCA_HOURS, TRIDENTE_HOURS, SOGESTA_HOURS), parse_mode="Markdown")
+                                     "🍟*Sogesta\n*{2}".format(DUCA_HOURS, TRIDENTE_HOURS, SOGESTA_HOURS),
+                                     parse_mode="Markdown")
 
         # Send statistics about monthly use
         elif command_input == '/statistiche':
@@ -178,7 +183,7 @@ def handle(msg):
             year = int(now.strftime("%Y"))
             month = int(now.strftime("%m"))
 
-            # Get graph 
+            # Get graph
             fname = get_month_graph(year, month)
 
             with open(fname, 'rb') as f:
@@ -192,8 +197,7 @@ def handle(msg):
         # Send news to all registred users - Password required - 1
         elif command_input == '/sendnews':
             USER_STATE[chat_id] = 3
-            bot.sendMessage(chat_id, "*Inserisci la password*",
-                            parse_mode="Markdown")
+            bot.sendMessage(chat_id, "*Inserisci la password*", parse_mode="Markdown")
 
         # Send news to all registred users - Password required - 2
         elif USER_STATE[chat_id] == 3:
@@ -212,6 +216,65 @@ def handle(msg):
 
             # Send to all users
             send_msg_all(command_input)
+
+        # Send poll to all registred users - Password required - 1
+        elif command_input == '/sendpoll':
+            USER_STATE[chat_id] = 6
+            bot.sendMessage(chat_id, "*Inserisci la password*", parse_mode="Markdown")
+
+        # Send poll to all registred users - Password required - 2
+        elif USER_STATE[chat_id] == 6:
+            if command_input.lower() == PASSWORD:
+                USER_STATE[chat_id] = 7
+                bot.sendMessage(chat_id, "*Fai una domanda*", parse_mode="Markdown")
+            else:
+                USER_STATE[chat_id] = 0
+                bot.sendMessage(chat_id, "*Password Errata*", parse_mode="Markdown")
+
+        # Send poll to all registred users - Password required - 3
+        elif USER_STATE[chat_id] == 7:
+            USER_STATE[chat_id] = 8
+            TEMP[chat_id] = {}
+            TEMP[chat_id]['question'] = command_input
+
+            bot.sendMessage(chat_id, "*Prima risposta*", parse_mode="Markdown")
+
+
+        # Send poll to all registred users - Password required - 4
+        elif USER_STATE[chat_id] == 8:
+            USER_STATE[chat_id] = 9
+            TEMP[chat_id]['first_answer'] = command_input
+
+            bot.sendMessage(chat_id, "Seconda risposta", parse_mode="Markdown")
+
+        elif USER_STATE[chat_id] == 9:
+            USER_STATE[chat_id] = 0
+
+            question = TEMP[chat_id]['question'].capitalize()
+            first_answer = TEMP[chat_id]['first_answer'].capitalize()
+            second_answer = command_input.capitalize()
+
+            # Register in DB
+            register_poll(question, first_answer, second_answer)
+
+            # Send to all users
+            send_msg_poll(question, first_answer, second_answer)
+
+        # Send report to admin
+        if command_input == '/segnala':
+            bot.sendMessage(chat_id, 'Descrivi il tuo problema:')
+            USER_STATE[chat_id] = 5
+
+        if USER_STATE[chat_id] == 5:
+            USER_STATE[chat_id] = 0
+
+            # Sent to admins
+            msg = "Messaggio inviato da {0}:\n{1}".format(chat_id, command_input)
+            send_msg_report(msg)
+
+            # Send to user
+            msg = 'Il messaggio "_{0}"_ è stato inviato con successo'.format(command_input)
+            bot.sendMessage(chat_id, msg, parse_mode="Markdown")
 
     # Send news to all registred users - Password required - 3
     elif content_type == 'photo' and USER_STATE[chat_id] == 4:
@@ -290,9 +353,9 @@ def get_menu(payload):
             name = str(re.findall('(">.*?<\/)', str(link)))
 
             # Remove useless chars
-            name = name.replace('''['">''', '').replace(
+            name = name.replace('''['">''', '').replace("</']", '')
+            name = name.replace('\\', '').replace('*', 'X')
 
-                "</']", '').replace('\\', '').replace('*', 'X')
             # Replace HTML 'Strong' with Markdown 'bold text'
             if "<strong> " in name:
                 name = name.replace('<strong> ', '*')
@@ -311,9 +374,9 @@ def get_menu(payload):
                 rv2 = '\n🍟Contorno:\n'
                 rv3 = '\n🍨Frutta/Dolce:\n'
 
-            # Capitalized menus
-            name = name[:1].title() + name[1:].lower()
-            
+            # Capitalized entries
+            name = name.capitalize()
+
             # Check plate type
             if idi == '10':
                 rv0 += ' • ' + name + bt + '\n'
@@ -337,6 +400,7 @@ def get_menu(payload):
         return [rvp, rvc]
     else:
         return
+
 
 def get_month_graph(year, month):
     """
@@ -397,7 +461,37 @@ def send_msg_all(msg):
 
     return 1
 
-# Send the msg to all registred clients
+
+def send_msg_poll(question, first_answer, second_answer):
+    """
+    Send given message to all users
+    """
+    for user in get_user_list():
+        try:
+            keyboard = InlineKeyboardMarkup(inline_keyboard=[[
+                InlineKeyboardButton(text=first_answer, callback_data="1_%s" % question),
+                InlineKeyboardButton(text=second_answer, callback_data="2_%s" % question),
+            ]])
+            # TODO
+
+            bot.sendMessage(user, question, parse_mode="Markdown", reply_markup=keyboard)
+        except:
+            continue
+
+    return 1
+
+def send_msg_report(msg):
+    """
+    Send given message to all users
+    """
+    for user in ADMIN:
+        try:
+            bot.sendMessage(user, msg, parse_mode="Markdown")
+        except:
+            continue
+
+    return 1
+
 def send_photo_all(photo, caption):
     """
     Send given photo to all users
@@ -418,6 +512,7 @@ def register_user(chat_id, username, name):
     """
     Register given user to receive news and statistics
     """
+
     # Open connection to DB
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
@@ -435,6 +530,7 @@ def register_user(chat_id, username, name):
         conn.close()
 
     return 1
+
 
 def register_request(chat_id, request):
     """
@@ -463,6 +559,79 @@ def register_request(chat_id, request):
     conn.close()
     return 1
 
+def register_poll(question, first_answer, second_answer):
+    """
+    Register poll in DB
+    """
+    # Open connection to DB
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    query = ('INSERT INTO poll(ask, answer1, answer2, count_answer1, count_answer2) '
+             'VALUES("{0}", "{1}", "{2}", 0, 0)'.format(question, first_answer, second_answer))
+
+    cursor.execute(query)
+    conn.commit()
+
+    # Close connection to DB
+    conn.close()
+    return 1
+
+def on_callback_query(msg):
+    """
+    Register answer to poll
+    """
+    query_id, from_id, data = telepot.glance(msg, flavor='callback_query')
+
+    response = data.split('_')[0]
+    question = data.split('_')[1]
+
+    # Open connection to DB
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    if response != '0':
+        query = ('UPDATE poll '
+                'SET count_answer{0} = count_answer{0} + 1 '
+                'WHERE ask="{1}"'.format(response, question))
+        cursor.execute(query)
+        conn.commit()
+
+        bot.answerCallbackQuery(query_id, "Grazie per aver votato")
+
+    query = ('SELECT answer1, answer2, count_answer1, count_answer2 '
+            'FROM poll WHERE ask="{0}"'.format(question))
+    cursor.execute(query)
+
+    answer1, answer2, response1, response2 = cursor.fetchall()[0]
+
+    # Calculate percentage
+    tot = response1 + response2
+    pa1 = int((response1 / tot) * 100)
+    pa2 = int((response2 / tot) * 100)
+
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[[
+        InlineKeyboardButton(text=answer1 + "(" + str(pa1) + "%)", callback_data='0_%s' % question),
+        InlineKeyboardButton(text=answer2 + "(" + str(pa2) + "%)", callback_data='0_%s' % question),
+    ]])
+
+    # Edit buttons
+    edit = (msg['message']['chat']['id'], msg['message']['message_id']) 
+    try:
+        bot.editMessageText(edit, question, reply_markup=keyboard)
+    except telepot.exception.TelegramError:
+        pass
+
+    # Close connection to DB
+    conn.close()
+
+    bot.sendMessage(from_id, "Hai già votato!\n\n"
+                             "Voti totali: {0}\n"
+                             "({1}%) voti per {2}\n"
+                             "({3}%) voti per {4}".format(tot, pa1, answer1, pa2, answer2))
+
+    bot.answerCallbackQuery(query_id)
+
 def get_user_list():
     """
     Return the list of registred users chat_id
@@ -480,6 +649,7 @@ def get_user_list():
     conn.close()
     return users
 
+
 def get_total_requests():
     """
     Get total number of requests made by users
@@ -495,6 +665,7 @@ def get_total_requests():
     # Close connection to DB
     conn.close()
     return total_requests
+
 
 def get_total_users():
     """
@@ -512,6 +683,7 @@ def get_total_users():
     conn.close()
     return total_users
 
+
 def get_use_in_day(date):
     """
     Return the number of request in given DATE (YYYY-MM-DD)
@@ -520,7 +692,8 @@ def get_use_in_day(date):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
-    query = 'SELECT count(*) FROM request WHERE date BETWEEN "{0} 00:00:00" AND "{0} 23:59:59"'.format(date)
+    query = 'SELECT count(*) FROM request WHERE date BETWEEN "{0} 00:00:00" AND "{0} 23:59:59"'.format(
+        date)
     cursor.execute(query)
     day_uses = cursor.fetchone()[0]
 
@@ -551,13 +724,12 @@ with open(PIDFILE, 'w') as f:
 
 # Variables
 USER_STATE = {}
-KITCHEN_VAR = {}
-DATE_VAR = {}
+TEMP = {}
 
 # Start working
 try:
     bot = telepot.Bot(TOKEN)
-    bot.message_loop(handle)
+    bot.message_loop({'chat': handle, 'callback_query': on_callback_query})
 
     while 1:
         sleep(10)

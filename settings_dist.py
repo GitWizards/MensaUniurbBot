@@ -3,3 +3,6 @@ TOKEN = 'TOKEN'
 
 # Password required for special operations
 PASSWORD = 'PASSWORD'
+
+# Admin report message
+ADMIN = []

@@ -13,12 +13,12 @@ try:
     query = ('CREATE TABLE user('
              'chat_id integer primary key,'
              'username text,'
-             'name text);')
+             'name text)')
     c.execute(query)
 
     query = ('CREATE TABLE action('
              'id integer primary key autoincrement,'
-             'name text);')
+             'name text)')
     c.execute(query)
 
     query = ('CREATE TABLE request('
@@ -27,18 +27,26 @@ try:
             'user integer,'
             'action integer,'
             'foreign key(user) references user(chat_id),'
-            'foreign key(action) references action(id));')
+            'foreign key(action) references action(id))')
     c.execute(query)
 
-    c.execute('INSERT INTO action(name) VALUES("/duca");')
-    c.execute('INSERT INTO action(name) VALUES("/tridente");')
-    c.execute('INSERT INTO action(name) VALUES("/sogesta");')
-    c.execute('INSERT INTO action(name) VALUES("/cibusduca");')
-    c.execute('INSERT INTO action(name) VALUES("/cibustridente");')
-    c.execute('INSERT INTO action(name) VALUES("/orari");')
-    c.execute('INSERT INTO action(name) VALUES("/prezzi");')
-    c.execute('INSERT INTO action(name) VALUES("/allergeni");')
-    c.execute('INSERT INTO action(name) VALUES("/info");')
+    query = ('CREATE TABLE poll('
+             'ask text primary key,'
+             'answer1 text,'
+             'answer2 text,'
+             'count_answer1 integer,'
+             'count_answer2 integer)')
+    c.execute(query)
+
+    c.execute('INSERT INTO action(name) VALUES("/duca")')
+    c.execute('INSERT INTO action(name) VALUES("/tridente")')
+    c.execute('INSERT INTO action(name) VALUES("/sogesta")')
+    c.execute('INSERT INTO action(name) VALUES("/cibusduca")')
+    c.execute('INSERT INTO action(name) VALUES("/cibustridente")')
+    c.execute('INSERT INTO action(name) VALUES("/orari")')
+    c.execute('INSERT INTO action(name) VALUES("/prezzi")')
+    c.execute('INSERT INTO action(name) VALUES("/allergeni")')
+    c.execute('INSERT INTO action(name) VALUES("/info")')
 except:
     print("DB exist already!")
 finally:
