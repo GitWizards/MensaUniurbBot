@@ -5,7 +5,7 @@ START_MSG = "*Benvenuto su @MensaUniurbBot*\n"\
             "_Il bot è stato creato in modo non ufficiale né ERSU Urbino né UNIURB sono responsabili in alcun modo._"
 
 # Message when resturant is closed
-CLOSED_MSG = "*Mensa {0}*\n\nNon disponibile.\n\n⚠️ Orari apertura ⚠️\n{1}"
+CLOSED_MSG = "*Menu Mensa {0}*\n\nNon disponibile.\n\n⚠️ Orari apertura ⚠️\n{1}"
 
 # Opening hours
 DUCA_HOURS = "Aperta tutti i giorni della settimana, esclusi sabato e domenica, dalle ore *12:00* alle ore *14:00* "\

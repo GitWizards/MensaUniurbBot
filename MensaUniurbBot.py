@@ -76,12 +76,12 @@ def handle(msg):
             p_entries = []
 
             ck = {
-                    '/duca' : 'Duca',
-                    '/tridente' : 'Tridente',
-                    '/sogesta' : 'Sogesta',
-                    '/cibustridente' : 'CibusTr',
-                    '/cibusduca' : 'Cibus'
-                  }
+                    '/duca': 'Duca',
+                    '/tridente': 'Tridente',
+                    '/sogesta': 'Sogesta',
+                    '/cibustridente': 'CibusTr',
+                    '/cibusduca': 'Cibus'
+                 }
 
             # Init a dict to save temporaries for this action
             TEMP[chat_id] = {}
@@ -95,9 +95,9 @@ def handle(msg):
             entries.append(['Oggi'])
 
             for day in range(1, 8):
-                date = now + timedelta(day) 
+                date = now + timedelta(day)
                 p_entries.append(date.strftime("%A %d/%m"))
-                counter += 1 
+                counter += 1
 
                 if counter > 3:
                     entries.append(p_entries)
@@ -135,7 +135,7 @@ def handle(msg):
                 # Users choose lunch or dinner
                 markup = ReplyKeyboardMarkup(keyboard=[['Pranzo'], ['Cena']])
                 bot.sendMessage(chat_id, "Pranzo o Cena?", reply_markup=markup)
-        
+
         elif USER_STATE[chat_id] == 2:
             USER_STATE[chat_id] = 0
 
@@ -203,7 +203,7 @@ def handle(msg):
         elif USER_STATE[chat_id] == 3:
             if command_input.lower() == PASSWORD:
                 USER_STATE[chat_id] = 4
-                bot.sendMessage(chat_id, 
+                bot.sendMessage(chat_id,
                                 "*Invia un messaggio o una foto con caption\n(Markdown non supportato con foto)*",
                                 parse_mode="Markdown")
             else:
@@ -296,15 +296,23 @@ def get_menu_message(kitchen, date, meal):
     """
     Generate a ready-to-send message with menu of given kitchen
     """
-    ch = { 
-            'Duca' : DUCA_HOURS,
-            'Cibus' : DUCA_HOURS,
-            'Tridente' : TRIDENTE_HOURS,
-            'CibusTr' : TRIDENTE_HOURS,
+    ch = {
+            'Duca': DUCA_HOURS,
+            'Cibus': DUCA_HOURS,
+            'Tridente': TRIDENTE_HOURS,
+            'CibusTr': TRIDENTE_HOURS,
             'Sogesta': SOGESTA_HOURS
          }
 
-    cm = { 'Pranzo' : 0, 'Cena' : 1 }
+    cn = {
+            'Cibus': 'Cibus-Duca',
+            'CibusTr': 'Cibus-Tridente',
+            'Duca': 'Duca',
+            'Tridente': 'Tridente',
+            'Sogesta': 'Sogesta'
+         }
+
+    cm = {'Pranzo': 0, 'Cena': 1}
 
     # Get menu
     payload = {'mensa': kitchen, 'da': date, 'a': date}
@@ -312,7 +320,7 @@ def get_menu_message(kitchen, date, meal):
 
     # If menu exist send it
     try:
-        msg = "🗓️*Mensa {0}*\n{1}".format(kitchen, core_msg[cm[meal]])
+        msg = "🗓️*Mensa {0}*\n{1}".format(cn[kitchen], core_msg[cm[meal]])
         msg += "\n⚠️ Il menù potrebbe subire delle variazioni ⚠️"
 
         # Random spam
@@ -321,7 +329,7 @@ def get_menu_message(kitchen, date, meal):
                     "[Dona 2€](https://www.gitcheese.com/donate/users/9751015/repos/90749559) oppure "
                     "[dona 5€](https://www.gitcheese.com/donate/users/9751015/repos/90749559).")
     except TypeError:
-        msg = CLOSED_MSG.format(kitchen, ch[kitchen])
+        msg = CLOSED_MSG.format(cn[kitchen], ch[kitchen])
 
     return msg
 
@@ -391,8 +399,7 @@ def get_menu(payload):
                 rv3 += ' • ' + name + bt + '\n'
                 empty = False
         except:
-            e = sys.exc_info()[0]
-            print("Error: %s" % e)
+            pass
 
     rvc += rv0 + rv1 + rv2 + rv3
 
@@ -472,7 +479,6 @@ def send_msg_poll(question, first_answer, second_answer):
                 InlineKeyboardButton(text=first_answer, callback_data="1_%s" % question),
                 InlineKeyboardButton(text=second_answer, callback_data="2_%s" % question),
             ]])
-            # TODO
 
             bot.sendMessage(user, question, parse_mode="Markdown", reply_markup=keyboard)
         except:
@@ -616,7 +622,7 @@ def on_callback_query(msg):
     ]])
 
     # Edit buttons
-    edit = (msg['message']['chat']['id'], msg['message']['message_id']) 
+    edit = (msg['message']['chat']['id'], msg['message']['message_id'])
     try:
         bot.editMessageText(edit, question, reply_markup=keyboard)
     except telepot.exception.TelegramError:
