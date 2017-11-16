@@ -261,11 +261,11 @@ def handle(msg):
             send_msg_poll(question, first_answer, second_answer)
 
         # Send report to admin
-        if command_input == '/segnala':
-            bot.sendMessage(chat_id, 'Descrivi il tuo problema:')
+        elif command_input == '/segnala':
             USER_STATE[chat_id] = 5
+            bot.sendMessage(chat_id, '*Descrivi il tuo problema*', parse_mode="Markdown")
 
-        if USER_STATE[chat_id] == 5:
+        elif USER_STATE[chat_id] == 5:
             USER_STATE[chat_id] = 0
 
             # Sent to admins
@@ -305,8 +305,8 @@ def get_menu_message(kitchen, date, meal):
          }
 
     cn = {
-            'Cibus': 'Cibus-Duca',
-            'CibusTr': 'Cibus-Tridente',
+            'Cibus': 'Cibus Duca',
+            'CibusTr': 'Cibus Tridente',
             'Duca': 'Duca',
             'Tridente': 'Tridente',
             'Sogesta': 'Sogesta'
