@@ -37,6 +37,9 @@ def handle(msg):
     """
     content_type, chat_type, chat_id = telepot.glance(msg)
 
+    # Variables
+    global poll, first, second
+
     # Check user state
     try:
         USER_STATE[chat_id]
@@ -290,18 +293,69 @@ def handle(msg):
             # Send to all users
             send_msg_all(command_input_original)
 
+        # Send poll to all registred users - Password required - 1
+        elif command_input == '/sendpoll':
+            USER_STATE[chat_id] = 11
+            bot.sendMessage(chat_id, "*Inserisci la password*",
+                            parse_mode="Markdown")
+
+        # Send poll to all registred users - Password required - 2
+        elif USER_STATE[chat_id] == 11:
+            if command_input.lower() == PASSWORD:
+                USER_STATE[chat_id] = 12
+                bot.sendMessage(chat_id,
+                                "*Fai una domanda:*",
+                                parse_mode="Markdown")
+            else:
+                USER_STATE[chat_id] = 0
+                bot.sendMessage(chat_id, "*Password Errata*",
+                                parse_mode="Markdown")
+
+        # Send poll to all registred users - Password required - 3
+        elif USER_STATE[chat_id] == 12:
+            USER_STATE[chat_id] = 13
+            bot.sendMessage(chat_id, "Prima risposta",
+                            parse_mode="Markdown")
+            try:
+                poll = command_input_original
+            except:
+                poll = command_input
+
+        # Send poll to all registred users - Password required - 4
+        elif USER_STATE[chat_id] == 13:
+            USER_STATE[chat_id] = 14
+            bot.sendMessage(chat_id, "Seconda risposta",
+                            parse_mode="Markdown")
+            try:
+                first = command_input_original
+            except:
+                first = command_input
+
+        elif USER_STATE[chat_id] == 14:
+            USER_STATE[chat_id] = 0
+
+            try:
+                second = command_input_original
+            except:
+                second = command_input
+
+            # Send to all users
+            send_msg_poll(poll)
+
         # Send report to admin
-        if command_input == '/report' and USER_STATE[chat_id] == 0:
+        if command_input == '/segnala' and USER_STATE[chat_id] == 0:
             bot.sendMessage(chat_id, 'Scrivi il tuo problema e invia')
             USER_STATE[chat_id] = 1
 
-        if command_input != '/report' and USER_STATE[chat_id] == 1:
+        if command_input != '/segnala' and USER_STATE[chat_id] == 1:
             try:
-                message = "Messaggio inviato da " + str(chat_id) + ":\n" + command_input_original
+                message = "Messaggio inviato da " + \
+                    str(chat_id) + ":\n" + command_input_original
                 bot.sendMessage(chat_id, 'Il messaggio "_' + command_input_original +
                                 '"_ è stato inviato con successo', parse_mode="Markdown")
             except:
-                message = "Messaggio inviato da " + str(chat_id) + ":\n" + command_input
+                message = "Messaggio inviato da " + \
+                    str(chat_id) + ":\n" + command_input
                 bot.sendMessage(chat_id, 'Il messaggio "_' + command_input +
                                 '"_ è stato inviato con successo', parse_mode="Markdown")
             send_msg_report(message)
@@ -458,6 +512,7 @@ def send_msg_report(msg):
 
     return 1
 
+
 def send_msg_all(msg):
     """
     Send given message to all users
@@ -469,6 +524,46 @@ def send_msg_all(msg):
             continue
 
     return 1
+
+
+def send_msg_poll(msg):
+    """
+    Send given message to all users
+    """
+
+    # Open connection to DB
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    query = ('INSERT INTO poll(ask, answer1, answer2, count_answer1, count_answer2) '
+             'VALUES("{0}", "{1}", "{2}", {3}, {4})'.format(poll, first, second, 0, 0))
+
+    cursor.execute(query)
+    conn.commit()
+
+    # Close connection to DB
+    conn.close()
+
+    for user in get_user_list():
+        try:
+
+            # Capitalized answers
+            first1 = first[:1].title() + first[1:].lower()
+            second1 = second[:1].title() + second[1:].lower()
+
+            keyboard = InlineKeyboardMarkup(inline_keyboard=[[
+                InlineKeyboardButton(text=first1, callback_data='1'),
+                InlineKeyboardButton(text=second1, callback_data='2'),
+            ]])
+
+            bot.sendMessage(user, msg, parse_mode="Markdown",
+                            reply_markup=keyboard)
+            USER_STATE[user] = 99
+        except:
+            continue
+
+    return 1
+
 
 def send_photo_all(photo, caption):
     """
@@ -485,6 +580,8 @@ def send_photo_all(photo, caption):
     return 1
 
 # Utility functions
+
+
 def convert_date(date):
     """
     Covert MM-DD-YYYY to DD-MM-YYYY
@@ -500,6 +597,7 @@ def register_user(chat_id, username, name):
     """
     Register given user to receive news and statistics
     """
+
     # Open connection to DB
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
@@ -545,6 +643,97 @@ def register_request(chat_id, request):
     # Close connection to DB
     conn.close()
     return 1
+
+
+def on_callback_query(msg):
+    query_id, from_id, data = telepot.glance(msg, flavor='callback_query')
+
+    if data == '1' and USER_STATE[from_id] == 99:
+        # Open connection to DB
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+
+        # Get the number from the server and increase it by 1
+        query = ('SELECT count_answer1 FROM poll WHERE ask == "%s"' % poll)
+        cursor.execute(query)
+        action_id = cursor.fetchone()[0]
+
+        query = ('SELECT count_answer2 FROM poll WHERE ask == "%s"' % poll)
+        cursor.execute(query)
+        action_id2 = cursor.fetchone()[0]
+
+        action_id = int(action_id) + 1
+        cursor.execute('UPDATE poll SET count_answer1="{0}" WHERE ask="{1}"'.format(
+            int(action_id), poll))
+
+        # Close connection to DB
+        conn.commit()
+        conn.close()
+        USER_STATE[from_id] = 0
+
+    elif data == '2' and USER_STATE[from_id] == 99:
+        # Open connection to DB
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+
+        # Get the number from the server and increase it by 2
+        query = ('SELECT count_answer1 FROM poll WHERE ask == "%s"' % poll)
+        cursor.execute(query)
+        action_id = cursor.fetchone()[0]
+
+        query = ('SELECT count_answer2 FROM poll WHERE ask == "%s"' % poll)
+        cursor.execute(query)
+        action_id2 = cursor.fetchone()[0]
+
+        action_id2 = int(action_id2) + 1
+        cursor.execute('UPDATE poll SET count_answer2="{0}" WHERE ask="{1}"'.format(
+            int(action_id2), poll))
+
+        # Close connection to DB
+        conn.commit()
+        conn.close()
+        USER_STATE[from_id] = 0
+
+    try:
+        # Capitalized answers
+        first1 = first[:1].title() + first[1:].lower()
+        second1 = second[:1].title() + second[1:].lower()
+
+        a = (100 / (int(action_id) + int(action_id2)) * action_id)
+        b = (100 / (int(action_id) + int(action_id2)) * action_id2)
+        keyboard = InlineKeyboardMarkup(inline_keyboard=[[
+            InlineKeyboardButton(
+                text=first1 + "(" + str(int(a)) + "%)", callback_data='a'),
+            InlineKeyboardButton(
+                text=second1 + "(" + str(int(b)) + "%)", callback_data='b'),
+        ]])
+
+        bot.sendMessage(from_id, "Grazie per aver votato",
+                        parse_mode='Markdown', reply_markup=keyboard)
+    except:
+        # Open connection to DB
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+
+        query = ('SELECT count_answer1 FROM poll WHERE ask == "%s"' % poll)
+        cursor.execute(query)
+        action_id = cursor.fetchone()[0]
+
+        query = ('SELECT count_answer2 FROM poll WHERE ask == "%s"' % poll)
+        cursor.execute(query)
+        action_id2 = cursor.fetchone()[0]
+
+        a = (100 / (int(action_id) + int(action_id2)) * action_id)
+        b = (100 / (int(action_id) + int(action_id2)) * action_id2)
+        c = int(action_id) + int(action_id2)
+
+        # Capitalized answers
+        first1 = first[:1].title() + first[1:].lower()
+        second1 = second[:1].title() + second[1:].lower()
+
+        bot.sendMessage(from_id, "Hai già votato!\n\n" + "Voti totali: " + str(int(c)) + "\n" +
+                        "(" + str(int(a)) + "%) voti per " + first1 + "\n" + "(" + str(int(b)) + "%) voti per " + second1)
+
 
 def get_user_list():
     """
@@ -638,11 +827,16 @@ with open(PIDFILE, 'w') as f:
 
 # Variables
 USER_STATE = {}
+poll = ''
+first = ''
+second = ''
+action_id = ''
+action_id2 = ''
 
 # Start working
 try:
     bot = telepot.Bot(TOKEN)
-    bot.message_loop(handle)
+    bot.message_loop({'chat': handle, 'callback_query': on_callback_query})
 
     while 1:
         sleep(10)

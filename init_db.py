@@ -30,6 +30,15 @@ try:
             'foreign key(action) references action(id));')
     c.execute(query)
 
+    query = ('CREATE TABLE poll('
+            'id integer primary key autoincrement,'
+            'ask text,'
+            'answer1 text,'
+            'answer2 text,'
+            'count_answer1 integer,'
+            'count_answer2 integer);')
+    c.execute(query)
+
     c.execute('INSERT INTO action(name) VALUES("/duca");')
     c.execute('INSERT INTO action(name) VALUES("/tridente");')
     c.execute('INSERT INTO action(name) VALUES("/sogesta");')
