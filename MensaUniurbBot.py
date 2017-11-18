@@ -224,15 +224,12 @@ def handle(msg):
 
         # Edit news to all registred users - Password required - 2
         elif USER_STATE[chat_id] == 13:
-            uno = os.popen("cat sendnews.txt").read()
-            uno = uno.replace(" ", "\n")
-            uno = uno.split('\n')
 
             if command_input.lower() == PASSWORD:
                 USER_STATE[chat_id] = 14
                 bot.sendMessage(chat_id,
-                                "*Edita il messaggio o la caption della foto\n(Markdown non supportato con foto)*",
-                                parse_mode="Markdown")
+                                "*Edita il messaggio*",
+                                parse_mode="Markdown", reply_to_message_id=TEMP[chat_id]['sent']['message_id'])
             else:
                 USER_STATE[chat_id] = 0
                 bot.sendMessage(chat_id, "*Password Errata*", parse_mode="Markdown")
@@ -242,6 +239,21 @@ def handle(msg):
             USER_STATE[chat_id] = 0
             # Send to all users
             edit_msg_news(command_input)
+
+        # Delete news to all registred users - Password required - 1
+        elif command_input == '/deletenews':
+            USER_STATE[chat_id] = 15
+            bot.sendMessage(chat_id, "*Inserisci la password*", parse_mode="Markdown")
+
+        # Delete news to all registred users - Password required - 2
+        elif USER_STATE[chat_id] == 15:
+
+            if command_input.lower() == PASSWORD:
+                USER_STATE[chat_id] = 16
+                delete_msg_news(command_input)
+            else:
+                USER_STATE[chat_id] = 0
+                bot.sendMessage(chat_id, "*Password Errata*", parse_mode="Markdown")
 
         # Send poll to all registred users - Password required - 1
         elif command_input == '/sendpoll':
@@ -497,8 +509,20 @@ def edit_msg_news(msg):
         try:
             edited = telepot.message_identifier(TEMP[user]['sent'])
             bot.editMessageText(edited, msg, parse_mode="Markdown")
-        except Exception as e:
-            print(e)
+        except:
+            continue
+
+    return 1
+
+def delete_msg_news(msg):
+    """
+    Delete last message sent to all users
+    """
+    for user in get_user_list():
+        try:
+            edited = telepot.message_identifier(TEMP[user]['sent'])
+            bot.deleteMessage(edited)
+        except:
             continue
 
     return 1
@@ -540,7 +564,9 @@ def send_photo_all(photo, caption):
 
     for user in users:
         try:
-            bot.sendPhoto(user, photo, caption=caption)
+            sent = bot.sendPhoto(user, photo, caption=caption)
+            TEMP[user] = {}
+            TEMP[user]['sent'] = sent
         except:
             continue
 
