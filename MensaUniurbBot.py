@@ -215,7 +215,33 @@ def handle(msg):
             USER_STATE[chat_id] = 0
 
             # Send to all users
-            send_msg_all(command_input)
+            send_msg_news(command_input)
+
+        # Edit news to all registred users - Password required - 1
+        elif command_input == '/editnews':
+            USER_STATE[chat_id] = 13
+            bot.sendMessage(chat_id, "*Inserisci la password*", parse_mode="Markdown")
+
+        # Edit news to all registred users - Password required - 2
+        elif USER_STATE[chat_id] == 13:
+            uno = os.popen("cat sendnews.txt").read()
+            uno = uno.replace(" ", "\n")
+            uno = uno.split('\n')
+
+            if command_input.lower() == PASSWORD:
+                USER_STATE[chat_id] = 14
+                bot.sendMessage(chat_id,
+                                "*Edita il messaggio o la caption della foto\n(Markdown non supportato con foto)*",
+                                parse_mode="Markdown")
+            else:
+                USER_STATE[chat_id] = 0
+                bot.sendMessage(chat_id, "*Password Errata*", parse_mode="Markdown")
+
+        # Edit news to all registred users - Password required - 3
+        elif USER_STATE[chat_id] == 14:
+            USER_STATE[chat_id] = 0
+            # Send to all users
+            edit_msg_news(command_input)
 
         # Send poll to all registred users - Password required - 1
         elif command_input == '/sendpoll':
@@ -449,18 +475,33 @@ def get_month_graph(year, month):
 
 
 # Telegram related functions
-def send_msg_all(msg):
+def send_msg_news(msg):
     """
     Send given message to all users
     """
     for user in get_user_list():
         try:
-            bot.sendMessage(user, msg, parse_mode="Markdown")
+            sent = bot.sendMessage(user, msg, parse_mode="Markdown")
+            TEMP[user] = {}
+            TEMP[user]['sent'] = sent
         except:
+            continue
+       
+    return 1
+
+def edit_msg_news(msg):
+    """
+    Edit last message sent to all users
+    """
+    for user in get_user_list():
+        try:
+            edited = telepot.message_identifier(TEMP[user]['sent'])
+            bot.editMessageText(edited, msg, parse_mode="Markdown")
+        except Exception as e:
+            print(e)
             continue
 
     return 1
-
 
 def send_msg_poll(question, first_answer, second_answer):
     """
