@@ -194,6 +194,18 @@ def handle(msg):
                 bot.sendPhoto(chat_id, f, caption)
                 f.close()
 
+        # Send location Duca
+        elif command_input == '/posizioneduca':
+            bot.sendLocation(chat_id, "43.72640143124929", "12.63739407389494", reply_to_message_id=msg['message_id'])
+        
+        # Send location Tridente
+        elif command_input == '/posizionetridente':
+            bot.sendLocation(chat_id, "43.720036", "12.623293", reply_to_message_id=msg['message_id'])
+        
+        # Send location Sogesta
+        elif command_input == '/posizionesogesta':
+            bot.sendLocation(chat_id, "43.700293", "12.641057", reply_to_message_id=msg['message_id'])
+
         # Send news to all registred users - Password required - 1
         elif command_input == '/sendnews':
             USER_STATE[chat_id] = 3
