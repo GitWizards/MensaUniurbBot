@@ -52,7 +52,7 @@ def handle(msg):
         if command_input == '/start':
             bot.sendMessage(chat_id, START_MSG, parse_mode='Markdown')
 
-            # Try to save username and name
+            # Try to save username, name and language
             username = ""
             full_name = ""
             language = ""
@@ -65,13 +65,39 @@ def handle(msg):
 
             except KeyError:
                 pass
-            print(msg)
             register_user(chat_id, username, full_name, language)
 
         # Get menu
         elif command_input in ['/duca', '/tridente', '/sogesta', '/cibusduca', '/cibustridente']:
             register_request(chat_id, command_input)
             USER_STATE[chat_id] = 1
+
+            # Open connection to DB
+            conn = sqlite3.connect(DB_NAME)
+            cursor = conn.cursor()
+
+            # Get notification
+            query = (
+                'SELECT username, name FROM user WHERE chat_id == "%s"' % chat_id)
+            cursor.execute(query)
+            username, name = cursor.fetchall()[0]
+
+            if username == "" or name == "" or username == None or name == None:
+            # Try to update username and name
+                username = ""
+                full_name = ""
+
+                try:
+                    username = msg['chat']['username']
+                    full_name += msg['chat']['first_name']
+                    full_name += ' ' + msg['chat']['last_name']
+
+                except KeyError:
+                    pass
+                update_user(chat_id, username, full_name)
+
+            # Close connection to DB
+            conn.close()
 
             # Some work vars
             counter = 0
@@ -155,7 +181,8 @@ def handle(msg):
             register_request(chat_id, command_input)
 
             with open('price_list.png', 'rb') as f:
-                bot.sendPhoto(chat_id, f, reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
+                bot.sendPhoto(chat_id, f, reply_markup=ReplyKeyboardRemove(
+                    remove_keyboard=True))
                 f.close()
 
         # Send allergy table
@@ -200,7 +227,8 @@ def handle(msg):
                 caption = ("Utenti totali: {0}\n"
                            "Richieste totali: {1}".format(get_total_users(), get_total_requests()))
 
-                bot.sendPhoto(chat_id, f, caption, reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
+                bot.sendPhoto(chat_id, f, caption, reply_markup=ReplyKeyboardRemove(
+                    remove_keyboard=True))
                 f.close()
 
         # Send location Duca
@@ -227,21 +255,16 @@ def handle(msg):
             conn = sqlite3.connect(DB_NAME)
             cursor = conn.cursor()
 
-            # Get notification
+            # Get notification , language
             query = (
-                'SELECT notification FROM user WHERE chat_id == "%s"' % chat_id)
+                'SELECT notification, language FROM user WHERE chat_id == "%s"' % chat_id)
             cursor.execute(query)
-            notification = cursor.fetchone()[0].title()
-
-            # Get language
-            query = ('SELECT language FROM user WHERE chat_id == "%s"' % chat_id)
-            cursor.execute(query)
-            language = cursor.fetchone()[0].title()
+            notification, language = cursor.fetchall()[0]
 
             # Close connection to DB
             conn.close()
 
-            entries.append(['Notifiche: ' + notification])
+            entries.append(['Notifiche: ' + notification.title()])
 
             entries.append(p_entries)
 
@@ -711,6 +734,30 @@ def register_user(chat_id, username, name, language):
     try:
         query = ('INSERT INTO user(chat_id, name, username, notification, language) '
                  'VALUES({0}, "{1}", "{2}", "{3}", "{4}")'.format(chat_id, name, username, 'on', language))
+
+        cursor.execute(query)
+        conn.commit()
+    except sqlite3.IntegrityError:
+        return 0
+    finally:
+        # Close connection to DB
+        conn.close()
+
+    return 1
+
+
+def update_user(chat_id, username, name):
+    """
+    Register given user to receive news and statistics
+    """
+    # Open connection to DB
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    try:
+        query = ('UPDATE user '
+                 'SET username ="{0}", name ="{1}" '
+                 'WHERE chat_id="{2}"'.format(username, name, chat_id))
 
         cursor.execute(query)
         conn.commit()
