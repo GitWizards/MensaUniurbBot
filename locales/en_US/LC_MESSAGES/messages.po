@@ -1,0 +1,59 @@
+msgid "today"
+msgstr "Today"
+
+msgid "date"
+msgstr "Enter the date"
+
+msgid "lunch"
+msgstr "Lunch"
+
+msgid "dinner"
+msgstr "Dinner"
+
+msgid "or"
+msgstr " or "
+
+msgid "usage_statistics"
+msgstr "Usage statistics"
+
+msgid "days_of_the_month"
+msgstr "Days of the month"
+
+msgid "use"
+msgstr "Use"
+
+msgid "total_user"
+msgstr "Total users: "
+
+msgid "total_requests"
+msgstr "Total requests: "
+
+msgid "source_code"
+msgstr "Source code:"
+
+msgid "developed_by"
+msgstr "Developed by:"
+
+msgid "beer"
+msgstr "If you are satisfied give a beer to developers"
+
+msgid "report"
+msgstr "Describe your problem"
+
+msgid "from"
+msgstr "Message sent from "
+
+msgid "report_one"
+msgstr "The "
+
+msgid "report_two"
+msgstr " message has been sent successfully"
+
+msgid "notification"
+msgstr "Notification: "
+
+msgid "language"
+msgstr "Change language: "
+
+msgid "settings"
+msgstr "Settings"

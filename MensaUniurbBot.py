@@ -8,6 +8,7 @@ Author: Radeox (dawid.weglarz95@gmail.com)
 #!/usr/bin/python3.6
 import os
 import sys
+import gettext
 
 from time import sleep
 from datetime import datetime, timedelta
@@ -37,6 +38,30 @@ def handle(msg):
     This function handle all incoming messages
     """
     content_type, chat_type, chat_id = telepot.glance(msg)
+
+    # Function to change language
+    # Open connection to DB
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    # Get notification , language
+    query = (
+        'SELECT notification, language FROM user WHERE chat_id == "%s"' % chat_id)
+    cursor.execute(query)
+    notification, language = cursor.fetchall()[0]
+
+    if language == "it":
+        LANG = ['it_IT.ISO8859-15']
+    elif language == "en":
+        LANG = ['en_US']
+
+    TEMP[chat_id] = {}
+    TEMP[chat_id]['lang'] = LANG
+    t = gettext.translation('messages', 'locales', languages=LANG)
+    _ = t.gettext
+
+    # Close connection to DB
+    conn.close()
 
     # Check user state
     try:
@@ -83,7 +108,7 @@ def handle(msg):
             username, name = cursor.fetchall()[0]
 
             if username == "" or name == "" or username == None or name == None:
-            # Try to update username and name
+                # Try to update username and name
                 username = ""
                 full_name = ""
 
@@ -113,15 +138,15 @@ def handle(msg):
             }
 
             # Init a dict to save temporaries for this action
-            TEMP[chat_id] = {}
             TEMP[chat_id]['kitchen'] = ck[command_input]
-
+            
             # Set locale to get day names
-            locale.setlocale(locale.LC_TIME, 'it_IT.UTF-8')
+            LANG = TEMP[chat_id]['lang'][0].split(".")
+            locale.setlocale(locale.LC_TIME, LANG[0])
 
             # Get current day
             now = datetime.now()
-            entries.append(['Oggi'])
+            entries.append([_('today')])
 
             for day in range(1, 8):
                 date = now + timedelta(day)
@@ -136,7 +161,7 @@ def handle(msg):
 
             # Make week keyboard
             markup = ReplyKeyboardMarkup(keyboard=entries)
-            bot.sendMessage(chat_id, "Inserisci la data", reply_markup=markup)
+            bot.sendMessage(chat_id, _('date'), reply_markup=markup)
 
         elif USER_STATE[chat_id] == 1:
             USER_STATE[chat_id] = 2
@@ -144,7 +169,7 @@ def handle(msg):
             now = datetime.now()
 
             # If current day
-            if command_input == 'Oggi':
+            if command_input == _('today'):
                 date = now.strftime('%m-%d-%Y')
             else:
                 d, m = command_input.split()[1].split('/')
@@ -164,8 +189,10 @@ def handle(msg):
                                 reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
             else:
                 # Users choose lunch or dinner
-                markup = ReplyKeyboardMarkup(keyboard=[['Pranzo'], ['Cena']])
-                bot.sendMessage(chat_id, "Pranzo o Cena?", reply_markup=markup)
+                markup = ReplyKeyboardMarkup(
+                    keyboard=[[_('lunch')], [_('dinner')]])
+                bot.sendMessage(chat_id, _('lunch') + _('or') +
+                                _('dinner') + "?", reply_markup=markup)
 
         elif USER_STATE[chat_id] == 2:
             USER_STATE[chat_id] = 0
@@ -198,12 +225,12 @@ def handle(msg):
                 [InlineKeyboardButton(text='Dona',
                                       url='https://www.gitcheese.com/donate/users/9751015/repos/90749559')],
             ])
-            bot.sendMessage(chat_id, "Codice sorgente:\n"
-                                     "https://github.com/Radeox/MensaUniurbBot\n\n"
-                                     "Sviluppato da:\n"
-                                     "https://github.com/Radeox\n"
-                                     "https://github.com/Fast0n\n\n"
-                                     "🍺 Se sei soddisfatto offri una birra agli sviluppatori 🍺", reply_markup=keyboard)
+            bot.sendMessage(chat_id, _('source_code') + "\n" +
+                            "https://github.com/Radeox/MensaUniurbBot\n\n" +
+                            _('developed_by') + "\n" +
+                            "https://github.com/Radeox\n" +
+                            "https://github.com/Fast0n\n\n" +
+                            "🍺 " + _('beer') + " 🍺", reply_markup=keyboard)
 
         # Send opening hours
         elif command_input == '/orari':
@@ -220,12 +247,12 @@ def handle(msg):
             month = int(now.strftime("%m"))
 
             # Get graph
-            fname = get_month_graph(year, month)
+            fname = get_month_graph(chat_id, year, month)
 
             with open(fname, 'rb') as f:
                 # Get caption
-                caption = ("Utenti totali: {0}\n"
-                           "Richieste totali: {1}".format(get_total_users(), get_total_requests()))
+                caption = (_('total_user') + "{0}".format(get_total_users()) + "\n" + _(
+                    'total_requests') + "{0}".format(get_total_requests()))
 
                 bot.sendPhoto(chat_id, f, caption, reply_markup=ReplyKeyboardRemove(
                     remove_keyboard=True))
@@ -261,18 +288,31 @@ def handle(msg):
             cursor.execute(query)
             notification, language = cursor.fetchall()[0]
 
+            if language == "it":
+                LANG = ['it_IT']
+            elif language == "en":
+                LANG = ['en_US']
+            
+
+            t = gettext.translation('messages', 'locales', languages=LANG)
+            _ = t.gettext
+
             # Close connection to DB
             conn.close()
 
-            entries.append(['Notifiche: ' + notification.title()])
+            entries.append([_('notification') + notification.title()])
+            if language == "en":
+                entries.append([_('language') + "It" + " 🇮🇹"])
+            elif language == "it":
+                entries.append([_('language') + "En" + " 🇺🇸"])
 
             entries.append(p_entries)
 
             # Make week keyboard
             markup = ReplyKeyboardMarkup(keyboard=entries)
-            bot.sendMessage(chat_id, "⚙️ Impostazioni", reply_markup=markup)
+            bot.sendMessage(chat_id, "⚙️ " + _('settings') , reply_markup=markup)
 
-        elif command_input == "Notifiche: Off":
+        elif command_input == _('notification') + "Off":
             # Open connection to DB
             conn = sqlite3.connect(DB_NAME)
             cursor = conn.cursor()
@@ -289,7 +329,7 @@ def handle(msg):
             msg['text'] = "/impostazioni"
             handle(msg)
 
-        elif command_input == "Notifiche: On":
+        elif command_input == _('notification') + "On":
             # Open connection to DB
             conn = sqlite3.connect(DB_NAME)
             cursor = conn.cursor()
@@ -301,6 +341,33 @@ def handle(msg):
             cursor.execute(query)
             conn.commit()
 
+            # Close connection to DB
+            conn.close()
+            msg['text'] = "/impostazioni"
+            handle(msg)
+
+        elif command_input == _('language') + "It" + " 🇮🇹":
+            # Open connection to DB
+            conn = sqlite3.connect(DB_NAME)
+            cursor = conn.cursor()
+            query = ('UPDATE user '
+                     'SET language ="{0}" '
+                     'WHERE chat_id="{1}"'.format("it", chat_id))
+            cursor.execute(query)
+            conn.commit()
+            # Close connection to DB
+            conn.close()
+            msg['text'] = "/impostazioni"
+            handle(msg)
+        elif command_input == _('language') + "En" + " 🇺🇸":
+            # Open connection to DB
+            conn = sqlite3.connect(DB_NAME)
+            cursor = conn.cursor()
+            query = ('UPDATE user '
+                     'SET language ="{0}" '
+                     'WHERE chat_id="{1}"'.format("en", chat_id))
+            cursor.execute(query)
+            conn.commit()
             # Close connection to DB
             conn.close()
             msg['text'] = "/impostazioni"
@@ -421,20 +488,20 @@ def handle(msg):
         # Send report to admin
         elif command_input == '/segnala':
             USER_STATE[chat_id] = 5
-            bot.sendMessage(chat_id, '*Descrivi il tuo problema*',
+            bot.sendMessage(chat_id, '*' + _('report') + '*',
                             parse_mode="Markdown", reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
 
         elif USER_STATE[chat_id] == 5:
             USER_STATE[chat_id] = 0
 
             # Sent to admins
-            msg = "Messaggio inviato da {0}:\n_{1}_".format(
+            msg = _('from') + "{0}:\n_{1}_".format(
                 chat_id, command_input)
             send_msg_report(msg)
 
             # Send to user
-            msg = 'Il messaggio "_{0}"_ è stato inviato con successo'.format(
-                command_input)
+            msg = _('report_one') + '_"{0}"_'.format(
+                command_input) + _('report_two')
             bot.sendMessage(chat_id, msg, parse_mode="Markdown")
 
     # Send news to all registred users - Password required - 3
@@ -473,7 +540,7 @@ def get_menu_message(kitchen, date, meal):
         'Sogesta': 'Sogesta'
     }
 
-    cm = {'Pranzo': 0, 'Cena': 1}
+    cm = {'Pranzo': 0, 'Cena': 1, 'Lunch': 0, 'Dinner': 1}
 
     # Get menu
     payload = {'mensa': kitchen, 'da': date, 'a': date}
@@ -566,7 +633,7 @@ def get_menu(payload):
     return [msg_lunch, msg_dinner]
 
 
-def get_month_graph(year, month):
+def get_month_graph(msg, year, month):
     """
     Return the uses graph of given month
     """
@@ -575,6 +642,29 @@ def get_month_graph(year, month):
         os.mkdir('plots')
     except FileExistsError:
         pass
+
+    # Function to change language
+    # Open connection to DB
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    # Get notification , language
+    query = (
+        'SELECT notification, language FROM user WHERE chat_id == "%s"' % msg)
+    cursor.execute(query)
+    notification, language = cursor.fetchall()[0]
+
+    if language == "it":
+        LANG = ['it_IT.ISO8859-15']
+    elif language == "en":
+        LANG = ['en_US']
+
+    t = gettext.translation('messages', 'locales', languages=LANG)
+    _ = t.gettext
+
+    # Close connection to DB
+    conn.close()
+
 
     # Get current month days
     date = "{0}-{1}-".format(year, month)
@@ -591,10 +681,10 @@ def get_month_graph(year, month):
     plt.clf()
 
     # Add titles
-    plt.title("Statistiche d'uso {0}/{1}".format(month, year))
-    plt.xlabel("Giorni del mese")
+    plt.title( _('usage_statistics') + " {0}/{1}".format(month, year))
+    plt.xlabel( _('days_of_the_month') )
     plt.xlim([1, days_month])
-    plt.ylabel("Utilizzi")
+    plt.ylabel(_('use') )
 
     # Set grid
     plt.grid()
@@ -720,8 +810,9 @@ def send_photo_all(photo, caption):
 
     return 1
 
-
 ## Query funtions ##
+
+
 def register_user(chat_id, username, name, language):
     """
     Register given user to receive news and statistics

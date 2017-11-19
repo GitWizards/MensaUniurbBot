@@ -1,0 +1,59 @@
+msgid "today"
+msgstr "Oggi"
+
+msgid "date"
+msgstr "Inserisci la data"
+
+msgid "lunch"
+msgstr "Pranzo"
+
+msgid "dinner"
+msgstr "Cena"
+
+msgid "or"
+msgstr " o "
+
+msgid "usage_statistics"
+msgstr "Statistiche d'uso"
+
+msgid "days_of_the_month"
+msgstr "Giorni del mese"
+
+msgid "use"
+msgstr "Utilizzi"
+
+msgid "total_user"
+msgstr "Utenti totali: "
+
+msgid "total_requests"
+msgstr "Richieste totali: "
+
+msgid "source_code"
+msgstr "Codice sorgente:"
+
+msgid "developed_by"
+msgstr "Sviluppato da:"
+
+msgid "beer"
+msgstr "Se sei soddisfatto offri una birra agli sviluppatori"
+
+msgid "report"
+msgstr "Descrivi il tuo problema"
+
+msgid "from"
+msgstr "Messaggio inviato da "
+
+msgid "report_one"
+msgstr "Il messaggio "
+
+msgid "report_two"
+msgstr " e' stato inviato con successo"
+
+msgid "notification"
+msgstr "Notifiche: "
+
+msgid "language"
+msgstr "Cambia lingua: "
+
+msgid "settings"
+msgstr "Impostazioni"
