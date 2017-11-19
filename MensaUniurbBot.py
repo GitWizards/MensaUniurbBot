@@ -55,15 +55,18 @@ def handle(msg):
             # Try to save username and name
             username = ""
             full_name = ""
+            language = ""
 
             try:
                 username = msg['chat']['username']
+                language = msg['from']['language_code']
                 full_name += msg['chat']['first_name']
                 full_name += ' ' + msg['chat']['last_name']
+
             except KeyError:
                 pass
-
-            register_user(chat_id, username, full_name)
+            print(msg)
+            register_user(chat_id, username, full_name, language)
 
         # Get menu
         elif command_input in ['/duca', '/tridente', '/sogesta', '/cibusduca', '/cibustridente']:
@@ -76,12 +79,12 @@ def handle(msg):
             p_entries = []
 
             ck = {
-                    '/duca': 'Duca',
-                    '/tridente': 'Tridente',
-                    '/sogesta': 'Sogesta',
-                    '/cibustridente': 'CibusTr',
-                    '/cibusduca': 'Cibus'
-                 }
+                '/duca': 'Duca',
+                '/tridente': 'Tridente',
+                '/sogesta': 'Sogesta',
+                '/cibustridente': 'CibusTr',
+                '/cibusduca': 'Cibus'
+            }
 
             # Init a dict to save temporaries for this action
             TEMP[chat_id] = {}
@@ -129,8 +132,10 @@ def handle(msg):
                 USER_STATE[chat_id] = 0
 
                 # Finally send menu
-                msg = get_menu_message(TEMP[chat_id]['kitchen'], TEMP[chat_id]['date'], 'Cena')
-                bot.sendMessage(chat_id, msg, parse_mode="Markdown", reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
+                msg = get_menu_message(
+                    TEMP[chat_id]['kitchen'], TEMP[chat_id]['date'], 'Cena')
+                bot.sendMessage(chat_id, msg, parse_mode="Markdown",
+                                reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
             else:
                 # Users choose lunch or dinner
                 markup = ReplyKeyboardMarkup(keyboard=[['Pranzo'], ['Cena']])
@@ -140,21 +145,24 @@ def handle(msg):
             USER_STATE[chat_id] = 0
 
             # Finally send menu
-            msg = get_menu_message(TEMP[chat_id]['kitchen'], TEMP[chat_id]['date'], command_input)
-            bot.sendMessage(chat_id, msg, parse_mode="Markdown", reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
+            msg = get_menu_message(
+                TEMP[chat_id]['kitchen'], TEMP[chat_id]['date'], command_input)
+            bot.sendMessage(chat_id, msg, parse_mode="Markdown",
+                            reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
 
         # Send prices table
         elif command_input == '/prezzi':
             register_request(chat_id, command_input)
 
             with open('price_list.png', 'rb') as f:
-                bot.sendPhoto(chat_id, f)
+                bot.sendPhoto(chat_id, f, reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
                 f.close()
 
         # Send allergy table
         elif command_input == '/allergeni':
             register_request(chat_id, command_input)
-            bot.sendPhoto(chat_id, 'http://menu.ersurb.it/menum/Allergeni_legenda.png')
+            bot.sendPhoto(
+                chat_id, 'http://menu.ersurb.it/menum/Allergeni_legenda.png', reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
 
         # Send credits
         elif command_input == '/info':
@@ -162,7 +170,7 @@ def handle(msg):
             keyboard = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text='Dona',
                                       url='https://www.gitcheese.com/donate/users/9751015/repos/90749559')],
-                ])
+            ])
             bot.sendMessage(chat_id, "Codice sorgente:\n"
                                      "https://github.com/Radeox/MensaUniurbBot\n\n"
                                      "Sviluppato da:\n"
@@ -174,8 +182,9 @@ def handle(msg):
         elif command_input == '/orari':
             register_request(chat_id, command_input)
             bot.sendMessage(chat_id, "🍝*Duca*\n{0}\n\n*🍖Tridente*\n{1}\n\n"
-                                     "🍟*Sogesta\n*{2}".format(DUCA_HOURS, TRIDENTE_HOURS, SOGESTA_HOURS),
-                                     parse_mode="Markdown")
+                                     "🍟*Sogesta\n*{2}".format(
+                                         DUCA_HOURS, TRIDENTE_HOURS, SOGESTA_HOURS),
+                                     parse_mode="Markdown", reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
 
         # Send statistics about monthly use
         elif command_input == '/statistiche':
@@ -191,25 +200,94 @@ def handle(msg):
                 caption = ("Utenti totali: {0}\n"
                            "Richieste totali: {1}".format(get_total_users(), get_total_requests()))
 
-                bot.sendPhoto(chat_id, f, caption)
+                bot.sendPhoto(chat_id, f, caption, reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
                 f.close()
 
         # Send location Duca
         elif command_input == '/posizioneduca':
-            bot.sendLocation(chat_id, "43.72640143124929", "12.63739407389494", reply_to_message_id=msg['message_id'])
-        
+            bot.sendLocation(chat_id, "43.72640143124929",
+                             "12.63739407389494", reply_to_message_id=msg['message_id'])
+
         # Send location Tridente
         elif command_input == '/posizionetridente':
-            bot.sendLocation(chat_id, "43.720036", "12.623293", reply_to_message_id=msg['message_id'])
-        
+            bot.sendLocation(chat_id, "43.720036", "12.623293",
+                             reply_to_message_id=msg['message_id'])
+
         # Send location Sogesta
         elif command_input == '/posizionesogesta':
-            bot.sendLocation(chat_id, "43.700293", "12.641057", reply_to_message_id=msg['message_id'])
+            bot.sendLocation(chat_id, "43.700293", "12.641057",
+                             reply_to_message_id=msg['message_id'])
+
+        # Settings menu
+        elif command_input == '/impostazioni':
+            entries = []
+            p_entries = []
+
+            # Open connection to DB
+            conn = sqlite3.connect(DB_NAME)
+            cursor = conn.cursor()
+
+            # Get notification
+            query = (
+                'SELECT notification FROM user WHERE chat_id == "%s"' % chat_id)
+            cursor.execute(query)
+            notification = cursor.fetchone()[0].title()
+
+            # Get language
+            query = ('SELECT language FROM user WHERE chat_id == "%s"' % chat_id)
+            cursor.execute(query)
+            language = cursor.fetchone()[0].title()
+
+            # Close connection to DB
+            conn.close()
+
+            entries.append(['Notifiche: ' + notification])
+
+            entries.append(p_entries)
+
+            # Make week keyboard
+            markup = ReplyKeyboardMarkup(keyboard=entries)
+            bot.sendMessage(chat_id, "⚙️ Impostazioni", reply_markup=markup)
+
+        elif command_input == "Notifiche: Off":
+            # Open connection to DB
+            conn = sqlite3.connect(DB_NAME)
+            cursor = conn.cursor()
+
+            query = ('UPDATE user '
+                     'SET notification ="{0}" '
+                     'WHERE chat_id="{1}"'.format("on", chat_id))
+
+            cursor.execute(query)
+            conn.commit()
+
+            # Close connection to DB
+            conn.close()
+            msg['text'] = "/impostazioni"
+            handle(msg)
+
+        elif command_input == "Notifiche: On":
+            # Open connection to DB
+            conn = sqlite3.connect(DB_NAME)
+            cursor = conn.cursor()
+
+            query = ('UPDATE user '
+                     'SET notification ="{0}" '
+                     'WHERE chat_id="{1}"'.format("off", chat_id))
+
+            cursor.execute(query)
+            conn.commit()
+
+            # Close connection to DB
+            conn.close()
+            msg['text'] = "/impostazioni"
+            handle(msg)
 
         # Send news to all registred users - Password required - 1
         elif command_input == '/sendnews':
             USER_STATE[chat_id] = 3
-            bot.sendMessage(chat_id, "*Inserisci la password*", parse_mode="Markdown")
+            bot.sendMessage(chat_id, "*Inserisci la password*",
+                            parse_mode="Markdown", reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
 
         # Send news to all registred users - Password required - 2
         elif USER_STATE[chat_id] == 3:
@@ -220,7 +298,8 @@ def handle(msg):
                                 parse_mode="Markdown")
             else:
                 USER_STATE[chat_id] = 0
-                bot.sendMessage(chat_id, "*Password Errata*", parse_mode="Markdown")
+                bot.sendMessage(chat_id, "*Password Errata*",
+                                parse_mode="Markdown")
 
         # Send news to all registred users - Password required - 3
         elif USER_STATE[chat_id] == 4:
@@ -232,7 +311,8 @@ def handle(msg):
         # Edit news to all registred users - Password required - 1
         elif command_input == '/editnews':
             USER_STATE[chat_id] = 13
-            bot.sendMessage(chat_id, "*Inserisci la password*", parse_mode="Markdown")
+            bot.sendMessage(chat_id, "*Inserisci la password*",
+                            parse_mode="Markdown", reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
 
         # Edit news to all registred users - Password required - 2
         elif USER_STATE[chat_id] == 13:
@@ -244,7 +324,8 @@ def handle(msg):
                                 parse_mode="Markdown", reply_to_message_id=TEMP[chat_id]['sent']['message_id'])
             else:
                 USER_STATE[chat_id] = 0
-                bot.sendMessage(chat_id, "*Password Errata*", parse_mode="Markdown")
+                bot.sendMessage(chat_id, "*Password Errata*",
+                                parse_mode="Markdown")
 
         # Edit news to all registred users - Password required - 3
         elif USER_STATE[chat_id] == 14:
@@ -255,7 +336,8 @@ def handle(msg):
         # Delete news to all registred users - Password required - 1
         elif command_input == '/deletenews':
             USER_STATE[chat_id] = 15
-            bot.sendMessage(chat_id, "*Inserisci la password*", parse_mode="Markdown")
+            bot.sendMessage(chat_id, "*Inserisci la password*",
+                            parse_mode="Markdown", reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
 
         # Delete news to all registred users - Password required - 2
         elif USER_STATE[chat_id] == 15:
@@ -265,21 +347,25 @@ def handle(msg):
                 delete_msg_news(command_input)
             else:
                 USER_STATE[chat_id] = 0
-                bot.sendMessage(chat_id, "*Password Errata*", parse_mode="Markdown")
+                bot.sendMessage(chat_id, "*Password Errata*",
+                                parse_mode="Markdown")
 
         # Send poll to all registred users - Password required - 1
         elif command_input == '/sendpoll':
             USER_STATE[chat_id] = 6
-            bot.sendMessage(chat_id, "*Inserisci la password*", parse_mode="Markdown")
+            bot.sendMessage(chat_id, "*Inserisci la password*",
+                            parse_mode="Markdown")
 
         # Send poll to all registred users - Password required - 2
         elif USER_STATE[chat_id] == 6:
             if command_input.lower() == PASSWORD:
                 USER_STATE[chat_id] = 7
-                bot.sendMessage(chat_id, "*Fai una domanda*", parse_mode="Markdown")
+                bot.sendMessage(chat_id, "*Fai una domanda*",
+                                parse_mode="Markdown")
             else:
                 USER_STATE[chat_id] = 0
-                bot.sendMessage(chat_id, "*Password Errata*", parse_mode="Markdown")
+                bot.sendMessage(chat_id, "*Password Errata*",
+                                parse_mode="Markdown")
 
         # Send poll to all registred users - Password required - 3
         elif USER_STATE[chat_id] == 7:
@@ -288,7 +374,6 @@ def handle(msg):
             TEMP[chat_id]['question'] = command_input
 
             bot.sendMessage(chat_id, "*Prima risposta*", parse_mode="Markdown")
-
 
         # Send poll to all registred users - Password required - 4
         elif USER_STATE[chat_id] == 8:
@@ -313,17 +398,20 @@ def handle(msg):
         # Send report to admin
         elif command_input == '/segnala':
             USER_STATE[chat_id] = 5
-            bot.sendMessage(chat_id, '*Descrivi il tuo problema*', parse_mode="Markdown")
+            bot.sendMessage(chat_id, '*Descrivi il tuo problema*',
+                            parse_mode="Markdown", reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
 
         elif USER_STATE[chat_id] == 5:
             USER_STATE[chat_id] = 0
 
             # Sent to admins
-            msg = "Messaggio inviato da {0}:\n_{1}_".format(chat_id, command_input)
+            msg = "Messaggio inviato da {0}:\n_{1}_".format(
+                chat_id, command_input)
             send_msg_report(msg)
 
             # Send to user
-            msg = 'Il messaggio "_{0}"_ è stato inviato con successo'.format(command_input)
+            msg = 'Il messaggio "_{0}"_ è stato inviato con successo'.format(
+                command_input)
             bot.sendMessage(chat_id, msg, parse_mode="Markdown")
 
     # Send news to all registred users - Password required - 3
@@ -347,20 +435,20 @@ def get_menu_message(kitchen, date, meal):
     Generate a ready-to-send message with menu of given kitchen
     """
     ch = {
-            'Duca': DUCA_HOURS,
-            'Cibus': DUCA_HOURS,
-            'Tridente': TRIDENTE_HOURS,
-            'CibusTr': TRIDENTE_HOURS,
-            'Sogesta': SOGESTA_HOURS
-         }
+        'Duca': DUCA_HOURS,
+        'Cibus': DUCA_HOURS,
+        'Tridente': TRIDENTE_HOURS,
+        'CibusTr': TRIDENTE_HOURS,
+        'Sogesta': SOGESTA_HOURS
+    }
 
     cn = {
-            'Cibus': 'Cibus Duca',
-            'CibusTr': 'Cibus Tridente',
-            'Duca': 'Duca',
-            'Tridente': 'Tridente',
-            'Sogesta': 'Sogesta'
-         }
+        'Cibus': 'Cibus Duca',
+        'CibusTr': 'Cibus Tridente',
+        'Duca': 'Duca',
+        'Tridente': 'Tridente',
+        'Sogesta': 'Sogesta'
+    }
 
     cm = {'Pranzo': 0, 'Cena': 1}
 
@@ -371,7 +459,8 @@ def get_menu_message(kitchen, date, meal):
     # If menu exist send it
 
     if core_msg[cm[meal]] != "":
-        msg = "🗓️*Menu Mensa {0}*\n\n{1}".format(cn[kitchen], core_msg[cm[meal]])
+        msg = "🗓️*Menu Mensa {0}*\n\n{1}".format(
+            cn[kitchen], core_msg[cm[meal]])
         msg += "\n⚠️ Il menù potrebbe subire delle variazioni ⚠️"
 
         # Random spam
@@ -383,6 +472,7 @@ def get_menu_message(kitchen, date, meal):
         msg = CLOSED_MSG.format(cn[kitchen], ch[kitchen])
 
     return msg
+
 
 def get_menu(payload):
     """
@@ -452,6 +542,7 @@ def get_menu(payload):
 
     return [msg_lunch, msg_dinner]
 
+
 def get_month_graph(year, month):
     """
     Return the uses graph of given month
@@ -505,13 +596,28 @@ def send_msg_news(msg):
     """
     for user in get_user_list():
         try:
-            sent = bot.sendMessage(user, msg, parse_mode="Markdown")
-            TEMP[user] = {}
-            TEMP[user]['sent'] = sent
+            # Open connection to DB
+            conn = sqlite3.connect(DB_NAME)
+            cursor = conn.cursor()
+
+            # Get notification
+            query = (
+                'SELECT notification FROM user WHERE chat_id == "%s"' % user)
+            cursor.execute(query)
+            notification = cursor.fetchone()[0].title()
+
+            # Close connection to DB
+            conn.close()
+
+            if notification == "On":
+                sent = bot.sendMessage(user, msg, parse_mode="Markdown")
+                TEMP[user] = {}
+                TEMP[user]['sent'] = sent
         except:
             continue
-       
+
     return 1
+
 
 def edit_msg_news(msg):
     """
@@ -526,6 +632,7 @@ def edit_msg_news(msg):
 
     return 1
 
+
 def delete_msg_news(msg):
     """
     Delete last message sent to all users
@@ -539,6 +646,7 @@ def delete_msg_news(msg):
 
     return 1
 
+
 def send_msg_poll(question, first_answer, second_answer):
     """
     Send given message to all users
@@ -546,15 +654,19 @@ def send_msg_poll(question, first_answer, second_answer):
     for user in get_user_list():
         try:
             keyboard = InlineKeyboardMarkup(inline_keyboard=[[
-                InlineKeyboardButton(text=first_answer, callback_data="1_%s" % question),
-                InlineKeyboardButton(text=second_answer, callback_data="2_%s" % question),
+                InlineKeyboardButton(
+                    text=first_answer, callback_data="1_%s" % question),
+                InlineKeyboardButton(text=second_answer,
+                                     callback_data="2_%s" % question),
             ]])
 
-            bot.sendMessage(user, question, parse_mode="Markdown", reply_markup=keyboard)
+            bot.sendMessage(user, question, parse_mode="Markdown",
+                            reply_markup=keyboard)
         except:
             continue
 
     return 1
+
 
 def send_msg_report(msg):
     """
@@ -567,6 +679,7 @@ def send_msg_report(msg):
             continue
 
     return 1
+
 
 def send_photo_all(photo, caption):
     """
@@ -586,7 +699,7 @@ def send_photo_all(photo, caption):
 
 
 ## Query funtions ##
-def register_user(chat_id, username, name):
+def register_user(chat_id, username, name, language):
     """
     Register given user to receive news and statistics
     """
@@ -596,8 +709,8 @@ def register_user(chat_id, username, name):
     cursor = conn.cursor()
 
     try:
-        query = ('INSERT INTO user(chat_id, name, username) '
-                 'VALUES({0}, "{1}", "{2}")'.format(chat_id, name, username))
+        query = ('INSERT INTO user(chat_id, name, username, notification, language) '
+                 'VALUES({0}, "{1}", "{2}", "{3}", "{4}")'.format(chat_id, name, username, 'on', language))
 
         cursor.execute(query)
         conn.commit()
@@ -637,6 +750,7 @@ def register_request(chat_id, request):
     conn.close()
     return 1
 
+
 def register_poll(question, first_answer, second_answer):
     """
     Register poll in DB
@@ -655,6 +769,7 @@ def register_poll(question, first_answer, second_answer):
     conn.close()
     return 1
 
+
 def on_callback_query(msg):
     """
     Register answer to poll
@@ -670,15 +785,15 @@ def on_callback_query(msg):
 
     if response != '0':
         query = ('UPDATE poll '
-                'SET count_answer{0} = count_answer{0} + 1 '
-                'WHERE ask="{1}"'.format(response, question))
+                 'SET count_answer{0} = count_answer{0} + 1 '
+                 'WHERE ask="{1}"'.format(response, question))
         cursor.execute(query)
         conn.commit()
 
         bot.answerCallbackQuery(query_id, "Grazie per aver votato")
 
     query = ('SELECT answer1, answer2, count_answer1, count_answer2 '
-            'FROM poll WHERE ask="{0}"'.format(question))
+             'FROM poll WHERE ask="{0}"'.format(question))
     cursor.execute(query)
 
     answer1, answer2, response1, response2 = cursor.fetchall()[0]
@@ -689,8 +804,10 @@ def on_callback_query(msg):
     pa2 = int((response2 / tot) * 100)
 
     keyboard = InlineKeyboardMarkup(inline_keyboard=[[
-        InlineKeyboardButton(text=answer1 + "(" + str(pa1) + "%)", callback_data='0_%s' % question),
-        InlineKeyboardButton(text=answer2 + "(" + str(pa2) + "%)", callback_data='0_%s' % question),
+        InlineKeyboardButton(
+            text=answer1 + "(" + str(pa1) + "%)", callback_data='0_%s' % question),
+        InlineKeyboardButton(
+            text=answer2 + "(" + str(pa2) + "%)", callback_data='0_%s' % question),
     ]])
 
     # Edit buttons
@@ -709,6 +826,7 @@ def on_callback_query(msg):
                              "({3}%) voti per {4}".format(tot, pa1, answer1, pa2, answer2))
 
     bot.answerCallbackQuery(query_id)
+
 
 def get_user_list():
     """

@@ -13,7 +13,9 @@ try:
     query = ('CREATE TABLE user('
              'chat_id integer primary key,'
              'username text,'
-             'name text)')
+             'name text,'
+             'notification text,'
+             'language text)')
     c.execute(query)
 
     query = ('CREATE TABLE action('
