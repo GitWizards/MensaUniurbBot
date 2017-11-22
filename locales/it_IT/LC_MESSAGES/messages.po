@@ -1,7 +1,33 @@
+msgid "welcome_message"
+msgstr "*Benvenuto su @MensaUniurbBot*\n"\
+       "Qui troverai il menu' offerto dal ERSU per i studenti di Uniurb \nsia per il ristorante /duca che il /tridente.\n\n"\
+       "_Il bot e' stato creato in modo non ufficiale ne' ERSU Urbino ne' UNIURB sono responsabili in alcun modo._"
+
+msgid "duca_hours"
+msgstr "Aperta tutti i giorni della settimana, esclusi sabato e domenica, dalle ore *12:00* alle ore *14:00* "\
+       "e dalle ore *19:00* alle ore *21:00*.\n*Cibus* dalle ore *12:00* alle ore *14:30* e dalle ore *19:00* alle ore *21:30*.\n"\
+       "*Posizione* /posizioneduca"
+
+msgid "tridente_hours"
+msgstr "Aperta tutti i giorni della settimana dalle ore *12:00* alle ore *14:00* e dalle ore *19:00* alle ore *21:00* "\
+       "*\nCibus* esclusi sabato e domenica, stessi orari.\n"\
+       "*Posizione* /posizionetridente"
+
+msgid "sogesta_hours"
+msgstr "Aperta da Ottobre a Giugno, tutti i giorni della settimana esclusa la domenica, "\
+       "dalle ore *12:30* alle ore *14:00* e dalle ore *19:30* alle ore *21:00*.\n"\
+       "*Posizione* /posizionesogesta"
+
+msgid "not_available"
+msgstr "*Non disponibile*"
+
+msgid "opening_hours"
+msgstr "Orari apertura"
+
 msgid "today"
 msgstr "Oggi"
 
-msgid "date"
+msgid "insert_date"
 msgstr "Inserisci la data"
 
 msgid "lunch"
@@ -10,8 +36,8 @@ msgstr "Pranzo"
 msgid "dinner"
 msgstr "Cena"
 
-msgid "or"
-msgstr " o "
+msgid "lunch_or_dinner"
+msgstr "Pranzo o Cena?"
 
 msgid "usage_statistics"
 msgstr "Statistiche d'uso"
@@ -19,41 +45,80 @@ msgstr "Statistiche d'uso"
 msgid "days_of_the_month"
 msgstr "Giorni del mese"
 
-msgid "use"
+msgid "uses"
 msgstr "Utilizzi"
 
-msgid "total_user"
-msgstr "Utenti totali: "
+msgid "total_users"
+msgstr "Utenti totali: {0}"
 
 msgid "total_requests"
-msgstr "Richieste totali: "
+msgstr "Richieste totali: {0}"
 
 msgid "source_code"
-msgstr "Codice sorgente:"
+msgstr "Codice sorgente: "
 
 msgid "developed_by"
-msgstr "Sviluppato da:"
+msgstr "Sviluppato da: "
 
-msgid "beer"
+msgid "offer_us_a_beer"
 msgstr "Se sei soddisfatto offri una birra agli sviluppatori"
 
-msgid "report"
-msgstr "Descrivi il tuo problema"
+msgid "report_problem"
+msgstr "*Descrivi il tuo problema*"
 
-msgid "from"
-msgstr "Messaggio inviato da "
+msgid "sent_from"
+msgstr "Messaggio inviato da {0}:\n_{1}_"
 
-msgid "report_one"
-msgstr "Il messaggio "
-
-msgid "report_two"
-msgstr " e' stato inviato con successo"
+msgid "messages_was_sent"
+msgstr "Il messaggio _{0}_ e' stato inviato con successo"
 
 msgid "notification"
 msgstr "Notifiche: "
 
 msgid "language"
-msgstr "Cambia lingua: "
+msgstr "Imposta lingua: "
 
 msgid "settings"
 msgstr "Impostazioni"
+
+msgid "menu_change"
+msgstr "Il menu' potrebbe subire delle variazioni"
+
+msgid "donate"
+msgstr "Dona"
+
+msgid "english"
+msgstr "Inglese"
+
+msgid "italian"
+msgstr "Italiano"
+
+msgid "enter_password"
+msgstr "*Inserisci la password*"
+
+msgid "send_msg_photo"
+msgstr "*Invia un messaggio o una foto con caption*\n(Markdown non supportato con foto)"
+
+msgid "wrong_password"
+msgstr "*Password Errata*"
+
+msgid "edit_message"
+msgstr "*Edita il messaggio*"
+
+msgid "ask_question"
+msgstr "*Fai una domanda*"
+
+msgid "first_answer"
+msgstr "*Prima risposta*"
+
+msgid "second_answer"
+msgstr "*Seconda risposta*"
+
+msgid "help_us"
+msgstr "Aiutaci a sostenere le spese di @MensaUniurb\\_Bot.\n[Dona 2 Euro]({0}) oppure [dona 5 Euro]({0})"
+
+msgid "thanks_vote"
+msgstr "Grazie per aver votato"
+
+msgid "vote_summary"
+msgstr "Hai gia' votato!\n\nVoti totali: {0}\n({1}%) voti per {2}\n({3}%) voti per {4}"
