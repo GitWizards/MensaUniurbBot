@@ -39,10 +39,16 @@ def handle(msg):
     """
     content_type, chat_type, chat_id = telepot.glance(msg)
 
-    # Function to change language
-    # Open connection to DB
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
+    # Try to update username, name and language
+    # Needed to fill missing data in DB
+    # To be removed in future
+    ############################
+    try:
+        username = msg['chat']['username']
+        full_name = msg['chat']['first_name']
+        full_name += ' ' + msg['chat']['last_name']
+    except KeyError:
+        pass
 
     # Get notification , language
     query = (
