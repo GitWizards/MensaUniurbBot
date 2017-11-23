@@ -35,9 +35,16 @@ try:
     query = ('CREATE TABLE poll('
              'ask text primary key,'
              'answer1 text,'
-             'answer2 text,'
-             'count_answer1 integer,'
-             'count_answer2 integer)')
+             'answer2 text)')
+    c.execute(query)
+
+    query = ('CREATE TABLE user_answer('
+             'user integer,'
+             'poll text,'
+             'answer text,'
+             'foreign key(user) references user(chat_id),'
+             'foreign key(poll) references poll(ask),'
+             'primary key(user, poll))')
     c.execute(query)
 
     c.execute('INSERT INTO action(name) VALUES("/duca")')

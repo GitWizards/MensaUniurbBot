@@ -214,14 +214,15 @@ def handle(msg):
             # Get graph
             fname = get_month_graph(chat_id, year, month)
 
-            with open(fname, 'rb') as f:
-                # Get caption
-                caption = (_('total_users').format(get_total_users()) + "\n" + 
-                           _('total_requests').format(get_total_requests()))
+            # Get caption
+            caption = (_('total_users').format(get_total_users()) + "\n" + 
+                       _('total_requests').format(get_total_requests()))
 
-                bot.sendPhoto(chat_id, f, caption,
-                              reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
-                f.close()
+            # Open photo
+            f = open(fname, 'rb')
+
+            bot.sendPhoto(chat_id, f, caption)
+            f.close()
 
         # Send location Duca
         elif command_input == '/posizioneduca':
@@ -285,8 +286,7 @@ def handle(msg):
         # Send news to all registred users - Password required - 1
         elif command_input == '/sendnews':
             USER_STATE[chat_id] = 3
-            bot.sendMessage(chat_id, _('enter_password'), parse_mode="Markdown",
-                            reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
+            bot.sendMessage(chat_id, _('enter_password'), parse_mode="Markdown")
 
         # Send news to all registred users - Password required - 2
         elif USER_STATE[chat_id] == 3:
@@ -307,16 +307,14 @@ def handle(msg):
         # Edit news to all registred users - Password required - 1
         elif command_input == '/editnews':
             USER_STATE[chat_id] = 5
-            bot.sendMessage(chat_id, _('enter_password'), parse_mode="Markdown",
-                            reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
+            bot.sendMessage(chat_id, _('enter_password'), parse_mode="Markdown")
 
         # Edit news to all registred users - Password required - 2
         elif USER_STATE[chat_id] == 5:
             USER_STATE[chat_id] = 6
 
             if command_input.lower() == PASSWORD:
-                bot.sendMessage(chat_id, _('edit_message'), parse_mode="Markdown",
-                                reply_to_message_id=TEMP[chat_id]['sent']['message_id'])
+                bot.sendMessage(chat_id, _('edit_message'), parse_mode="Markdown")
             else:
                 bot.sendMessage(chat_id, _('wrong_password'), parse_mode="Markdown")
 
@@ -330,8 +328,7 @@ def handle(msg):
         # Delete news to all registred users - Password required - 1
         elif command_input == '/deletenews':
             USER_STATE[chat_id] = 7
-            bot.sendMessage(chat_id, _('enter_password'), parse_mode="Markdown",
-                            reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
+            bot.sendMessage(chat_id, _('enter_password'), parse_mode="Markdown")
 
         # Delete news to all registred users - Password required - 2
         elif USER_STATE[chat_id] == 7:
@@ -388,8 +385,7 @@ def handle(msg):
         # Send report to admin
         elif command_input == '/segnala':
             USER_STATE[chat_id] = 13
-            bot.sendMessage(chat_id, _('report_problem'), parse_mode="Markdown",
-                            reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
+            bot.sendMessage(chat_id, _('report_problem'), parse_mode="Markdown")
 
         elif USER_STATE[chat_id] == 13:
             USER_STATE[chat_id] = 0
@@ -624,14 +620,13 @@ def send_msg_poll(question, first_answer, second_answer):
     for user in get_user_list():
         try:
             keyboard = InlineKeyboardMarkup(inline_keyboard=[[
-                InlineKeyboardButton(text=first_answer, callback_data="1_%s" % question),
-                InlineKeyboardButton(text=second_answer, callback_data="2_%s" % question),
+                InlineKeyboardButton(text=first_answer, callback_data="{0}_{1}".format(question, first_answer)),
+                InlineKeyboardButton(text=second_answer, callback_data="{0}_{1}".format(question, second_answer)),
             ]])
 
             bot.sendMessage(user, question, parse_mode="Markdown", reply_markup=keyboard)
         except:
             continue
-
     return 1
 
 
@@ -644,7 +639,6 @@ def send_msg_report(msg):
             bot.sendMessage(user, msg, parse_mode="Markdown")
         except:
             continue
-
     return 1
 
 
@@ -662,7 +656,6 @@ def send_photo_all(photo, caption):
                 TEMP[user]['sent'] = sent
         except:
             continue
-
     return 1
 
 ## Query funtions ##
@@ -676,7 +669,7 @@ def register_user(chat_id, username, name):
 
     try:
         query = ('INSERT INTO user(chat_id, name, username, notification, language) '
-                 'VALUES({0}, "{1}", "{2}", "on", "it_IT")'.format(chat_id, name, username))
+                 'VALUES("{0}", "{1}", "{2}", "on", "it_IT")'.format(chat_id, name, username))
         cursor.execute(query)
         conn.commit()
     except sqlite3.IntegrityError:
@@ -727,7 +720,7 @@ def register_request(chat_id, request):
     action_id = cursor.fetchone()[0]
 
     query = ('INSERT INTO request(date, user, action) '
-             'VALUES("{0}", {1}, {2})'.format(date, chat_id, action_id))
+             'VALUES("{0}", "{1}", "{2}")'.format(date, chat_id, action_id))
 
     cursor.execute(query)
     conn.commit()
@@ -809,27 +802,47 @@ def on_callback_query(msg):
     elif language == 'en_US.UTF-8':
         lang_en.install()
 
-    response = data.split('_')[0]
-    question = data.split('_')[1]
+    question = data.split('_')[0]
+    answer = data.split('_')[1]
 
     # Open connection to DB
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
-    if response != '0':
-        query = ('UPDATE poll '
-                 'SET count_answer{0} = count_answer{0} + 1 '
-                 'WHERE ask="{1}"'.format(response, question))
+    # Insert vote in DB
+    try:
+        query = ('INSERT INTO user_answer(user, poll, answer)'
+                 'VALUES("{0}", "{1}", "{2}")'.format(from_id, question, answer))
         cursor.execute(query)
         conn.commit()
 
         bot.answerCallbackQuery(query_id, _('thanks_vote'))
+    except:
+        pass
 
-    query = ('SELECT answer1, answer2, count_answer1, count_answer2 '
-             'FROM poll WHERE ask="{0}"'.format(question))
+    # Get answers
+    query = ('SELECT answer1, answer2 '
+             'FROM poll '
+             'WHERE ask = "{0}"'.format(question))
     cursor.execute(query)
+    answer1, answer2 = cursor.fetchone()
 
-    answer1, answer2, response1, response2 = cursor.fetchall()[0]
+    # Get count for answer 1
+    query = ('SELECT COUNT(*) '
+             'FROM user_answer '
+             'WHERE poll = "{0}" and answer = "{1}"'.format(question, answer1))
+    cursor.execute(query)
+    response1 = cursor.fetchone()[0]
+
+    # Get count for answer 2
+    query = ('SELECT COUNT(*) '
+             'FROM user_answer '
+             'WHERE poll = "{0}" and answer = "{1}"'.format(question, answer2))
+    cursor.execute(query)
+    response2 = cursor.fetchone()[0]
+
+    # Close connection to DB
+    conn.close()
 
     # Calculate percentage
     tot = response1 + response2
@@ -837,10 +850,8 @@ def on_callback_query(msg):
     pa2 = int((response2 / tot) * 100)
 
     keyboard = InlineKeyboardMarkup(inline_keyboard=[[
-        InlineKeyboardButton(
-            text=answer1 + "(" + str(pa1) + "%)", callback_data='0_%s' % question),
-        InlineKeyboardButton(
-            text=answer2 + "(" + str(pa2) + "%)", callback_data='0_%s' % question),
+        InlineKeyboardButton(text=answer1 + "(" + str(pa1) + "%)", callback_data="{0}_{1}".format(question, answer1)),
+        InlineKeyboardButton(text=answer2 + "(" + str(pa2) + "%)", callback_data="{0}_{1}".format(question, answer2)),
     ]])
 
     # Edit buttons
@@ -850,11 +861,7 @@ def on_callback_query(msg):
     except telepot.exception.TelegramError:
         pass
 
-    # Close connection to DB
-    conn.close()
-
     bot.sendMessage(from_id, _('vote_summary').format(tot, pa1, answer1, pa2, answer2))
-    bot.answerCallbackQuery(query_id)
 
 
 def get_user_list():
