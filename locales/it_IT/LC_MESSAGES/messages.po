@@ -125,3 +125,15 @@ msgstr "Hai gia' votato!\n\nVoti totali: {0}\n({1}%) voti per {2}\n({3}%) voti p
 
 msgid "deleted_message"
 msgstr "Messaggio eliminato con successo"
+
+msgid "first"
+msgstr "Primi:\n{0}"
+
+msgid "second"
+msgstr "Secondi:\n{0}"
+
+msgid "side"
+msgstr "Contorno:\n{0}"
+
+msgid "fruit"
+msgstr "Frutta/Dolce:\n{0}"

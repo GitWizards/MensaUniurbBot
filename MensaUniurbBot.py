@@ -495,13 +495,13 @@ def get_menu(payload):
             last = True
         elif idi == '10' and last:
             if p[0]:
-                msg_lunch += "🍝Primi:\n%s\n" % p[0]
+                msg_lunch += "🍝" + _('first').format(p[0]) + "\n"
             if p[1]:
-                msg_lunch += "🍖Secondi:\n%s\n" % p[1]
+                msg_lunch += "🍖" + _('second').format(p[1]) + "\n"
             if p[2]:
-                msg_lunch += "🍟Contorno:\n%s\n" % p[2]
+                msg_lunch += "🍟" + _('side').format(p[2]) + "\n"
             if p[3]:
-                msg_lunch += "🍨Frutta/Dolce:\n%s" % p[3]
+                msg_lunch += "🍨" + _('fruit').format(p[3]) + "\n"
 
             # Reset accumulation vars
             p = ['', '', '', '']
@@ -518,13 +518,13 @@ def get_menu(payload):
             p[3] += ' • {0}\n'.format(name)
 
     if p[0]:
-        msg_dinner += "🍝Primi:\n%s\n" % p[0]
+        msg_dinner += "🍝" + _('first').format(p[0]) + "\n"
     if p[1]:
-        msg_dinner += "🍖Secondi:\n%s\n" % p[1]
+        msg_dinner += "🍖" + _('second').format(p[1]) + "\n"
     if p[2]:
-        msg_dinner += "🍟Contorno:\n%s\n" % p[2]
+        msg_dinner += "🍟" + _('side').format(p[2]) + "\n"
     if p[3]:
-        msg_dinner += "🍨Frutta/Dolce:\n%s" % p[3]
+        msg_dinner += "🍨" + _('fruit').format(p[3]) + "\n"
 
     return [msg_lunch, msg_dinner]
 
