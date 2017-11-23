@@ -168,10 +168,13 @@ def handle(msg):
         elif command_input == '/prezzi':
             register_request(chat_id, command_input)
 
-            # TODO
-            with open('price_list.png', 'rb') as f:
-                bot.sendPhoto(chat_id, f, 
-                              reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
+            if language == 'it_IT.UTF-8':
+                f = open('price_list_it.png', 'rb')
+                bot.sendPhoto(chat_id, f)
+                f.close()
+            elif language == 'en_US.UTF-8':
+                f = open('price_list_en.png', 'rb')
+                bot.sendPhoto(chat_id, f)
                 f.close()
 
         # Send allergy table
