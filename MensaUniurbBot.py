@@ -303,23 +303,22 @@ def handle(msg):
 
         # Edit news to all registred users - Password required - 1
         elif command_input == '/editnews':
-            USER_STATE[chat_id] = 13
+            USER_STATE[chat_id] = 5
             bot.sendMessage(chat_id, _('enter_password'), parse_mode="Markdown",
                             reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
 
         # Edit news to all registred users - Password required - 2
-        elif USER_STATE[chat_id] == 13:
+        elif USER_STATE[chat_id] == 5:
+            USER_STATE[chat_id] = 6
 
             if command_input.lower() == PASSWORD:
-                USER_STATE[chat_id] = 14
                 bot.sendMessage(chat_id, _('edit_message'), parse_mode="Markdown",
                                 reply_to_message_id=TEMP[chat_id]['sent']['message_id'])
             else:
-                USER_STATE[chat_id] = 0
                 bot.sendMessage(chat_id, _('wrong_password'), parse_mode="Markdown")
 
         # Edit news to all registred users - Password required - 3
-        elif USER_STATE[chat_id] == 14:
+        elif USER_STATE[chat_id] == 6:
             USER_STATE[chat_id] = 0
 
             # Send to all users
@@ -327,49 +326,50 @@ def handle(msg):
 
         # Delete news to all registred users - Password required - 1
         elif command_input == '/deletenews':
-            USER_STATE[chat_id] = 15
+            USER_STATE[chat_id] = 7
             bot.sendMessage(chat_id, _('enter_password'), parse_mode="Markdown",
                             reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
 
         # Delete news to all registred users - Password required - 2
-        elif USER_STATE[chat_id] == 15:
+        elif USER_STATE[chat_id] == 7:
+            USER_STATE[chat_id] = 0
+
             if command_input.lower() == PASSWORD:
-                USER_STATE[chat_id] = 16
-                delete_msg_news(command_input)
+                delete_msg_news()
+                bot.sendMessage(chat_id, _('deleted_message'), parse_mode="Markdown")
             else:
-                USER_STATE[chat_id] = 0
                 bot.sendMessage(chat_id, _('wrong_password'), parse_mode="Markdown")
 
         # Send poll to all registred users - Password required - 1
         elif command_input == '/sendpoll':
-            USER_STATE[chat_id] = 6
+            USER_STATE[chat_id] = 8
             bot.sendMessage(chat_id, _('enter_password'), parse_mode="Markdown")
 
         # Send poll to all registred users - Password required - 2
-        elif USER_STATE[chat_id] == 6:
+        elif USER_STATE[chat_id] == 8:
             if command_input.lower() == PASSWORD:
-                USER_STATE[chat_id] = 7
+                USER_STATE[chat_id] = 9
                 bot.sendMessage(chat_id, _('ask_question'), parse_mode="Markdown")
             else:
                 USER_STATE[chat_id] = 0
                 bot.sendMessage(chat_id, _('wrong_password'), parse_mode="Markdown")
 
         # Send poll to all registred users - Password required - 3
-        elif USER_STATE[chat_id] == 7:
-            USER_STATE[chat_id] = 8
+        elif USER_STATE[chat_id] == 9:
+            USER_STATE[chat_id] = 10
             TEMP[chat_id] = {}
             TEMP[chat_id]['question'] = command_input
 
             bot.sendMessage(chat_id, _('first_answer'), parse_mode="Markdown")
 
         # Send poll to all registred users - Password required - 4
-        elif USER_STATE[chat_id] == 8:
-            USER_STATE[chat_id] = 9
+        elif USER_STATE[chat_id] == 10:
+            USER_STATE[chat_id] = 11
             TEMP[chat_id]['first_answer'] = command_input
 
             bot.sendMessage(chat_id, _('second_answer'), parse_mode="Markdown")
 
-        elif USER_STATE[chat_id] == 9:
+        elif USER_STATE[chat_id] == 11:
             USER_STATE[chat_id] = 0
 
             question = TEMP[chat_id]['question'].capitalize()
@@ -384,11 +384,11 @@ def handle(msg):
 
         # Send report to admin
         elif command_input == '/segnala':
-            USER_STATE[chat_id] = 5
+            USER_STATE[chat_id] = 13
             bot.sendMessage(chat_id, _('report_problem'), parse_mode="Markdown",
                             reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
 
-        elif USER_STATE[chat_id] == 5:
+        elif USER_STATE[chat_id] == 13:
             USER_STATE[chat_id] = 0
 
             # Sent to admins
@@ -581,11 +581,10 @@ def send_msg_news(msg):
         try:
             if get_user_pref_notification(user) == "on":
                 sent = bot.sendMessage(user, msg, parse_mode="Markdown")
-                TEMP[ser] = {}
+                TEMP[user] = {}
                 TEMP[user]['sent'] = sent
         except:
             continue
-
     return 1
 
 
@@ -599,11 +598,10 @@ def edit_msg_news(msg):
             bot.editMessageText(edited, msg, parse_mode="Markdown")
         except:
             continue
-
     return 1
 
 
-def delete_msg_news(msg):
+def delete_msg_news():
     """
     Delete last message sent to all users
     """
@@ -613,7 +611,6 @@ def delete_msg_news(msg):
             bot.deleteMessage(edited)
         except:
             continue
-
     return 1
 
 

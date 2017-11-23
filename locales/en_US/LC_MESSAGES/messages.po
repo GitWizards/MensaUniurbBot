@@ -122,3 +122,6 @@ msgstr "Thanks for voting"
 
 msgid "vote_summary"
 msgstr "You have already voted!\n\nTotale votes: {0}\n({1}%) votes for {2}\n({3}%) votes for {4}"
+
+msgid "deleted_message"
+msgstr "Message deleted successfully"
