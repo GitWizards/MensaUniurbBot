@@ -84,14 +84,9 @@ def handle(msg):
             bot.sendMessage(chat_id, START_MSG, parse_mode='Markdown')
 
             # Try to save username, name and language
-            username = ""
-            full_name = ""
-            language = ""
-
             try:
                 username = msg['chat']['username']
-                language = msg['from']['language_code']
-                full_name += msg['chat']['first_name']
+                full_name = msg['chat']['first_name']
                 full_name += ' ' + msg['chat']['last_name']
 
             except KeyError:
@@ -102,33 +97,6 @@ def handle(msg):
         elif command_input in ['/duca', '/tridente', '/sogesta', '/cibusduca', '/cibustridente']:
             register_request(chat_id, command_input)
             USER_STATE[chat_id] = 1
-
-            # Open connection to DB
-            conn = sqlite3.connect(DB_NAME)
-            cursor = conn.cursor()
-
-            # Get notification
-            query = (
-                'SELECT username, name FROM user WHERE chat_id == "%s"' % chat_id)
-            cursor.execute(query)
-            username, name = cursor.fetchall()[0]
-
-            if username == "" or name == "" or username == None or name == None:
-                # Try to update username and name
-                username = ""
-                full_name = ""
-
-                try:
-                    username = msg['chat']['username']
-                    full_name += msg['chat']['first_name']
-                    full_name += ' ' + msg['chat']['last_name']
-
-                except KeyError:
-                    pass
-                update_user(chat_id, username, full_name)
-
-            # Close connection to DB
-            conn.close()
 
             # Some work vars
             counter = 0
@@ -282,100 +250,44 @@ def handle(msg):
         # Settings menu
         elif command_input == '/impostazioni':
             entries = []
-            p_entries = []
 
-            # Open connection to DB
-            conn = sqlite3.connect(DB_NAME)
-            cursor = conn.cursor()
+            # Notification preference
+            notif_pref = get_user_pref_notification(chat_id)
+            entries.append([_('notification') + notif_pref.title()])
 
-            # Get notification , language
-            query = (
-                'SELECT notification, language FROM user WHERE chat_id == "%s"' % chat_id)
-            cursor.execute(query)
-            notification, language = cursor.fetchall()[0]
+            # Language preference
+            language = get_user_language(chat_id)
 
-            if language == "it":
-                LANG = ['it_IT']
-            elif language == "en":
-                LANG = ['en_US']
+            if language == "en_US.UTF-8":
+                entries.append([_('language') + _('italian') + " 🇮🇹"])
+            elif language == "it_IT.UTF-8":
+                entries.append([_('language') + _('english') + " 🇺🇸"])
             
-
-            t = gettext.translation('messages', 'locales', languages=LANG)
-            _ = t.gettext
-
-            # Close connection to DB
-            conn.close()
-
-            entries.append([_('notification') + notification.title()])
-            if language == "en":
-                entries.append([_('language') + "It" + " 🇮🇹"])
-            elif language == "it":
-                entries.append([_('language') + "En" + " 🇺🇸"])
-
-            entries.append(p_entries)
-
             # Make week keyboard
             markup = ReplyKeyboardMarkup(keyboard=entries)
             bot.sendMessage(chat_id, "⚙️ " + _('settings') , reply_markup=markup)
 
-        elif command_input == _('notification') + "Off":
-            # Open connection to DB
-            conn = sqlite3.connect(DB_NAME)
-            cursor = conn.cursor()
+        # Settings - notification preference change
+        elif _('notification') in command_input:
+            # Toogle notification
+            if command_input.split()[1] == "On":
+                update_notif_pref(chat_id, 'off')
+            elif command_input.split()[1] == "Off":
+                update_notif_pref(chat_id, 'on')
 
-            query = ('UPDATE user '
-                     'SET notification ="{0}" '
-                     'WHERE chat_id="{1}"'.format("on", chat_id))
-
-            cursor.execute(query)
-            conn.commit()
-
-            # Close connection to DB
-            conn.close()
+            # Return to settings menu
             msg['text'] = "/impostazioni"
             handle(msg)
 
-        elif command_input == _('notification') + "On":
-            # Open connection to DB
-            conn = sqlite3.connect(DB_NAME)
-            cursor = conn.cursor()
+        # Settings - language change
+        elif _('language') in command_input:
+            # Set language
+            if command_input.split()[2] == _('italian'):
+                update_language(chat_id, 'it_IT.UTF-8')
+            elif command_input.split()[2] == _('english'):
+                update_language(chat_id, 'en_US.UTF-8')
 
-            query = ('UPDATE user '
-                     'SET notification ="{0}" '
-                     'WHERE chat_id="{1}"'.format("off", chat_id))
-
-            cursor.execute(query)
-            conn.commit()
-
-            # Close connection to DB
-            conn.close()
-            msg['text'] = "/impostazioni"
-            handle(msg)
-
-        elif command_input == _('language') + "It" + " 🇮🇹":
-            # Open connection to DB
-            conn = sqlite3.connect(DB_NAME)
-            cursor = conn.cursor()
-            query = ('UPDATE user '
-                     'SET language ="{0}" '
-                     'WHERE chat_id="{1}"'.format("it", chat_id))
-            cursor.execute(query)
-            conn.commit()
-            # Close connection to DB
-            conn.close()
-            msg['text'] = "/impostazioni"
-            handle(msg)
-        elif command_input == _('language') + "En" + " 🇺🇸":
-            # Open connection to DB
-            conn = sqlite3.connect(DB_NAME)
-            cursor = conn.cursor()
-            query = ('UPDATE user '
-                     'SET language ="{0}" '
-                     'WHERE chat_id="{1}"'.format("en", chat_id))
-            cursor.execute(query)
-            conn.commit()
-            # Close connection to DB
-            conn.close()
+            # Return to settings menu
             msg['text'] = "/impostazioni"
             handle(msg)
 
@@ -649,29 +561,6 @@ def get_month_graph(msg, year, month):
     except FileExistsError:
         pass
 
-    # Function to change language
-    # Open connection to DB
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-
-    # Get notification , language
-    query = (
-        'SELECT notification, language FROM user WHERE chat_id == "%s"' % msg)
-    cursor.execute(query)
-    notification, language = cursor.fetchall()[0]
-
-    if language == "it":
-        LANG = ['it_IT.ISO8859-15']
-    elif language == "en":
-        LANG = ['en_US']
-
-    t = gettext.translation('messages', 'locales', languages=LANG)
-    _ = t.gettext
-
-    # Close connection to DB
-    conn.close()
-
-
     # Get current month days
     date = "{0}-{1}-".format(year, month)
     days_month = 1 + calendar.monthrange(year, month)[1]
@@ -715,20 +604,7 @@ def send_msg_news(msg):
     """
     for user in get_user_list():
         try:
-            # Open connection to DB
-            conn = sqlite3.connect(DB_NAME)
-            cursor = conn.cursor()
-
-            # Get notification
-            query = (
-                'SELECT notification FROM user WHERE chat_id == "%s"' % user)
-            cursor.execute(query)
-            notification = cursor.fetchone()[0].title()
-
-            # Close connection to DB
-            conn.close()
-
-            if notification == "On":
+            if get_user_pref_notification(user) == "on":
                 sent = bot.sendMessage(user, msg, parse_mode="Markdown")
                 TEMP[user] = {}
                 TEMP[user]['sent'] = sent
@@ -914,11 +790,58 @@ def register_poll(question, first_answer, second_answer):
     return 1
 
 
+def update_notif_pref(chat_id, pref):
+    """
+    This function update the user preference to recevie or not the notifications
+    """
+    # Open connection to DB
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    query = ('UPDATE user '
+             'SET notification = "{0}" '
+             'WHERE chat_id = "{1}"'.format(pref, chat_id))
+
+    cursor.execute(query)
+    conn.commit()
+
+    # Close connection to DB
+    conn.close()
+    return 1
+
+
+def update_language(chat_id, lang):
+    """
+    This function update the user prefered language
+    """
+    # Open connection to DB
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    query = ('UPDATE user '
+             'SET language = "{0}" '
+             'WHERE chat_id = "{1}"'.format(lang, chat_id))
+
+    cursor.execute(query)
+    conn.commit()
+
+    # Close connection to DB
+    conn.close()
+    return 1
+
 def on_callback_query(msg):
     """
     Register answer to poll
     """
     query_id, from_id, data = telepot.glance(msg, flavor='callback_query')
+
+    # Get user prefered language
+    language = get_user_language(from_id)
+    locale.setlocale(locale.LC_TIME, language)
+    if language == 'it_IT.UTF-8':
+        lang_it.install()
+    elif language == 'en_US.UTF-8':
+        lang_en.install()
 
     response = data.split('_')[0]
     question = data.split('_')[1]
@@ -1040,6 +963,46 @@ def get_use_in_day(date):
     # Close connection to DB
     conn.close()
     return day_uses
+
+def get_user_language(chat_id):
+    """
+    Return user language
+    """
+    # Open connection to DB
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    query = ('SELECT language FROM user WHERE chat_id == "%s"' % chat_id)
+    cursor.execute(query)
+
+    try:
+        language = cursor.fetchone()[0]
+    except:
+        return 0
+    finally:
+        # Close connection to DB
+        conn.close()
+    return language
+
+def get_user_pref_notification(chat_id):
+    """
+    Return user notification preference
+    """
+    # Open connection to DB
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    query = ('SELECT notification FROM user WHERE chat_id == "%s"' % chat_id)
+    cursor.execute(query)
+
+    try:
+        notification = cursor.fetchone()[0]
+    except:
+        return 0
+    finally:
+        # Close connection to DB
+        conn.close()
+    return notification
 
 
 # Main
