@@ -42,6 +42,8 @@ def handle(msg):
     # Needed to fill missing data in DB
     # To be removed in future
     ############################
+    username = ""
+    full_name = ""
     try:
         username = msg['chat']['username']
         full_name = msg['chat']['first_name']
@@ -54,11 +56,19 @@ def handle(msg):
 
     # Get user prefered language
     language = get_user_language(chat_id)
-    locale.setlocale(locale.LC_TIME, language)
     if language == 'it_IT.UTF-8':
+        # Set Italian
         lang_it.install()
     elif language == 'en_US.UTF-8':
+        # Set English
         lang_en.install()
+    else:
+        # Set default (Italian)
+        lang_it.install()
+        language = 'it_IT.UTF-8'
+
+    # Set locale time for user language
+    locale.setlocale(locale.LC_TIME, language)
 
     # Check user state
     try:
@@ -680,7 +690,7 @@ def register_user(chat_id, username, name):
     return 1
 
 
-def update_user(chat_id, username=None, full_name=None):
+def update_user(chat_id, username, full_name):
     """
     Update name and username of missing users
     """
