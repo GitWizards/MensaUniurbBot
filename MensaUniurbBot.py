@@ -679,7 +679,7 @@ def register_user(chat_id, username, name):
 
     try:
         query = ('INSERT INTO user(chat_id, name, username, notification, language) '
-                 'VALUES("{0}", "{1}", "{2}", "on", "it_IT")'.format(chat_id, name, username))
+                 'VALUES("{0}", "{1}", "{2}", "on", "it_IT.UTF-8")'.format(chat_id, name, username))
         cursor.execute(query)
         conn.commit()
     except sqlite3.IntegrityError:
@@ -748,8 +748,8 @@ def register_poll(question, first_answer, second_answer):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
-    query = ('INSERT INTO poll(ask, answer1, answer2, count_answer1, count_answer2) '
-             'VALUES("{0}", "{1}", "{2}", 0, 0)'.format(question, first_answer, second_answer))
+    query = ('INSERT INTO poll(ask, answer1, answer2) '
+             'VALUES("{0}", "{1}", "{2}")'.format(question, first_answer, second_answer))
 
     cursor.execute(query)
     conn.commit()
