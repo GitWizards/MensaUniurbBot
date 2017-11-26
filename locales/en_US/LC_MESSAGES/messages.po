@@ -6,17 +6,17 @@ msgstr "*Welcome to @MensaUniurbBot*\n"\
 msgid "duca_hours"
 msgstr "Open every day except Saturday and Sunday, from *12:00* to *14:00* "\
        "and from *19:00* to *21:00*.\n*Cibus* from *12:00* to *14:30* and from *19:00* to *21:30*.\n"\
-       "*Location* /posizioneduca"
+       "*Location*: /posizioneduca"
 
 msgid "tridente_hours"
 msgstr "Open every day from *12:00* to *14:00* and from *19:00* to *21:00* "\
        "*\nCibus* except Saturday and Sunday, at same hours\n"\
-       "*Location* /posizionetridente"
+       "*Location*: /posizionetridente"
 
 msgid "sogesta_hours"
 msgstr "Open from October to June, every day except Sunday, "\
        "from *12:30* to *14:00* and from *19:30* to *21:00*.\n"\
-       "*Location* /posizionesogesta"
+       "*Location*: /posizionesogesta"
     
 msgid "not_available"
 msgstr "*Not available*"

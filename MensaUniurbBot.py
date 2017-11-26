@@ -160,10 +160,7 @@ def handle(msg):
                                 reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
             else:
                 # Users choose lunch or dinner
-                markup = ReplyKeyboardMarkup(keyboard=[
-                                                [_('lunch')],
-                                                [_('dinner')]
-                                            ])
+                markup = ReplyKeyboardMarkup(keyboard=[[_('lunch')], [_('dinner')]])
                 bot.sendMessage(chat_id, _('lunch_or_dinner'), reply_markup=markup)
 
         elif USER_STATE[chat_id] == 2:
@@ -433,7 +430,7 @@ def get_menu_message(kitchen, date, meal, language="it_IT-UFT.8"):
         'Cibus': _('duca_hours'),
         'Tridente': _('tridente_hours'),
         'CibusTr': _('tridente_hours'),
-        'Sogesta': _('sogesta_hour'),
+        'Sogesta': _('sogesta_hours'),
     }
 
     cn = {
