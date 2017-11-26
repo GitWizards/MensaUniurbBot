@@ -187,8 +187,7 @@ def handle(msg):
         # Send allergy table
         elif command_input == '/allergeni':
             register_request(chat_id, command_input)
-            bot.sendPhoto(chat_id, 'http://menu.ersurb.it/menum/Allergeni_legenda.png',
-                          reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
+            bot.sendPhoto(chat_id, 'http://menu.ersurb.it/menum/Allergeni_legenda.png')
 
         # Send credits
         elif command_input == '/info':
@@ -210,7 +209,7 @@ def handle(msg):
             bot.sendMessage(chat_id, "🍝*Duca*\n{0}\n\n*🍖Tridente*\n{1}\n\n"
                                      "🍟*Sogesta\n*{2}".format(
                                     _('duca_hours'), _('tridente_hours'), _('sogesta_hours')),
-                                     parse_mode="Markdown", reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
+                                     parse_mode="Markdown")
 
         # Send statistics about monthly use
         elif command_input == '/statistiche':
