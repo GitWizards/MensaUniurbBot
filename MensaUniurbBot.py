@@ -549,7 +549,7 @@ def get_month_graph(msg, year, month):
     month_counters = [0] * days_month
     radius = [1] * days_month
 
-    for day in enumerate(month_counters[1:]):
+    for day in enumerate(month_counters):
         month_counters[day[0]] = get_use_in_day(date + str(day[0]).zfill(2))
 
     # Clear plot
