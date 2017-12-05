@@ -1,6 +1,6 @@
 msgid "welcome_message"
 msgstr "*Welcome to @MensaUniurbBot*\n"\
-        "Here you will find the menu offered by the Uniurb students \nfor both the ERSU restaurant /duca and /tridente.\n\n"\
+        "Here you will find the menu offered by the Uniurb students for both the ERSU restaurant /duca, /tridente and /sogesta.\n\n"\
         "_The bot was created unofficially nor ERSU Urbino nor UNIURB are responsible for it in any way._"
 
 msgid "duca_hours"
