@@ -45,7 +45,10 @@ def handle(msg):
     username = ""
     full_name = ""
     try:
-        username = msg['chat']['username']
+        try:
+            username = msg['chat']['username']
+        except:
+            username = ""
         full_name = msg['chat']['first_name']
         full_name += ' ' + msg['chat']['last_name']
     except KeyError:
@@ -86,7 +89,11 @@ def handle(msg):
 
             # Try to save username, name and language
             try:
-                username = msg['chat']['username']
+                try:
+                    username = msg['chat']['username']
+                except:
+                    username = ""
+
                 full_name = msg['chat']['first_name']
                 full_name += ' ' + msg['chat']['last_name']
             except KeyError:
@@ -503,7 +510,7 @@ def get_menu(payload):
             if p[2]:
                 msg_lunch += "🍟" + _('side').format(p[2]) + "\n"
             if p[3]:
-                msg_lunch += "🍨" + _('fruit').format(p[3]) + "\n"
+                msg_lunch += "🍨" + _('fruit').format(p[3])
 
             # Reset accumulation vars
             p = ['', '', '', '']
@@ -526,7 +533,7 @@ def get_menu(payload):
     if p[2]:
         msg_dinner += "🍟" + _('side').format(p[2]) + "\n"
     if p[3]:
-        msg_dinner += "🍨" + _('fruit').format(p[3]) + "\n"
+        msg_dinner += "🍨" + _('fruit').format(p[3])
 
     return [msg_lunch, msg_dinner]
 
