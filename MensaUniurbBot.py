@@ -549,7 +549,7 @@ def get_month_graph(msg, year, month):
         pass
 
     # Get current month days
-    date = "{0}-{1}-".format(year, month)
+    date = "{0}-{1}-".format(year, str(month).zfill(2))
     days_month = 1 + calendar.monthrange(year, month)[1]
 
     # Create month array
@@ -563,7 +563,7 @@ def get_month_graph(msg, year, month):
     plt.clf()
 
     # Add titles
-    plt.title( _('usage_statistics') + " {0}/{1}".format(month, year))
+    plt.title( _('usage_statistics') + " {0}/{1}".format(str(month).zfill(2), year))
     plt.xlabel( _('days_of_the_month') )
     plt.xlim([1, days_month])
     plt.ylabel(_('use') )
@@ -937,8 +937,7 @@ def get_use_in_day(date):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
-    query = 'SELECT count(*) FROM request WHERE date BETWEEN "{0} 00:00:00" AND "{0} 23:59:59"'.format(
-        date)
+    query = 'SELECT count(*) FROM request WHERE date BETWEEN "{0} 00:00:00" AND "{0} 23:59:59"'.format(date)
     cursor.execute(query)
     day_uses = cursor.fetchone()[0]
 
