@@ -137,3 +137,12 @@ msgstr "Contorno:\n{0}"
 
 msgid "fruit"
 msgstr "Frutta/Dolce:\n{0}"
+
+msgid "classic_cibus"
+msgstr "Classico o Cibus?"
+
+msgid "classic"
+msgstr "Classico"
+
+msgid "cibus"
+msgstr "Cibus"

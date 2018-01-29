@@ -17,7 +17,7 @@ msgid "sogesta_hours"
 msgstr "Open from October to June, every day except Sunday, "\
        "from *12:30* to *14:00* and from *19:30* to *21:00*.\n"\
        "*Location*: /posizionesogesta"
-    
+
 msgid "not_available"
 msgstr "*Not available*"
 
@@ -137,3 +137,12 @@ msgstr "Side:\n{0}"
 
 msgid "fruit"
 msgstr "Fruit/Dessert:\n{0}"
+
+msgid "classic_cibus"
+msgstr "Classic or Cibus?"
+
+msgid "classic"
+msgstr "Classic"
+
+msgid "cibus"
+msgstr "Cibus"

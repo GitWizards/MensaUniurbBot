@@ -16,7 +16,6 @@ from random import randint
 
 import locale
 import calendar
-import re
 import sqlite3
 import requests
 import telepot
@@ -102,27 +101,71 @@ def handle(msg):
             register_user(chat_id, username, full_name)
 
         # Get menu
-        elif command_input in ['/duca', '/tridente', '/sogesta', '/cibusduca', '/cibustridente']:
+        elif command_input in ['/duca', '/tridente', '/sogesta']:
             register_request(chat_id, command_input)
             USER_STATE[chat_id] = 1
 
             # Some work vars
             counter = 0
-            entries = []
-            p_entries = []
 
             ck = {
                 '/duca': 'Duca',
                 '/tridente': 'Tridente',
                 '/sogesta': 'Sogesta',
-                '/cibustridente': 'CibusTr',
-                '/cibusduca': 'Cibus'
             }
 
             # Init a dict to save temporaries for this action
             TEMP[chat_id] = {}
             TEMP[chat_id]['kitchen'] = ck[command_input]
-            
+
+            # Check if user choose duca/tridente or sogesta
+            if TEMP[chat_id]['kitchen'] == 'Duca' or TEMP[chat_id]['kitchen'] == 'Tridente':
+                entries = [[_("classic")], [_("cibus")]]
+                USER_STATE[chat_id] = 1
+
+                # Make keyboard
+                markup = ReplyKeyboardMarkup(keyboard=entries)
+                bot.sendMessage(chat_id, _('classic_cibus'), reply_markup=markup)
+            else:
+                USER_STATE[chat_id] = 2
+                entries = []
+                counter = 0
+                p_entries = []
+
+                # Get current day
+                now = datetime.now()
+                entries.append([_('today')])
+
+                for day in range(1, 8):
+                    date = now + timedelta(day)
+                    p_entries.append(date.strftime("%A %d/%m"))
+                    counter += 1
+
+                    if counter > 3:
+                        entries.append(p_entries)
+                        p_entries = []
+                        counter = 0
+                entries.append(p_entries)
+
+                # Make week keyboard
+                markup = ReplyKeyboardMarkup(keyboard=entries)
+                bot.sendMessage(chat_id, _('insert_date'), reply_markup=markup)
+
+        # Date select keyboard
+        elif USER_STATE[chat_id] == 1:
+            if TEMP[chat_id]['kitchen'] == 'Duca':
+                if command_input != _('classic'):
+                    TEMP[chat_id]['kitchen'] = 'Cibus'
+
+            elif TEMP[chat_id]['kitchen'] == 'Tridente':
+                if command_input != _('classic'):
+                    TEMP[chat_id]['kitchen'] = 'CibusTr'
+
+            USER_STATE[chat_id] = 2
+            entries = []
+            counter = 0
+            p_entries = []
+
             # Get current day
             now = datetime.now()
             entries.append([_('today')])
@@ -142,9 +185,8 @@ def handle(msg):
             markup = ReplyKeyboardMarkup(keyboard=entries)
             bot.sendMessage(chat_id, _('insert_date'), reply_markup=markup)
 
-        elif USER_STATE[chat_id] == 1:
-            USER_STATE[chat_id] = 2
-
+        elif USER_STATE[chat_id] == 2:
+            USER_STATE[chat_id] = 3
             now = datetime.now()
 
             # If current day
@@ -170,7 +212,7 @@ def handle(msg):
                 markup = ReplyKeyboardMarkup(keyboard=[[_('lunch')], [_('dinner')]])
                 bot.sendMessage(chat_id, _('lunch_or_dinner'), reply_markup=markup)
 
-        elif USER_STATE[chat_id] == 2:
+        elif USER_STATE[chat_id] == 3:
             USER_STATE[chat_id] = 0
 
             # Finally send menu
@@ -228,7 +270,7 @@ def handle(msg):
             fname = get_month_graph(chat_id, year, month)
 
             # Get caption
-            caption = (_('total_users').format(get_total_users()) + "\n" + 
+            caption = (_('total_users').format(get_total_users()) + "\n" +
                        _('total_requests').format(get_total_requests()))
 
             # Open photo
@@ -267,10 +309,10 @@ def handle(msg):
                 entries.append([_('language') + _('italian') + " 🇮🇹"])
             elif language == "it_IT.UTF-8":
                 entries.append([_('language') + _('english') + " 🇺🇸"])
-            
+
             # Make week keyboard
             markup = ReplyKeyboardMarkup(keyboard=entries)
-            bot.sendMessage(chat_id, "⚙️ " + _('settings') , reply_markup=markup)
+            bot.sendMessage(chat_id, "⚙️ " + _('settings'), reply_markup=markup)
 
         # Settings - notification preference change
         elif _('notification') in command_input:
