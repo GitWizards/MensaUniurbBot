@@ -454,7 +454,7 @@ def handle(msg):
             bot.sendMessage(chat_id, msg, parse_mode="Markdown")
 
     # Send news to all registred users - Password required - 3
-    elif content_type == 'photo' and USER_STATE[chat_id] == 11:
+    elif content_type == 'photo' and USER_STATE[chat_id] == 10:
         USER_STATE[chat_id] = 0
 
         # Check if caption exist

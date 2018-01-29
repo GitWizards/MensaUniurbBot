@@ -69,7 +69,7 @@ msgstr "*Describe your problem*"
 msgid "sent_from"
 msgstr "Message sent from {0}:\n_{1}_"
 
-msgid "messages_was_sent"
+msgid "message_was_sent"
 msgstr "The _{0}_ message has been sent successfully"
 
 msgid "notification"
