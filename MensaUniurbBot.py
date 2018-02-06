@@ -446,7 +446,7 @@ def handle(msg):
             USER_STATE[chat_id] = 0
 
             # Sent to admins
-            msg = _('sent_from').format(chat_id, command_input)
+            msg = _('sent_from').format(get_username(chat_id), command_input)
             send_msg_report(msg)
 
             # Send to user
@@ -918,6 +918,29 @@ def on_callback_query(msg):
 
     bot.sendMessage(from_id, _('vote_summary').format(tot, pa1, answer1, pa2, answer2))
 
+def get_username(chat_id):
+    """
+    Return the username from users chat_id
+    """
+    # Open connection to DB
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    # Get username
+    query = 'SELECT username FROM user WHERE chat_id = "{0}"'.format(chat_id)
+    cursor.execute(query)
+    username = cursor.fetchone()[0]
+
+    if username == "":
+        query = 'SELECT name FROM user WHERE chat_id = "{0}"'.format(chat_id)
+        cursor.execute(query)
+        username = cursor.fetchone()[0]
+    else:
+        username = '@' + username
+
+    # Close connection to DB
+    conn.close()
+    return username
 
 def get_user_list():
     """

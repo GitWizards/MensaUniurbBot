@@ -64,10 +64,10 @@ msgid "offer_us_a_beer"
 msgstr "If you are satisfied offer us a beer"
 
 msgid "report_problem"
-msgstr "*Describe your problem*"
+msgstr "*Describe your problem*\n\nPlease, if you don't have a username provide us a different way to contact you or contact us directly at @radeox or @fast0n."
 
 msgid "sent_from"
-msgstr "Message sent from {0}:\n_{1}_"
+msgstr "Message sent from {0}\n_{1}_"
 
 msgid "message_was_sent"
 msgstr "The _{0}_ message has been sent successfully"
