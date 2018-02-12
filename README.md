@@ -10,7 +10,7 @@ Ora gli studenti di Uniurb, ma anche altri, potranno controllare in tempo reale 
 
 ## Se il bot vi è stato utile, offriteci una birra ##
 
-[![gitcheese.com](https://s3.amazonaws.com/gitcheese-ui-master/images/badge.svg)](https://www.gitcheese.com/donate/users/9751015/repos/90749559)
+[![Donate](https://img.shields.io/badge/Dona-Paypal-Blue.svg)](https://paypal.me/radeox)
 
 ------------------------------------------------------------------------------------
 

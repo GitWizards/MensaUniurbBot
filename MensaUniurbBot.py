@@ -502,7 +502,7 @@ def get_menu_message(kitchen, date, meal, language="it_IT-UFT.8"):
 
         # Random spam
         if randint(1, 5) == 3:
-            msg += ("\n\n💙") + _('help_us').format("https://www.gitcheese.com/donate/users/9751015/repos/90749559")
+            msg += ("\n\n💙") + _('help_us').format("https://paypal.me/Radeox/2", "https://paypal.me/Radeox/5")
     else:
         msg = ("🗓️*Menu {0}*\n\n{1}\n\n⚠️ {2} ⚠️\n{3}".format(cn[kitchen],
                                                            _('not_available'),

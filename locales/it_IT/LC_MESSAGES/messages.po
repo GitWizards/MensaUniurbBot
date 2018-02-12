@@ -115,7 +115,7 @@ msgid "second_answer"
 msgstr "*Seconda risposta*"
 
 msgid "help_us"
-msgstr "Aiutaci a sostenere le spese di @MensaUniurb\\_Bot.\n[Dona 2 Euro]({0}) oppure [dona 5 Euro]({0})"
+msgstr "Aiutaci a sostenere le spese di @MensaUniurb\\_Bot.\n[Dona 2 Euro]({0}) oppure [dona 5 Euro]({1})"
 
 msgid "thanks_vote"
 msgstr "Grazie per aver votato"
