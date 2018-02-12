@@ -242,8 +242,7 @@ def handle(msg):
         elif command_input == '/info':
             register_request(chat_id, command_input)
             keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton(text=_('donate'),
-                                      url='https://www.gitcheese.com/donate/users/9751015/repos/90749559')],
+                [InlineKeyboardButton(text=_('donate'), url='https://paypal.me/Radeox/')],
             ])
             bot.sendMessage(chat_id, _('source_code') + "\n" +
                             "https://github.com/Radeox/MensaUniurbBot\n\n" +
