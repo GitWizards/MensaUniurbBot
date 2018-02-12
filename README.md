@@ -10,7 +10,7 @@ Ora gli studenti di Uniurb, ma anche altri, potranno controllare in tempo reale 
 
 ## Se il bot vi è stato utile, offriteci una birra ##
 
-[![Donate](https://img.shields.io/badge/Dona-Paypal-Blue.svg)](https://paypal.me/radeox)
+[![Donate](https://img.shields.io/badge/Dona-Paypal-blue.svg)](https://paypal.me/radeox)
 
 ------------------------------------------------------------------------------------
 
