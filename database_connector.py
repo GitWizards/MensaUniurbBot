@@ -11,7 +11,6 @@ class DatabaseConnector:
         # Database where all requests are stored
         self.DB_NAME = database_name
 
-    # todo init database if dont exists
     def register_user(self, chat_id, username, name):
         """
         Register given user to receive news and statistics
