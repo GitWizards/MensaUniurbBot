@@ -271,7 +271,10 @@ class MessageHandler:
     #! ------------ End message handler ------------
 
     def handle_start_msg(self, chat_id, msg):
-        # todo
+        """
+        Handle the first message recevied from user, saving him in the db and
+        sending some infos
+        """
         # Save username and/or name
         try:
             try:
@@ -391,7 +394,13 @@ class MessageHandler:
 
             # Check if menu is not empty
             if msg:
-                # Todo add paypal stuff (random)
+                # Randomly add some paypal spam
+                if randint(1, 5) == 3:
+                    msg += ("\n\n💙Aiutaci a sostenere le spese di @MensaUniurb\_Bot.\n[Dona 2 Euro]"
+                            "(https://paypal.me/Radeox/2) oppure [dona 5 Euro](https://paypal.me/Radeox/5)."
+                            "\nGrazie del sostegno🍻")
+
+                # Send message
                 bot.sendMessage(chat_id, msg, parse_mode="Markdown",
                                 reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
             else:
@@ -492,11 +501,10 @@ class MessageHandler:
         plt.grid()
 
         # Add plots
-        # todo #169D58 change color
-        plt.plot(month_counters, color='#0099ff', linewidth=2.5)
-        plt.plot(month_counters, 'o', color='#5e97f6')
+        plt.plot(month_counters, color='#169D58', linewidth=2.5)
+        plt.plot(month_counters, 'o', color='#138D4F')
         plt.fill(radius, month_counters)
-        plt.fill_between(range(days_month), month_counters, 0, color='#99d6ff')
+        plt.fill_between(range(days_month), month_counters, 0, color='#71BA95')
 
         # Save it!
         fname = "plots/{0}_{1}.png".format(year, month)
