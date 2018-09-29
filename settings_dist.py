@@ -1,8 +1,11 @@
 # Your Bot token (get it from BotFather)
-TOKEN = 'TOKEN'
+TOKEN = "TOKEN"
+
+#Database to be used
+DB_NAME = "database.db"
 
 # Password required for special operations
-PASSWORD = 'PASSWORD'
+PASSWORD = "PASSWORD"
 
 # Admin report message
 ADMIN = []
