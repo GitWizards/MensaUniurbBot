@@ -148,10 +148,12 @@ class Sogesta(Resource):
 
 # Routes configuration
 api.add_resource(Duca, '/duca/<date>/<meal>')
-api.add_resource(CibusDuca, '/cibusduca/<date>')
 api.add_resource(Tridente, '/tridente/<date>/<meal>')
-api.add_resource(CibusTridente, '/cibustr/<date>')
-api.add_resource(Sogesta, '/sogesta/<date>/<meal>')
+
+# Disabled routes
+# api.add_resource(CibusDuca, '/cibusduca/<date>')
+# api.add_resource(CibusTridente, '/cibustr/<date>')
+# api.add_resource(Sogesta, '/sogesta/<date>/<meal>')
 
 
 # Run this sh*t
