@@ -1,1068 +1,629 @@
 """
 MensaUniurb - Telegram Bot
 
-Author: Radeox (dawid.weglarz95@gmail.com)
-        Fast0n (theplayergame97@gmail.com)
+Authors: Radeox (dawid.weglarz95@gmail.com)
+         Fast0n (theplayergame97@gmail.com)
 """
 
-#!/usr/bin/python3.6
 import os
 import sys
+import re
+import json
 import gettext
-
+import locale
+import calendar
+import telepot
 from time import sleep
 from datetime import datetime, timedelta
 from random import randint
 
-import locale
-import calendar
-import sqlite3
 import requests
-import telepot
-
 from bs4 import BeautifulSoup
-from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
-
-from settings import TOKEN, PASSWORD, ADMIN
-
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
+
+from database_connector import DatabaseConnector
+from settings import TOKEN, PASSWORD, ADMIN, DB_NAME
 
 
-# Message handle funtion
-def handle(msg):
-    """
-    This function handle all incoming messages
-    """
-    content_type, chat_type, chat_id = telepot.glance(msg)
+class MessageHandler:
+    # Preserve all different user stages between messages
+    USER_STATE = {}
 
-    # Try to update username, name and language
-    # Needed to fill missing data in DB
-    # To be removed in future
-    ############################
-    username = ""
-    full_name = ""
-    try:
+    # Connector manages all interactions with the database
+    dc = DatabaseConnector(DB_NAME)
+
+    # Store the info about last message sent to all users
+    GLOBAL_MSG = {}
+
+    # Message handle funtion
+    def handle(self, msg):
+        """
+        This function handle all incoming messages and passages through the various states
+        """
+        content_type, chat_type, chat_id = telepot.glance(msg)
+        input_msg = msg['text']
+
+        # Check user state
         try:
-            username = msg['chat']['username']
-        except:
-            username = ""
-        full_name = msg['chat']['first_name']
-        full_name += ' ' + msg['chat']['last_name']
-    except KeyError:
-        pass
+            self.USER_STATE[chat_id]
+        except KeyError:
+            self.USER_STATE[chat_id] = 0
 
-    update_user(chat_id, username, full_name)
-    ############################
+        # Check what type of content was sent
+        if content_type == "text":
+            #! ------------ Immediate responses ------------
+            if input_msg == "/start":
+                self.handle_start_msg(chat_id, msg)
 
-    # Get user prefered language
-    language = get_user_language(chat_id)
-    if language == 'it_IT.UTF-8':
-        # Set Italian
-        lang_it.install()
-    elif language == 'en_US.UTF-8':
-        # Set English
-        lang_en.install()
-    else:
-        # Set default (Italian)
-        lang_it.install()
-        language = 'it_IT.UTF-8'
+            # Send info about bot
+            elif input_msg == "/info":
+                self.send_info(chat_id)
+                self.dc.register_request(chat_id, input_msg)
 
-    # Set locale time for user language
-    locale.setlocale(locale.LC_TIME, language)
+            # Send prices table
+            elif input_msg == "/prezzi":
+                self.send_price_table(chat_id)
+                self.dc.register_request(chat_id, input_msg)
 
-    # Check user state
-    try:
-        USER_STATE[chat_id]
-    except KeyError:
-        USER_STATE[chat_id] = 0
+            # Send opening hours
+            elif input_msg == "/orari":
+                self.send_opening_hours(chat_id)
+                self.dc.register_request(chat_id, input_msg)
 
-    # Check what type of content was sent
-    if content_type == 'text':
-        command_input = msg['text']
+            # Send statistics about monthly use
+            elif input_msg == "/statistiche":
+                self.send_stats(chat_id)
 
-        # Send start message
-        if command_input == '/start':
-            bot.sendMessage(chat_id, _('welcome_message'), parse_mode='Markdown')
+            # Send allergy table
+            elif input_msg == "/allergeni":
+                bot.sendPhoto(chat_id,
+                              "http://menu.ersurb.it/menum/Allergeni_legenda.png")
+                self.dc.register_request(chat_id, input_msg)
 
-            # Try to save username, name and language
+            # Send location Duca
+            elif input_msg == "/posizioneduca":
+                bot.sendLocation(chat_id, "43.72640143124929", "12.63739407389494",
+                                 reply_to_message_id=msg['message_id'])
+
+            # Send location Tridente
+            elif input_msg == "/posizionetridente":
+                bot.sendLocation(chat_id, "43.720036", "12.623293",
+                                 reply_to_message_id=msg['message_id'])
+
+            # Send location Sogesta
+            elif input_msg == "/posizionesogesta":
+                bot.sendLocation(chat_id, "43.700293", "12.641057",
+                                 reply_to_message_id=msg['message_id'])
+
+            #! ------------ State transition handler ------------
+            #! ------------ Entry points ------------
+            elif input_msg == "/duca":
+                #! Skipping this choice as it was removed on website
+                # self.USER_STATE[chat_id] = 1
+                self.USER_STATE[chat_id] = 11
+
+                # Send classic/cibus keyboard
+                # self.send_kitchen_keyboard(chat_id)
+
+                #! Skip here
+                self.send_dish_keyboard(chat_id)
+                self.dc.register_request(chat_id, input_msg)
+
+            elif input_msg == "/tridente":
+                #! Skipping this choice as it was removed on website
+                # self.USER_STATE[chat_id] = 2
+                self.USER_STATE[chat_id] = 21
+
+                # Send classic/cibus keyboard
+                # self.send_kitchen_keyboard(chat_id)
+
+                #! Skip here
+                self.send_dish_keyboard(chat_id)
+                self.dc.register_request(chat_id, input_msg)
+
+            #! Disabled for now
+            # elif input_msg == "/sogesta":
+            #     self.USER_STATE[chat_id] = 3
+
+            #     # Send moment (lunch/dinner) keyboard
+            #     self.send_dish_keyboard(chat_id)
+            #     self.dc.register_request(chat_id, input_msg)
+
+            # User can write a report to admins
+            elif input_msg == "/segnala":
+                self.USER_STATE[chat_id] = 90
+                bot.sendMessage(chat_id, "⚙️*Descrivi il tuo problema*🔧\n\nSe non hai impostato un username fornisci "
+                                "un altro modo per contattarti altrimenti contatta direttamente @radeox o @fast0n.",
+                                parse_mode="Markdown")
+
+            # ------------ Admin commands ------------
+            elif input_msg == "/sendnews":
+                bot.sendMessage(chat_id, "Inserisci la password.")
+                self.USER_STATE[chat_id] = 1000
+
+            elif input_msg == "/editnews":
+                bot.sendMessage(chat_id, "Inserisci la password.")
+                self.USER_STATE[chat_id] = 1100
+
+            elif input_msg == "/deletenews":
+                bot.sendMessage(chat_id, "Inserisci la password.")
+                self.USER_STATE[chat_id] = 1200
+
+            #! ------------ Intermediate stages ------------
+            # Duca or Tridente (classic)
+            elif input_msg == "Classico" and \
+                    (self.USER_STATE[chat_id] == 1 or self.USER_STATE[chat_id] == 2):
+
+                # State 11 or 21
+                self.USER_STATE[chat_id] = (self.USER_STATE[chat_id] * 10) + 1
+
+                # Send moment (lunch/dinner) keyboard
+                self.send_dish_keyboard(chat_id)
+
+            # Duca or Tridente (cibus)
+            elif input_msg == "Cibus" and \
+                    (self.USER_STATE[chat_id] == 1 or self.USER_STATE[chat_id] == 2):
+
+                # State 12 or 22
+                self.USER_STATE[chat_id] = (self.USER_STATE[chat_id] * 10) + 2
+
+                # Send keyboard to choose day
+                self.send_week_keyboard(chat_id)
+
+            # Duca or Tridente (classic-lunch)
+            elif input_msg == "Pranzo" and \
+                    (self.USER_STATE[chat_id] == 11 or self.USER_STATE[chat_id] == 21):
+
+                # State 111 or 211
+                self.USER_STATE[chat_id] = (self.USER_STATE[chat_id] * 10) + 1
+
+                # Send keyboard to choose day
+                self.send_week_keyboard(chat_id)
+
+            # Duca or Tridente (classic-dinner)
+            elif input_msg == "Cena" and \
+                    (self.USER_STATE[chat_id] == 11 or self.USER_STATE[chat_id] == 21):
+
+                # State 112 or 212
+                self.USER_STATE[chat_id] = (self.USER_STATE[chat_id] * 10) + 2
+
+                # Send keyboard to choose day
+                self.send_week_keyboard(chat_id)
+
+            # Sogesta (Lunch)
+            elif input_msg == "Pranzo" and self.USER_STATE[chat_id] == 3:
+                self.USER_STATE[chat_id] = 31
+
+                # Send keyboard to choose day
+                self.send_week_keyboard(chat_id)
+
+            # Sogesta (dinner)
+            elif input_msg == "Cena" and self.USER_STATE[chat_id] == 3:
+                self.USER_STATE[chat_id] = 32
+
+                # Send keyboard to choose day
+                self.send_week_keyboard(chat_id)
+
+            # ------------ Admin commands ------------
+            # New global message
+            elif input_msg == PASSWORD and self.USER_STATE[chat_id] == 1000:
+                bot.sendMessage(chat_id, "Inserisci messaggio da mandare.")
+                self.USER_STATE[chat_id] == 1001
+
+            # Edit global message
+            elif input_msg == PASSWORD and self.USER_STATE[chat_id] == 1100:
+                bot.sendMessage(chat_id, "Inserisci il nuovo messaggio.")
+                self.USER_STATE[chat_id] == 1101
+
+            #! ------------ Final stage ------------
+            # User should responde with a date in each of this stages
+            elif self.USER_STATE[chat_id] in [12, 22, 31, 32, 111, 112, 211, 212]:
+                self.handle_week_messages(chat_id, input_msg)
+
+                # Return to initial state
+                self.USER_STATE[chat_id] = 0
+
+            # The message will be delivered to all registred admins
+            elif self.USER_STATE[chat_id] == 90:
+                self.send_report(input_msg)
+
+                # Return to initial state
+                self.USER_STATE[chat_id] = 0
+
+            # Send message to all users
+            elif self.USER_STATE[chat_id] == 1101:
+                self.send_msg_news(input_msg)
+                bot.sendMessage(chat_id, "Messaggio inviato.")
+                self.USER_STATE[chat_id] = 0
+
+            # Edit last message sent to users
+            elif self.USER_STATE[chat_id] == 1101:
+                self.edit_msg_news(input_msg)
+                bot.sendMessage(chat_id, "Messaggio modificato.")
+                self.USER_STATE[chat_id] = 0
+
+            # ------------ Admin commands ------------
+            # Delete last message to users
+            elif input_msg == PASSWORD and self.USER_STATE[chat_id] == 1200:
+                self.delete_msg_news()
+                bot.sendMessage(chat_id, "Messaggio eliminato.")
+                self.USER_STATE[chat_id] = 0
+
+        # Someone is trying to send a photo to all users
+        elif content_type == "photo" and self.USER_STATE[chat_id]:
+            # Check if caption exist
             try:
-                try:
-                    username = msg['chat']['username']
-                except:
-                    username = ""
-
-                full_name = msg['chat']['first_name']
-                full_name += ' ' + msg['chat']['last_name']
+                caption = msg['caption']
             except KeyError:
-                pass
+                caption = None
 
-            register_user(chat_id, username, full_name)
+            # Get photo ID
+            photo = msg['photo'][-1]['file_id']
 
-        # Get menu
-        elif command_input in ['/duca', '/tridente', '/sogesta']:
-            register_request(chat_id, command_input)
-            USER_STATE[chat_id] = 1
+            self.send_photo_all(photo, caption)
 
-            # Some work vars
-            counter = 0
+            bot.sendMessage(chat_id, "Messaggio inviato.")
+            self.USER_STATE[chat_id] = 0
 
-            ck = {
-                '/duca': 'Duca',
-                '/tridente': 'Tridente',
-                '/sogesta': 'Sogesta',
-            }
+    #! ------------ End message handler ------------
 
-            # Init a dict to save temporaries for this action
-            TEMP[chat_id] = {}
-            TEMP[chat_id]['kitchen'] = ck[command_input]
+    def handle_start_msg(self, chat_id, msg):
+        # todo
+        # Save username and/or name
+        try:
+            try:
+                username = msg['chat']['username']
+            except:
+                username = ""
 
-            # Check if user choose duca/tridente or sogesta
-            if TEMP[chat_id]['kitchen'] == 'Duca' or TEMP[chat_id]['kitchen'] == 'Tridente':
-                entries = [[_("classic")], [_("cibus")]]
-                USER_STATE[chat_id] = 1
+            full_name = msg['chat']['first_name']
+            full_name += ' ' + msg['chat']['last_name']
+        except KeyError:
+            pass
 
-                # Make keyboard
-                markup = ReplyKeyboardMarkup(keyboard=entries)
-                bot.sendMessage(chat_id, _('classic_cibus'), reply_markup=markup)
-            else:
-                USER_STATE[chat_id] = 2
-                entries = []
-                counter = 0
-                p_entries = []
+        self.dc.register_user(chat_id, username, full_name)
 
-                # Get current day
-                now = datetime.now()
-                entries.append([_('today')])
+        # Answer to user
+        #! Changed
+        # bot.sendMessage(chat_id, "*Benvenuto su @MensaUniurbBot*\n"
+        #                 "Qui troverai il menù offerto dal ERSU per gli studenti di Uniurb per il ristorante /duca, /tridente e /sogesta.\n\n"
+        #                 "_Il bot è stato creato in modo non ufficiale nè ERSU Urbino nè UNIURB sono responsabili in alcun modo._",
+        #                 parse_mode='Markdown')
+        bot.sendMessage(chat_id, "*Benvenuto su @MensaUniurbBot*\n"
+                        "Qui troverai il menù offerto dal ERSU per gli studenti di Uniurb per il ristorante /duca e /tridente.\n\n"
+                        "_Il bot è stato creato in modo non ufficiale nè ERSU Urbino nè UNIURB sono responsabili in alcun modo._",
+                        parse_mode='Markdown')
 
-                for day in range(1, 8):
-                    date = now + timedelta(day)
-                    p_entries.append(date.strftime("%A %d/%m"))
-                    counter += 1
+    def send_price_table(self, chat_id):
+        """
+        Send an image with the prices of each dish
+        """
+        with open("price_list_it.png", 'rb') as f:
+            bot.sendPhoto(chat_id, f)
+            f.close()
 
-                    if counter > 3:
-                        entries.append(p_entries)
-                        p_entries = []
-                        counter = 0
-                entries.append(p_entries)
+    def send_info(self, chat_id):
+        """
+        Send info about the bot and devs
+        """
+        keyboard = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(
+                text="🍺 " + "Offrici una birra" + " 🍺", url="https://paypal.me/Radeox/")],
+        ])
 
-                # Make week keyboard
-                markup = ReplyKeyboardMarkup(keyboard=entries)
-                bot.sendMessage(chat_id, _('insert_date'), reply_markup=markup)
+        bot.sendMessage(chat_id, "Codice sorgente:" + "\n" +
+                        "https://github.com/FastRadeox/MensaUniurbBot\n\n" +
+                        "Sviluppato da:" + "\n" +
+                        "https://github.com/Radeox\n" +
+                        "https://github.com/Fast0n\n\n",
+                        reply_markup=keyboard)
 
-        # Date select keyboard
-        elif USER_STATE[chat_id] == 1:
-            if TEMP[chat_id]['kitchen'] == 'Duca':
-                if command_input != _('classic'):
-                    TEMP[chat_id]['kitchen'] = 'Cibus'
+    def send_opening_hours(self, chat_id):
+        """
+        Send the opening hours for each kitchen
+        """
+        #! Changed
+        # bot.sendMessage(chat_id, "🍝*Duca*\nAperta tutti i giorni della settimana,"
+        #                 "esclusi sabato e domenica, dalle ore *12:00* alle ore *14:00* "
+        #                 "e dalle ore *19:00* alle ore *21:00*.\n*Cibus* dalle ore *12:00* alle ore *14:30* e dalle ore *19:00* alle ore *21:30*.\n"
+        #                 "*Posizione*: /posizioneduca\n\n"
+        #                 "*🍖Tridente*\nAperta tutti i giorni della settimana dalle ore *12:00* alle ore *14:00*"
+        #                 "e dalle ore *19:00* alle ore *21:00*.\n"
+        #                 "*Cibus* esclusi sabato e domenica, stessi orari.\n"
+        #                 "*Posizione*: /posizionetridente\n\n"
+        #                 "🍟*Sogesta*\nAperta da Ottobre a Giugno, tutti i giorni della settimana "
+        #                 "esclusa la domenica, dalle ore *12:30* alle ore *14:00* e dalle ore *19:30* "
+        #                 "alle ore *21:00*.\n*Posizione*: /posizionesogesta",
+        #                 parse_mode="Markdown")
+        bot.sendMessage(chat_id, "🍝*Duca*\nAperta tutti i giorni della settimana,"
+                        "esclusi sabato e domenica, dalle ore *12:00* alle ore *14:00* "
+                        "e dalle ore *19:00* alle ore *21:00*.\n"
+                        "*Posizione*: /posizioneduca\n\n"
+                        "*🍖Tridente*\nAperta tutti i giorni della settimana dalle ore *12:00* alle ore *14:00*"
+                        "e dalle ore *19:00* alle ore *21:00*.\n"
+                        "*Posizione*: /posizionetridente\n\n",
+                        parse_mode="Markdown")
 
-            elif TEMP[chat_id]['kitchen'] == 'Tridente':
-                if command_input != _('classic'):
-                    TEMP[chat_id]['kitchen'] = 'CibusTr'
+    def handle_week_messages(self, chat_id, input_msg):
+        # Convert actual user state to right place
+        places = {
+            12: "cibusduca",
+            22: "cibustr",
+            31: "sogesta",
+            32: "sogesta",
+            111: "duca",
+            112: "duca",
+            211: "tridente",
+            212: "tridente"
+        }
 
-            USER_STATE[chat_id] = 2
-            entries = []
-            counter = 0
-            p_entries = []
+        # Convert actual user state to right meal
+        meals = {
+            12: None,
+            22: None,
+            31: "lunch",
+            32: "dinner",
+            111: "lunch",
+            112: "dinner",
+            211: "lunch",
+            212: "dinner"
+        }
 
-            # Get current day
+        # Regular expression to check if input message is in form DAY_NAME DAY/MONTH
+        p = re.compile("([A-Z])\w+ ([0-9])\w+\/([0-9])\w+")
+
+        if p.match(input_msg):
+            # Get current date to extract year
             now = datetime.now()
-            entries.append([_('today')])
 
-            for day in range(1, 8):
-                date = now + timedelta(day)
-                p_entries.append(date.strftime("%A %d/%m"))
-                counter += 1
+            # Exchange day and month to be in form MM-DD-YYYY as requested by API
+            date = "{0}-{1}-{2}".format(input_msg.split()[1].split("/")[1],
+                                        input_msg.split()[1].split("/")[0],
+                                        now.strftime("%Y"))
 
-                if counter > 3:
-                    entries.append(p_entries)
-                    p_entries = []
-                    counter = 0
-            entries.append(p_entries)
+            # Request message from API
+            msg = self.get_menu_msg(places[self.USER_STATE[chat_id]],
+                                    date,
+                                    meals[self.USER_STATE[chat_id]])
 
-            # Make week keyboard
-            markup = ReplyKeyboardMarkup(keyboard=entries)
-            bot.sendMessage(chat_id, _('insert_date'), reply_markup=markup)
-
-        elif USER_STATE[chat_id] == 2:
-            USER_STATE[chat_id] = 3
-            now = datetime.now()
-
-            # If current day
-            if command_input == _('today'):
-                date = now.strftime('%m-%d-%Y')
-            else:
-                d, m = command_input.split()[1].split('/')
-                y = now.strftime('%Y')
-                date = ("{0}-{1}-{2}".format(m, d, y))
-
-            TEMP[chat_id]['date'] = date
-
-            # Cibus can't choose
-            if TEMP[chat_id]['kitchen'] == 'Cibus' or TEMP[chat_id]['kitchen'] == 'CibusTr':
-                USER_STATE[chat_id] = 0
-
-                # Finally send menu
-                msg = get_menu_message(TEMP[chat_id]['kitchen'], TEMP[chat_id]['date'], 'Cena')
+            # Check if menu is not empty
+            if msg:
+                # Todo add paypal stuff (random)
                 bot.sendMessage(chat_id, msg, parse_mode="Markdown",
                                 reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
             else:
-                # Users choose lunch or dinner
-                markup = ReplyKeyboardMarkup(keyboard=[[_('lunch')], [_('dinner')]])
-                bot.sendMessage(chat_id, _('lunch_or_dinner'), reply_markup=markup)
+                # Nothing found, probably it's closed
+                bot.sendMessage(chat_id, "Non ho trovato nulla! Controlla gli orari:", parse_mode="Markdown",
+                                reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
+                self.send_opening_hours(chat_id)
 
-        elif USER_STATE[chat_id] == 3:
-            USER_STATE[chat_id] = 0
-
-            # Finally send menu
-            msg = get_menu_message(TEMP[chat_id]['kitchen'], TEMP[chat_id]['date'], command_input)
-            bot.sendMessage(chat_id, msg, parse_mode="Markdown",
+        else:
+            # User enters something instead using the keyboard
+            bot.sendMessage(chat_id, "Non ho capito. Se il problema persiste /segnala",
                             reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
 
-        # Send prices table
-        elif command_input == '/prezzi':
-            register_request(chat_id, command_input)
+    def get_menu_msg(self, place, date=datetime.now(), meal="lunch"):
+        """
+        Request the menu and prepare the message to be sent
+        """
+        r = requests.get(
+            "http://127.0.0.1:9543/{0}/{1}/{2}".format(place, date, meal))
 
-            if language == 'it_IT.UTF-8':
-                f = open('price_list_it.png', 'rb')
-                bot.sendPhoto(chat_id, f)
-                f.close()
-            elif language == 'en_US.UTF-8':
-                f = open('price_list_en.png', 'rb')
-                bot.sendPhoto(chat_id, f)
-                f.close()
+        data = json.loads(r.text)
+        msg = ""
 
-        # Send allergy table
-        elif command_input == '/allergeni':
-            register_request(chat_id, command_input)
-            bot.sendPhoto(chat_id, 'http://menu.ersurb.it/menum/Allergeni_legenda.png')
+        if data['not_empty']:
+            msg += "🍝" + "Primo:" + "\n"
+            for dish in data['menu']['first']:
+                msg += " • {0}\n".format(dish)
 
-        # Send credits
-        elif command_input == '/info':
-            register_request(chat_id, command_input)
-            keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton(text=_('donate'), url='https://paypal.me/Radeox/')],
-            ])
-            bot.sendMessage(chat_id, _('source_code') + "\n" +
-                            "https://github.com/Radeox/MensaUniurbBot\n\n" +
-                            _('developed_by') + "\n" +
-                            "https://github.com/Radeox\n" +
-                            "https://github.com/Fast0n\n\n" +
-                            "🍺 " + _('offer_us_a_beer') + " 🍺", reply_markup=keyboard)
+            msg += "\n🍖" + "Secondo:" + "\n"
+            for dish in data['menu']['second']:
+                msg += " • {0}\n".format(dish)
 
-        # Send opening hours
-        elif command_input == '/orari':
-            register_request(chat_id, command_input)
-            bot.sendMessage(chat_id, "🍝*Duca*\n{0}\n\n*🍖Tridente*\n{1}\n\n"
-                                     "🍟*Sogesta\n*{2}".format(
-                                    _('duca_hours'), _('tridente_hours'), _('sogesta_hours')),
-                                     parse_mode="Markdown")
+            msg += "\n🍟" + "Contorno:" + "\n"
+            for dish in data['menu']['side']:
+                msg += " • {0}\n".format(dish)
 
-        # Send statistics about monthly use
-        elif command_input == '/statistiche':
-            now = datetime.now()
-            year = int(now.strftime("%Y"))
-            month = int(now.strftime("%m"))
+            msg += "\n🍨" + "Frutta/Dolci:" + "\n"
+            for dish in data['menu']['fruit']:
+                msg += " • {0}\n".format(dish)
 
-            # Get graph
-            fname = get_month_graph(chat_id, year, month)
+            msg += "\n⚠️ Il menù potrebbe subire delle variazioni ⚠️"
 
-            # Get caption
-            caption = (_('total_users').format(get_total_users()) + "\n" +
-                       _('total_requests').format(get_total_requests()))
+        return msg
 
-            # Open photo
-            f = open(fname, 'rb')
+    def send_stats(self, chat_id):
+        """
+        Send a graph with monthly usage
+        """
+        now = datetime.now()
+        year = int(now.strftime("%Y"))
+        month = int(now.strftime("%m"))
 
-            bot.sendPhoto(chat_id, f, caption)
-            f.close()
+        # Get caption
+        caption = ("Utenti totali: {0}\nRichieste totali: {1}".format(
+                   self.dc.get_total_users(), self.dc.get_total_requests()))
 
-        # Send location Duca
-        elif command_input == '/posizioneduca':
-            bot.sendLocation(chat_id, "43.72640143124929", "12.63739407389494",
-                             reply_to_message_id=msg['message_id'])
+        # Regenerate use graph
+        fname = self.generate_use_graph(year, month)
 
-        # Send location Tridente
-        elif command_input == '/posizionetridente':
-            bot.sendLocation(chat_id, "43.720036", "12.623293",
-                             reply_to_message_id=msg['message_id'])
+        # Send use graph
+        f = open(fname, 'rb')
+        bot.sendPhoto(chat_id, f, caption)
+        f.close()
 
-        # Send location Sogesta
-        elif command_input == '/posizionesogesta':
-            bot.sendLocation(chat_id, "43.700293", "12.641057",
-                             reply_to_message_id=msg['message_id'])
-
-        # Settings menu
-        elif command_input == '/impostazioni':
-            entries = []
-
-            # Notification preference
-            notif_pref = get_user_pref_notification(chat_id)
-            entries.append([_('notification') + notif_pref.title()])
-
-            # Language preference
-            language = get_user_language(chat_id)
-
-            if language == "en_US.UTF-8":
-                entries.append([_('language') + _('italian') + " 🇮🇹"])
-            elif language == "it_IT.UTF-8":
-                entries.append([_('language') + _('english') + " 🇺🇸"])
-
-            # Make week keyboard
-            markup = ReplyKeyboardMarkup(keyboard=entries)
-            bot.sendMessage(chat_id, "⚙️ " + _('settings'), reply_markup=markup)
-
-        # Settings - notification preference change
-        elif _('notification') in command_input:
-            # Toogle notification
-            if command_input.split()[1] == "On":
-                update_notif_pref(chat_id, 'off')
-            elif command_input.split()[1] == "Off":
-                update_notif_pref(chat_id, 'on')
-
-            # Return to settings menu
-            msg['text'] = "/impostazioni"
-            handle(msg)
-
-        # Settings - language change
-        elif _('language') in command_input:
-            # Set language
-            if command_input.split()[2] == _('italian'):
-                update_language(chat_id, 'it_IT.UTF-8')
-            elif command_input.split()[2] == _('english'):
-                update_language(chat_id, 'en_US.UTF-8')
-
-            # Return to settings menu
-            msg['text'] = "/impostazioni"
-            handle(msg)
-
-        # Send news to all registred users - Password required - 1
-        elif command_input == '/sendnews':
-            USER_STATE[chat_id] = 10
-            bot.sendMessage(chat_id, _('enter_password'), parse_mode="Markdown")
-
-        # Send news to all registred users - Password required - 2
-        elif USER_STATE[chat_id] == 10:
-            if command_input.lower() == PASSWORD:
-                USER_STATE[chat_id] = 11
-                bot.sendMessage(chat_id, _('send_msg_photo'), parse_mode="Markdown")
-            else:
-                USER_STATE[chat_id] = 0
-                bot.sendMessage(chat_id, _('wrong_password'), parse_mode="Markdown")
-
-        # Send news to all registred users - Password required - 3
-        elif USER_STATE[chat_id] == 11:
-            USER_STATE[chat_id] = 0
-
-            # Send to all users
-            send_msg_news(command_input)
-
-        # Edit news to all registred users - Password required - 1
-        elif command_input == '/editnews':
-            USER_STATE[chat_id] = 20
-            bot.sendMessage(chat_id, _('enter_password'), parse_mode="Markdown")
-
-        # Edit news to all registred users - Password required - 2
-        elif USER_STATE[chat_id] == 20:
-            USER_STATE[chat_id] = 22
-
-            if command_input.lower() == PASSWORD:
-                bot.sendMessage(chat_id, _('edit_message'), parse_mode="Markdown")
-            else:
-                bot.sendMessage(chat_id, _('wrong_password'), parse_mode="Markdown")
-
-        # Edit news to all registred users - Password required - 3
-        elif USER_STATE[chat_id] == 22:
-            USER_STATE[chat_id] = 0
-
-            # Send to all users
-            edit_msg_news(command_input)
-
-        # Delete news to all registred users - Password required - 1
-        elif command_input == '/deletenews':
-            USER_STATE[chat_id] = 23
-            bot.sendMessage(chat_id, _('enter_password'), parse_mode="Markdown")
-
-        # Delete news to all registred users - Password required - 2
-        elif USER_STATE[chat_id] == 23:
-            USER_STATE[chat_id] = 0
-
-            if command_input.lower() == PASSWORD:
-                delete_msg_news()
-                bot.sendMessage(chat_id, _('deleted_message'), parse_mode="Markdown")
-            else:
-                bot.sendMessage(chat_id, _('wrong_password'), parse_mode="Markdown")
-
-        # Send poll to all registred users - Password required - 1
-        elif command_input == '/sendpoll':
-            USER_STATE[chat_id] = 24
-            bot.sendMessage(chat_id, _('enter_password'), parse_mode="Markdown")
-
-        # Send poll to all registred users - Password required - 2
-        elif USER_STATE[chat_id] == 24:
-            if command_input.lower() == PASSWORD:
-                USER_STATE[chat_id] = 25
-                bot.sendMessage(chat_id, _('ask_question'), parse_mode="Markdown")
-            else:
-                USER_STATE[chat_id] = 0
-                bot.sendMessage(chat_id, _('wrong_password'), parse_mode="Markdown")
-
-        # Send poll to all registred users - Password required - 3
-        elif USER_STATE[chat_id] == 25:
-            USER_STATE[chat_id] = 26
-            TEMP[chat_id] = {}
-            TEMP[chat_id]['question'] = command_input
-
-            bot.sendMessage(chat_id, _('first_answer'), parse_mode="Markdown")
-
-        # Send poll to all registred users - Password required - 4
-        elif USER_STATE[chat_id] == 26:
-            USER_STATE[chat_id] = 27
-            TEMP[chat_id]['first_answer'] = command_input
-
-            bot.sendMessage(chat_id, _('second_answer'), parse_mode="Markdown")
-
-        elif USER_STATE[chat_id] == 27:
-            USER_STATE[chat_id] = 0
-
-            question = TEMP[chat_id]['question'].capitalize()
-            first_answer = TEMP[chat_id]['first_answer'].capitalize()
-            second_answer = command_input.capitalize()
-
-            # Register in DB
-            register_poll(question, first_answer, second_answer)
-
-            # Send to all users
-            send_msg_poll(question, first_answer, second_answer)
-
-        # Send report to admin
-        elif command_input == '/segnala':
-            USER_STATE[chat_id] = 40
-            bot.sendMessage(chat_id, _('report_problem'), parse_mode="Markdown")
-
-        elif USER_STATE[chat_id] == 40:
-            USER_STATE[chat_id] = 0
-
-            # Sent to admins
-            msg = _('sent_from').format(get_username(chat_id), command_input)
-            send_msg_report(msg)
-
-            # Send to user
-            msg = _('message_was_sent').format(command_input)
-            bot.sendMessage(chat_id, msg, parse_mode="Markdown")
-
-    # Send news to all registred users - Password required - 3
-    elif content_type == 'photo' and USER_STATE[chat_id] == 10:
-        USER_STATE[chat_id] = 0
-
-        # Check if caption exist
+    def generate_use_graph(self, year, month):
+        """
+        Return the uses graph of given month
+        """
+        # Ensure storage directory exists
         try:
-            caption = msg['caption']
-        except KeyError:
-            caption = None
-
-        msg = msg['photo'][-1]['file_id']
-
-        # Send to all users
-        send_photo_all(msg, caption)
-
-
-def get_menu_message(kitchen, date, meal, language="it_IT-UFT.8"):
-    """
-    Generate a ready-to-send message with menu of given kitchen
-    """
-    ch = {
-        'Duca': _('duca_hours'),
-        'Cibus': _('duca_hours'),
-        'Tridente': _('tridente_hours'),
-        'CibusTr': _('tridente_hours'),
-        'Sogesta': _('sogesta_hours'),
-    }
-
-    cn = {
-        'Cibus': 'Cibus Duca',
-        'CibusTr': 'Cibus Tridente',
-        'Duca': 'Duca',
-        'Tridente': 'Tridente',
-        'Sogesta': 'Sogesta'
-    }
-
-    cm = {'Pranzo': 0, 'Cena': 1, 'Lunch': 0, 'Dinner': 1}
-
-    # Get menu
-    payload = {'mensa': kitchen, 'da': date, 'a': date}
-    core_msg = get_menu(payload)
-
-    # If menu exist send it
-
-    if core_msg[cm[meal]] is not "":
-        msg = "🗓️*Menu {0}*\n\n{1}\n⚠️ {2} ⚠️".format(cn[kitchen], core_msg[cm[meal]], _('menu_change'))
-
-        # Random spam
-        if randint(1, 5) == 3:
-            msg += ("\n\n💙") + _('help_us').format("https://paypal.me/Radeox/2", "https://paypal.me/Radeox/5")
-    else:
-        msg = ("🗓️*Menu {0}*\n\n{1}\n\n⚠️ {2} ⚠️\n{3}".format(cn[kitchen],
-                                                           _('not_available'),
-                                                           _('opening_hours'),
-                                                           ch[kitchen]))
-    return msg
-
-
-def get_menu(payload):
-    """
-    Get the menu from the ERSU page
-    """
-    r = requests.post("http://menu.ersurb.it/menum/menu.asp", data=payload)
-
-    last = False
-    msg_lunch = ""
-    msg_dinner = ""
-    p = ['', '', '', '']
-
-    soup = BeautifulSoup(r.text, 'html.parser')
-
-    for link in soup.find_all('a')[1:]:
-        app = link.get('onclick').replace('showModal', '')
-
-        # Get ID
-        idi = app.split()[1]
-        idi = idi.replace('"', '').replace(',', '')
-
-        # Get name
-        name = app.split(', ')[2]
-        name = name.replace('"', '').replace(');', '')
-
-        # Remove useless chars
-        name = name.replace('*', 'X')
-
-        # Capitalized entries
-        name = name.capitalize()
-
-        # Check if lunch/dinner
-        if idi == '40':
-            last = True
-        elif idi == '10' and last:
-            if p[0]:
-                msg_lunch += "🍝" + _('first').format(p[0]) + "\n"
-            if p[1]:
-                msg_lunch += "🍖" + _('second').format(p[1]) + "\n"
-            if p[2]:
-                msg_lunch += "🍟" + _('side').format(p[2]) + "\n"
-            if p[3]:
-                msg_lunch += "🍨" + _('fruit').format(p[3])
-
-            # Reset accumulation vars
-            p = ['', '', '', '']
-            last = False
-
-        # Check type
-        if idi == '10':
-            p[0] += ' • {0}\n'.format(name)
-        elif idi == '20':
-            p[1] += ' • {0}\n'.format(name)
-        elif idi == '30':
-            p[2] += ' • {0}\n'.format(name)
-        elif idi == '40':
-            p[3] += ' • {0}\n'.format(name)
-
-    if p[0]:
-        msg_dinner += "🍝" + _('first').format(p[0]) + "\n"
-    if p[1]:
-        msg_dinner += "🍖" + _('second').format(p[1]) + "\n"
-    if p[2]:
-        msg_dinner += "🍟" + _('side').format(p[2]) + "\n"
-    if p[3]:
-        msg_dinner += "🍨" + _('fruit').format(p[3])
-
-    return [msg_lunch, msg_dinner]
-
-
-def get_month_graph(msg, year, month):
-    """
-    Return the uses graph of given month
-    """
-    # Ensure storage directory exists
-    try:
-        os.mkdir('plots')
-    except FileExistsError:
-        pass
-
-    # Get current month days
-    date = "{0}-{1}-".format(year, str(month).zfill(2))
-    days_month = 1 + calendar.monthrange(year, month)[1]
-
-    # Create month array
-    month_counters = [0] * days_month
-    radius = [1] * days_month
-
-    for day in enumerate(month_counters):
-        month_counters[day[0]] = get_use_in_day(date + str(day[0]).zfill(2))
-
-    # Clear plot
-    plt.clf()
-
-    # Add titles
-    plt.title( _('usage_statistics') + " {0}/{1}".format(str(month).zfill(2), year))
-    plt.xlabel( _('days_of_the_month') )
-    plt.xlim([1, days_month])
-    plt.ylabel(_('use') )
-
-    # Set grid
-    plt.grid()
-
-    # Add plots
-    plt.plot(month_counters, color='#0099ff', linewidth=2.5)
-    plt.plot(month_counters, 'o', color='#5e97f6')
-    plt.fill(radius, month_counters)
-    plt.fill_between(range(days_month), month_counters, 0, color='#99d6ff')
-
-    # Save it!
-    fname = 'plots/{0}_{1}.png'.format(year, month)
-    plt.savefig(fname)
-
-    return fname
-
-
-# Telegram related functions
-def send_msg_news(msg):
-    """
-    Send given message to all users
-    """
-    for user in get_user_list():
-        try:
-            if get_user_pref_notification(user) == "on":
-                sent = bot.sendMessage(user, msg, parse_mode="Markdown")
-                TEMP[user] = {}
-                TEMP[user]['sent'] = sent
-        except:
-            continue
-    return 1
-
-
-def edit_msg_news(msg):
-    """
-    Edit last message sent to all users
-    """
-    for user in get_user_list():
-        try:
-            edited = telepot.message_identifier(TEMP[user]['sent'])
-            bot.editMessageText(edited, msg, parse_mode="Markdown")
-        except:
-            continue
-    return 1
-
-
-def delete_msg_news():
-    """
-    Delete last message sent to all users
-    """
-    for user in get_user_list():
-        try:
-            edited = telepot.message_identifier(TEMP[user]['sent'])
-            bot.deleteMessage(edited)
-        except:
-            continue
-    return 1
-
-
-def send_msg_poll(question, first_answer, second_answer):
-    """
-    Send given message to all users
-    """
-    for user in get_user_list():
-        try:
-            keyboard = InlineKeyboardMarkup(inline_keyboard=[[
-                InlineKeyboardButton(text=first_answer, callback_data="{0}_{1}".format(question, first_answer)),
-                InlineKeyboardButton(text=second_answer, callback_data="{0}_{1}".format(question, second_answer)),
-            ]])
-
-            bot.sendMessage(user, question, parse_mode="Markdown", reply_markup=keyboard)
-        except:
-            continue
-    return 1
-
-
-def send_msg_report(msg):
-    """
-    Send given message to all users
-    """
-    for user in ADMIN:
-        try:
-            bot.sendMessage(user, msg, parse_mode="Markdown")
-        except:
-            continue
-    return 1
-
-
-def send_photo_all(photo, caption):
-    """
-    Send given photo to all users
-    """
-    users = get_user_list()
-
-    for user in users:
-        try:
-            if get_user_pref_notification(user) == "on":
-                sent = bot.sendPhoto(user, photo, caption=caption)
-                TEMP[ser] = {}
-                TEMP[user]['sent'] = sent
-        except:
-            continue
-    return 1
-
-## Query funtions ##
-def register_user(chat_id, username, name):
-    """
-    Register given user to receive news and statistics
-    """
-    # Open connection to DB
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-
-    try:
-        query = ('INSERT INTO user(chat_id, name, username, notification, language) '
-                 'VALUES("{0}", "{1}", "{2}", "on", "it_IT.UTF-8")'.format(chat_id, name, username))
-        cursor.execute(query)
-        conn.commit()
-    except sqlite3.IntegrityError:
-        return 0
-    finally:
-        # Close connection to DB
-        conn.close()
-    return 1
-
-
-def update_user(chat_id, username, full_name):
-    """
-    Update name and username of missing users
-    """
-    # Open connection to DB
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-
-    try:
-        query = ('UPDATE user '
-                 'SET username = "{0}", name = "{1}" '
-                 'WHERE chat_id = "{2}"'.format(username, full_name, chat_id))
-        cursor.execute(query)
-        conn.commit()
-    except sqlite3.IntegrityError:
-        return 0
-    finally:
-        # Close connection to DB
-        conn.close()
-    return 1
-
-
-def register_request(chat_id, request):
-    """
-    Store in database request made by users
-    """
-    # Open connection to DB
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-
-    # Get current date
-    now = datetime.now()
-    date = now.strftime("%Y-%m-%d %H:%M:%S")
-
-    # Get ID
-    query = ('SELECT id FROM action WHERE name == "%s"' % request)
-    cursor.execute(query)
-    action_id = cursor.fetchone()[0]
-
-    query = ('INSERT INTO request(date, user, action) '
-             'VALUES("{0}", "{1}", "{2}")'.format(date, chat_id, action_id))
-
-    cursor.execute(query)
-    conn.commit()
-
-    # Close connection to DB
-    conn.close()
-    return 1
-
-
-def register_poll(question, first_answer, second_answer):
-    """
-    Register poll in DB
-    """
-    # Open connection to DB
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-
-    query = ('INSERT INTO poll(ask, answer1, answer2) '
-             'VALUES("{0}", "{1}", "{2}")'.format(question, first_answer, second_answer))
-
-    cursor.execute(query)
-    conn.commit()
-
-    # Close connection to DB
-    conn.close()
-    return 1
-
-
-def update_notif_pref(chat_id, pref):
-    """
-    This function update the user preference to recevie or not the notifications
-    """
-    # Open connection to DB
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-
-    query = ('UPDATE user '
-             'SET notification = "{0}" '
-             'WHERE chat_id = "{1}"'.format(pref, chat_id))
-
-    cursor.execute(query)
-    conn.commit()
-
-    # Close connection to DB
-    conn.close()
-    return 1
-
-
-def update_language(chat_id, lang):
-    """
-    This function update the user prefered language
-    """
-    # Open connection to DB
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-
-    query = ('UPDATE user '
-             'SET language = "{0}" '
-             'WHERE chat_id = "{1}"'.format(lang, chat_id))
-
-    cursor.execute(query)
-    conn.commit()
-
-    # Close connection to DB
-    conn.close()
-    return 1
-
-def on_callback_query(msg):
-    """
-    Register answer to poll
-    """
-    query_id, from_id, data = telepot.glance(msg, flavor='callback_query')
-
-    # Get user prefered language
-    language = get_user_language(from_id)
-    locale.setlocale(locale.LC_TIME, language)
-    if language == 'it_IT.UTF-8':
-        lang_it.install()
-    elif language == 'en_US.UTF-8':
-        lang_en.install()
-
-    question = data.split('_')[0]
-    answer = data.split('_')[1]
-
-    # Open connection to DB
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-
-    # Insert vote in DB
-    try:
-        query = ('INSERT INTO user_answer(user, poll, answer)'
-                 'VALUES("{0}", "{1}", "{2}")'.format(from_id, question, answer))
-        cursor.execute(query)
-        conn.commit()
-
-        bot.answerCallbackQuery(query_id, _('thanks_vote'))
-    except:
-        pass
-
-    # Get answers
-    query = ('SELECT answer1, answer2 '
-             'FROM poll '
-             'WHERE ask = "{0}"'.format(question))
-    cursor.execute(query)
-    answer1, answer2 = cursor.fetchone()
-
-    # Get count for answer 1
-    query = ('SELECT COUNT(*) '
-             'FROM user_answer '
-             'WHERE poll = "{0}" and answer = "{1}"'.format(question, answer1))
-    cursor.execute(query)
-    response1 = cursor.fetchone()[0]
-
-    # Get count for answer 2
-    query = ('SELECT COUNT(*) '
-             'FROM user_answer '
-             'WHERE poll = "{0}" and answer = "{1}"'.format(question, answer2))
-    cursor.execute(query)
-    response2 = cursor.fetchone()[0]
-
-    # Close connection to DB
-    conn.close()
-
-    # Calculate percentage
-    tot = response1 + response2
-    pa1 = int((response1 / tot) * 100)
-    pa2 = int((response2 / tot) * 100)
-
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[[
-        InlineKeyboardButton(text=answer1 + "(" + str(pa1) + "%)", callback_data="{0}_{1}".format(question, answer1)),
-        InlineKeyboardButton(text=answer2 + "(" + str(pa2) + "%)", callback_data="{0}_{1}".format(question, answer2)),
-    ]])
-
-    # Edit buttons
-    edit = (msg['message']['chat']['id'], msg['message']['message_id'])
-    try:
-        bot.editMessageText(edit, question, reply_markup=keyboard)
-    except telepot.exception.TelegramError:
-        pass
-
-    bot.sendMessage(from_id, _('vote_summary').format(tot, pa1, answer1, pa2, answer2))
-
-def get_username(chat_id):
-    """
-    Return the username from users chat_id
-    """
-    # Open connection to DB
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-
-    # Get username
-    query = 'SELECT username FROM user WHERE chat_id = "{0}"'.format(chat_id)
-    cursor.execute(query)
-    username = cursor.fetchone()[0]
-
-    if username == "":
-        query = 'SELECT name FROM user WHERE chat_id = "{0}"'.format(chat_id)
-        cursor.execute(query)
-        username = cursor.fetchone()[0]
-    else:
-        username = '@' + username
-
-    # Close connection to DB
-    conn.close()
-    return username
-
-def get_user_list():
-    """
-    Return the list of registred users chat_id
-    """
-    users = []
-
-    # Open connection to DB
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-
-    for user in cursor.execute('SELECT chat_id FROM user'):
-        users.append(user[0])
-
-    # Close connection to DB
-    conn.close()
-    return users
-
-
-def get_total_requests():
-    """
-    Get total number of requests made by users
-    """
-    # Open connection to DB
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-
-    query = 'SELECT count(*) FROM request'
-    cursor.execute(query)
-    total_requests = cursor.fetchone()[0]
-
-    # Close connection to DB
-    conn.close()
-    return total_requests
-
-
-def get_total_users():
-    """
-    Get total number of registered users
-    """
-    # Open connection to DB
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-
-    query = 'SELECT count(*) FROM user'
-    cursor.execute(query)
-    total_users = cursor.fetchone()[0]
-
-    # Close connection to DB
-    conn.close()
-    return total_users
-
-
-def get_use_in_day(date):
-    """
-    Return the number of request in given DATE (YYYY-MM-DD)
-    """
-    # Open connection to DB
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-
-    query = 'SELECT count(*) FROM request WHERE date BETWEEN "{0} 00:00:00" AND "{0} 23:59:59"'.format(date)
-    cursor.execute(query)
-    day_uses = cursor.fetchone()[0]
-
-    # Close connection to DB
-    conn.close()
-    return day_uses
-
-def get_user_language(chat_id):
-    """
-    Return user language
-    """
-    # Open connection to DB
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-
-    query = ('SELECT language FROM user WHERE chat_id == "%s"' % chat_id)
-    cursor.execute(query)
-
-    try:
-        language = cursor.fetchone()[0]
-    except:
-        return 0
-    finally:
-        # Close connection to DB
-        conn.close()
-    return language
-
-def get_user_pref_notification(chat_id):
-    """
-    Return user notification preference
-    """
-    # Open connection to DB
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-
-    query = ('SELECT notification FROM user WHERE chat_id == "%s"' % chat_id)
-    cursor.execute(query)
-
-    try:
-        notification = cursor.fetchone()[0]
-    except:
-        return 0
-    finally:
-        # Close connection to DB
-        conn.close()
-    return notification
+            os.mkdir("plots")
+        except FileExistsError:
+            pass
+
+        # Get current month days
+        date = "{0}-{1}-".format(year, str(month).zfill(2))
+        days_month = 1 + calendar.monthrange(year, month)[1]
+
+        # Create month array
+        month_counters = [0] * days_month
+        radius = [1] * days_month
+
+        for day in enumerate(month_counters):
+            month_counters[day[0]] = self.dc.get_use_in_day(
+                date + str(day[0]).zfill(2))
+
+        # Clear plot
+        plt.clf()
+
+        # Add titles
+        plt.title(
+            "Statistiche d'uso {0}/{1}".format(str(month).zfill(2), year))
+        plt.xlabel("Giorni del mese")
+        plt.xlim([1, days_month])
+        plt.ylabel("Richieste")
+
+        # Set grid
+        plt.grid()
+
+        # Add plots
+        # todo #169D58 change color
+        plt.plot(month_counters, color='#0099ff', linewidth=2.5)
+        plt.plot(month_counters, 'o', color='#5e97f6')
+        plt.fill(radius, month_counters)
+        plt.fill_between(range(days_month), month_counters, 0, color='#99d6ff')
+
+        # Save it!
+        fname = "plots/{0}_{1}.png".format(year, month)
+        plt.savefig(fname)
+
+        return fname
+
+    def send_kitchen_keyboard(self, chat_id):
+        """
+        Send the keyboard from which you can choose between Classic and Cibus
+        """
+        entries = [["Classico"], ["Cibus"]]
+        markup = ReplyKeyboardMarkup(keyboard=entries)
+        bot.sendMessage(chat_id, "Classico o Cibus?", reply_markup=markup)
+
+    def send_dish_keyboard(self, chat_id):
+        """
+        Send the keyboard from which you can choose between lunch and dinner
+        """
+        entries = [["Pranzo"], ["Cena"]]
+        markup = ReplyKeyboardMarkup(keyboard=entries)
+        bot.sendMessage(chat_id, "Pranzo o Cena?", reply_markup=markup)
+
+    def send_week_keyboard(self, chat_id):
+        """
+        Send the keyboard from which you can choose the day for your search
+        """
+        # Some working variables
+        counter = 0
+        entries = []
+        row = []
+
+        # Get today date
+        now = datetime.now()
+        entries.append(["Oggi {0}".format(now.strftime("%d/%m"))])
+
+        # Do some magic to generate the rest of keyboard keys
+        for day in range(1, 8):
+            date = now + timedelta(day)
+            row.append(date.strftime("%A %d/%m"))
+            counter += 1
+
+            # Put 3 days every row
+            if counter > 3:
+                entries.append(row)
+                row = []
+                counter = 0
+
+        # Append the remaning days
+        entries.append(row)
+
+        # Send week keyboard
+        markup = ReplyKeyboardMarkup(keyboard=entries)
+        bot.sendMessage(chat_id, "Inserisci la data:", reply_markup=markup)
+
+    # Telegram related functions
+    def send_msg_news(self, msg):
+        """
+        Send given message to all users
+        """
+        for user in self.dc.get_user_list():
+            try:
+                sent_msg = bot.sendMessage(user, msg, parse_mode="Markdown")
+                self.GLOBAL_MSG[user] = {}
+                self.GLOBAL_MSG[user]['sent'] = sent_msg
+            except:
+                continue
+        return 1
+
+    def send_photo_all(self, photo, caption):
+        """
+        Send given photo to all users
+        """
+        for user in self.dc.get_user_list():
+            try:
+                sent_msg = bot.sendPhoto(user, photo, caption=caption)
+                self.GLOBAL_MSG[user] = {}
+                self.GLOBAL_MSG[user]['sent'] = sent_msg
+            except:
+                continue
+        return 1
+
+    def edit_msg_news(self, new_msg):
+        """
+        Edit last message sent to all users
+        """
+        for user in self.dc.get_user_list():
+            try:
+                old_msg = telepot.message_identifier(
+                    self.GLOBAL_MSG[user]['sent'])
+                bot.editMessageText(old_msg, new_msg, parse_mode="Markdown")
+            except:
+                continue
+        return 1
+
+    def delete_msg_news(self):
+        """
+        Delete last message sent to all users
+        """
+        for user in self.dc.get_user_list():
+            try:
+                msg_to_delete = telepot.message_identifier(
+                    self.GLOBAL_MSG[user]['sent'])
+                bot.deleteMessage(msg_to_delete)
+            except:
+                continue
+        return 1
+
+    def send_report(self, msg):
+        """
+        Send given message to all users
+        """
+        for user in ADMIN:
+            try:
+                bot.sendMessage(user, msg, parse_mode="Markdown")
+            except:
+                continue
+        return 1
 
 
 # Main
 print("Starting MensaUniurbBot...")
 
-# Database name
-DB_NAME = 'mensauniurb.db'
 
 # PID file
 PID = str(os.getpid())
-PIDFILE = "/tmp/mensauniurbbot.pid"
-
-# Load languages
-lang_en = gettext.translation("messages", localedir="locales", languages=["en_US"], fallback=True)
-lang_it = gettext.translation("messages", localedir="locales", languages=["it_IT"], fallback=True)
+PIDFILE = "/tmp/mensa_uniurb_bot.pid"
 
 # Check if PID exist
 if os.path.isfile(PIDFILE):
@@ -1074,14 +635,11 @@ with open(PIDFILE, 'w') as f:
     f.write(PID)
     f.close()
 
-# Variables
-USER_STATE = {}
-TEMP = {}
-
 # Start working
 try:
+    handler = MessageHandler()
     bot = telepot.Bot(TOKEN)
-    bot.message_loop({'chat': handle, 'callback_query': on_callback_query})
+    bot.message_loop(handler.handle)
 
     while 1:
         sleep(10)
