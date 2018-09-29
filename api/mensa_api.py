@@ -11,7 +11,7 @@ api = Api(app)
 
 PORT = 9543
 
-def get_menu(place, meal, date):
+def get_menu(place, date, meal):
     """
     Return the menu from ERSU page in JSON format
     """
@@ -107,51 +107,51 @@ def get_menu(place, meal, date):
 
 
 class Duca(Resource):
-    def get(self, meal, date):
+    def get(self, date, meal):
         # We can't use slashes in links so we replace them
         date = date.replace('-', '/')
 
-        return get_menu('duca', meal, date)
+        return get_menu('duca', date, meal)
 
 
 class CibusDuca(Resource):
-    def get(self, meal, date):
+    def get(self, date):
         # We can't use slashes in links so we replace them
         date = date.replace('-', '/')
 
-        return get_menu('cibus', meal, date)
+        return get_menu('cibus', date, 'lunch')
 
 
 class Tridente(Resource):
-    def get(self, meal, date):
+    def get(self, date, meal):
         # We can't use slashes in links so we replace them
         date = date.replace('-', '/')
 
-        return get_menu('tridente', meal, date)
+        return get_menu('tridente', date, meal)
 
 
 class CibusTridente(Resource):
-    def get(self, meal, date):
+    def get(self, date, meal):
         # We can't use slashes in links so we replace them
         date = date.replace('-', '/')
 
-        return get_menu('cibustr', meal, date)
+        return get_menu('cibustr', date, 'lunch')
 
 
 class Sogesta(Resource):
-    def get(self, meal, date):
+    def get(self, date, meal):
         # We can't use slashes in links so we replace them
         date = date.replace('-', '/')
 
-        return get_menu('sogesta', meal, date)
+        return get_menu('sogesta', date, meal)
 
 
 # Routes configuration
-api.add_resource(Duca, '/duca/<meal>/<date>')
-api.add_resource(CibusDuca, '/cibusduca/<meal>/<date>')
-api.add_resource(Tridente, '/tridente/<meal>/<date>')
-api.add_resource(CibusTridente, '/cibustr/<meal>/<date>')
-api.add_resource(Sogesta, '/sogesta/<meal>/<date>')
+api.add_resource(Duca, '/duca/<date>/<meal>')
+api.add_resource(CibusDuca, '/cibusduca/<date>')
+api.add_resource(Tridente, '/tridente/<date>/<meal>')
+api.add_resource(CibusTridente, '/cibustr/<date>')
+api.add_resource(Sogesta, '/sogesta/<date>/<meal>')
 
 
 # Run this sh*t
