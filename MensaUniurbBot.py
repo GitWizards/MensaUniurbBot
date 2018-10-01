@@ -44,7 +44,6 @@ class MessageHandler:
         This function handle all incoming messages and passages through the various states
         """
         content_type, chat_type, chat_id = telepot.glance(msg)
-        input_msg = msg['text']
 
         # Check user state
         try:
@@ -54,6 +53,8 @@ class MessageHandler:
 
         # Check what type of content was sent
         if content_type == "text":
+            input_msg = msg['text']
+
             #! ------------ Immediate responses ------------
             if input_msg == "/start":
                 self.handle_start_msg(chat_id, msg)
@@ -141,15 +142,18 @@ class MessageHandler:
 
             # ------------ Admin commands ------------
             elif input_msg == "/sendnews":
-                bot.sendMessage(chat_id, "Inserisci la password.")
+                bot.sendMessage(
+                    chat_id, "🔐 *Inserisci la password* 🔐", parse_mode="markdown")
                 self.USER_STATE[chat_id] = 1000
 
             elif input_msg == "/editnews":
-                bot.sendMessage(chat_id, "Inserisci la password.")
+                bot.sendMessage(
+                    chat_id, "🔐 *Inserisci la password* 🔐", parse_mode="markdown")
                 self.USER_STATE[chat_id] = 1100
 
             elif input_msg == "/deletenews":
-                bot.sendMessage(chat_id, "Inserisci la password.")
+                bot.sendMessage(
+                    chat_id, "🔐 *Inserisci la password* 🔐", parse_mode="markdown")
                 self.USER_STATE[chat_id] = 1200
 
             #! ------------ Intermediate stages ------------
@@ -210,13 +214,15 @@ class MessageHandler:
             # ------------ Admin commands ------------
             # New global message
             elif input_msg == PASSWORD and self.USER_STATE[chat_id] == 1000:
-                bot.sendMessage(chat_id, "Inserisci messaggio da mandare.")
-                self.USER_STATE[chat_id] == 1001
+                bot.sendMessage(
+                    chat_id, "📝 *Inserisci il messaggio/foto da mandare* 📝", parse_mode="Markdown")
+                self.USER_STATE[chat_id] = 1001
 
             # Edit global message
             elif input_msg == PASSWORD and self.USER_STATE[chat_id] == 1100:
-                bot.sendMessage(chat_id, "Inserisci il nuovo messaggio.")
-                self.USER_STATE[chat_id] == 1101
+                bot.sendMessage(
+                    chat_id, "📝 *Inserisci il nuovo messaggio* 📝", parse_mode="Markdown")
+                self.USER_STATE[chat_id] = 1101
 
             #! ------------ Final stage ------------
             # User should responde with a date in each of this stages
@@ -234,22 +240,31 @@ class MessageHandler:
                 self.USER_STATE[chat_id] = 0
 
             # Send message to all users
-            elif self.USER_STATE[chat_id] == 1101:
+            elif self.USER_STATE[chat_id] == 1001:
                 self.send_msg_news(input_msg)
-                bot.sendMessage(chat_id, "Messaggio inviato.")
+                bot.sendMessage(
+                    chat_id, "💬 *Messaggio inviato* 💬", parse_mode="Markdown")
                 self.USER_STATE[chat_id] = 0
 
             # Edit last message sent to users
             elif self.USER_STATE[chat_id] == 1101:
                 self.edit_msg_news(input_msg)
-                bot.sendMessage(chat_id, "Messaggio modificato.")
+                bot.sendMessage(
+                    chat_id, "💬 *Messaggio modificato* 💬", parse_mode="Markdown")
                 self.USER_STATE[chat_id] = 0
 
             # ------------ Admin commands ------------
             # Delete last message to users
             elif input_msg == PASSWORD and self.USER_STATE[chat_id] == 1200:
                 self.delete_msg_news()
-                bot.sendMessage(chat_id, "Messaggio eliminato.")
+                bot.sendMessage(
+                    chat_id, "⚠️ *Messaggio eliminato* ⚠️", parse_mode="Markdown")
+                self.USER_STATE[chat_id] = 0
+
+            # Wrong password!
+            elif input_msg != PASSWORD and self.USER_STATE[chat_id] in [1000, 1100, 1200]:
+                bot.sendMessage(
+                    chat_id, "❌ *Password errata! Riprova!* ❌", parse_mode="Markdown")
                 self.USER_STATE[chat_id] = 0
 
         # Someone is trying to send a photo to all users
@@ -264,8 +279,8 @@ class MessageHandler:
             photo = msg['photo'][-1]['file_id']
 
             self.send_photo_all(photo, caption)
-
-            bot.sendMessage(chat_id, "Messaggio inviato.")
+            bot.sendMessage(chat_id, "💬 *Messaggio inviato* 💬",
+                            parse_mode="Markdown")
             self.USER_STATE[chat_id] = 0
 
     #! ------------ End message handler ------------
@@ -330,23 +345,23 @@ class MessageHandler:
         """
         #! Changed
         # bot.sendMessage(chat_id, "🍝*Duca*\nAperta tutti i giorni della settimana,"
-        #                 "esclusi sabato e domenica, dalle ore *12:00* alle ore *14:00* "
-        #                 "e dalle ore *19:00* alle ore *21:00*.\n*Cibus* dalle ore *12:00* alle ore *14:30* e dalle ore *19:00* alle ore *21:30*.\n"
+        #                 "esclusi sabato e domenica, dalle *12:00* alle *14:00* "
+        #                 "e dalle *19:00* alle *21:00*.\n*Cibus* dalle *12:00* alle *14:30* e dalle *19:00* alle *21:30*.\n"
         #                 "*Posizione*: /posizioneduca\n\n"
-        #                 "*🍖Tridente*\nAperta tutti i giorni della settimana dalle ore *12:00* alle ore *14:00*"
-        #                 "e dalle ore *19:00* alle ore *21:00*.\n"
+        #                 "*🍖Tridente*\nAperta tutti i giorni della settimana dalle *12:00* alle *14:00* "
+        #                 "e dalle *19:00* alle *21:00*.\n"
         #                 "*Cibus* esclusi sabato e domenica, stessi orari.\n"
         #                 "*Posizione*: /posizionetridente\n\n"
         #                 "🍟*Sogesta*\nAperta da Ottobre a Giugno, tutti i giorni della settimana "
-        #                 "esclusa la domenica, dalle ore *12:30* alle ore *14:00* e dalle ore *19:30* "
-        #                 "alle ore *21:00*.\n*Posizione*: /posizionesogesta",
+        #                 "esclusa la domenica, dalle *12:30* alle *14:00* e dalle *19:30* "
+        #                 "alle *21:00*.\n*Posizione*: /posizionesogesta",
         #                 parse_mode="Markdown")
-        bot.sendMessage(chat_id, "🍝*Duca*\nAperta tutti i giorni della settimana,"
-                        "esclusi sabato e domenica, dalle ore *12:00* alle ore *14:00* "
-                        "e dalle ore *19:00* alle ore *21:00*.\n"
+        bot.sendMessage(chat_id, "🍝*Duca*\nAperta tutti i giorni della settimana, "
+                        "esclusi sabato e domenica, dalle *12:00* alle *14:00* "
+                        "e dalle *19:00* alle *21:00*.\n"
                         "*Posizione*: /posizioneduca\n\n"
-                        "*🍖Tridente*\nAperta tutti i giorni della settimana dalle ore *12:00* alle ore *14:00*"
-                        "e dalle ore *19:00* alle ore *21:00*.\n"
+                        "*🍖Tridente*\nAperta tutti i giorni della settimana dalle *12:00* alle *14:00* "
+                        "e dalle *19:00* alle *21:00*.\n"
                         "*Posizione*: /posizionetridente\n\n",
                         parse_mode="Markdown")
 
@@ -561,7 +576,7 @@ class MessageHandler:
 
         # Send week keyboard
         markup = ReplyKeyboardMarkup(keyboard=entries)
-        bot.sendMessage(chat_id, "Inserisci la data:", reply_markup=markup)
+        bot.sendMessage(chat_id, "Quando?", reply_markup=markup)
 
     # Telegram related functions
     def send_msg_news(self, msg):
@@ -583,7 +598,7 @@ class MessageHandler:
         """
         for user in self.dc.get_user_list():
             try:
-                sent_msg = bot.sendPhoto(user, photo, caption=caption)
+                sent_msg = bot.sendPhoto(user, photo, caption=caption, parse_mode="Markdown")
                 self.GLOBAL_MSG[user] = {}
                 self.GLOBAL_MSG[user]['sent'] = sent_msg
             except:
