@@ -376,7 +376,7 @@ class MessageHandler:
         }
 
         # Regular expression to check if input message is in form DAY_NAME DAY/MONTH
-        p = re.compile("([A-Z])\w+ ([0-9])\w+\/([0-9])\w+")
+        p = re.compile("([A-z])\w+ ([0-9])\w+\/([0-9])\w+")
 
         if p.match(input_msg):
             # Get current date to extract year
@@ -536,6 +536,9 @@ class MessageHandler:
         counter = 0
         entries = []
         row = []
+
+        # Make sure the locale is set to italian
+        locale.setlocale(locale.LC_TIME, "it_IT.UTF-8")
 
         # Get today date
         now = datetime.now()
