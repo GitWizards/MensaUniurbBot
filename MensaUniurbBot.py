@@ -234,8 +234,7 @@ class MessageHandler:
 
             # The message will be delivered to all registred admins
             elif self.USER_STATE[chat_id] == 90:
-                self.send_report(input_msg)
-
+                self.send_report(msg)
                 # Return to initial state
                 self.USER_STATE[chat_id] = 0
 
@@ -636,9 +635,24 @@ class MessageHandler:
         """
         Send given message to all users
         """
+        # Get user message
+        input_msg = msg['text']
+
+        # Get user's username or name
+        try:
+            try:
+                username = "@" + msg['chat']['username']
+            except KeyError:
+                username = msg['chat']['first_name']
+                username += ' ' + msg['chat']['last_name']
+        except KeyError:
+            pass
+
+        # Send input_msg to all admins
         for user in ADMIN:
             try:
-                bot.sendMessage(user, msg, parse_mode="Markdown")
+                bot.sendMessage(user, "_{0}_\n\nInviato da: {1}".format(
+                    input_msg, username), parse_mode="Markdown")
             except:
                 continue
         return 1
