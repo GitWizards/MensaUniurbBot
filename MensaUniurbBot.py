@@ -420,7 +420,7 @@ class MessageHandler:
                                 reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
             else:
                 # Nothing found, probably it's closed
-                bot.sendMessage(chat_id, "Non ho trovato nulla! Controlla gli orari:", parse_mode="Markdown",
+                bot.sendMessage(chat_id, "Non ho trovato nulla🤷🏻‍♂️ Controlla gli /orari", parse_mode="Markdown",
                                 reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
                 self.send_opening_hours(chat_id)
 
@@ -598,7 +598,8 @@ class MessageHandler:
         """
         for user in self.dc.get_user_list():
             try:
-                sent_msg = bot.sendPhoto(user, photo, caption=caption, parse_mode="Markdown")
+                sent_msg = bot.sendPhoto(
+                    user, photo, caption=caption, parse_mode="Markdown")
                 self.GLOBAL_MSG[user] = {}
                 self.GLOBAL_MSG[user]['sent'] = sent_msg
             except:
