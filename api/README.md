@@ -3,7 +3,7 @@ This simple API written in flask wraps the ERSU menu directly from their webpage
 
 # Usage #
 You can access all data using:
-    `X.X.X.X:9543/<kitchen>/<date>/<moment>
+    `X.X.X.X:9543/<kitchen>/<date>/<moment>`
 
 * `kitchen`: `duca`, `tridente`
 * `date`: date in format MM-DD-YYYY
