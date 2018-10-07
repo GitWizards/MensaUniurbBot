@@ -240,9 +240,9 @@ class MessageHandler:
 
             # Send message to all users
             elif self.USER_STATE[chat_id] == 1001:
-                self.send_msg_news(input_msg)
+                sent_to = self.send_msg_news(input_msg)
                 bot.sendMessage(
-                    chat_id, "💬 *Messaggio inviato* 💬", parse_mode="Markdown")
+                    chat_id, "💬 *Messaggio inviato a {0} utenti* 💬".format(sent_to), parse_mode="Markdown")
                 self.USER_STATE[chat_id] = 0
 
             # Edit last message sent to users
@@ -277,9 +277,9 @@ class MessageHandler:
             # Get photo ID
             photo = msg['photo'][-1]['file_id']
 
-            self.send_photo_all(photo, caption)
-            bot.sendMessage(chat_id, "💬 *Messaggio inviato* 💬",
-                            parse_mode="Markdown")
+            sent_to = self.send_photo_all(photo, caption)
+            bot.sendMessage(
+                chat_id, "💬 *Messaggio inviato a {0} utenti* 💬".format(sent_to), parse_mode="Markdown")
             self.USER_STATE[chat_id] = 0
 
     #! ------------ End message handler ------------
@@ -582,28 +582,36 @@ class MessageHandler:
         """
         Send given message to all users
         """
+        # Counter
+        sent_to = 0
+
         for user in self.dc.get_user_list():
             try:
                 sent_msg = bot.sendMessage(user, msg, parse_mode="Markdown")
                 self.GLOBAL_MSG[user] = {}
                 self.GLOBAL_MSG[user]['sent'] = sent_msg
+                sent_to += 1
             except:
                 continue
-        return 1
+        return sent_to
 
     def send_photo_all(self, photo, caption):
         """
         Send given photo to all users
         """
+        # Counter
+        sent_to = 0
+
         for user in self.dc.get_user_list():
             try:
                 sent_msg = bot.sendPhoto(
                     user, photo, caption=caption, parse_mode="Markdown")
                 self.GLOBAL_MSG[user] = {}
                 self.GLOBAL_MSG[user]['sent'] = sent_msg
+                sent_to += 1
             except:
                 continue
-        return 1
+        return sent_to
 
     def edit_msg_news(self, new_msg):
         """
