@@ -232,8 +232,8 @@ class MessageHandler:
                 # Return to initial state
                 self.USER_STATE[chat_id] = 0
 
-            # The message will be delivered to all registred admins
             elif self.USER_STATE[chat_id] == 90:
+            # The message will be delivered to all registred admins
                 self.send_report(msg)
                 # Return to initial state
                 self.USER_STATE[chat_id] = 0
@@ -241,6 +241,13 @@ class MessageHandler:
             # Send message to all users
             elif self.USER_STATE[chat_id] == 1001:
                 sent_to = self.send_msg_news(input_msg)
+
+                # Check if there was some error
+                if sent_to == 0:
+                    bot.sendMessage(
+                        chat_id, "💬 *Messaggio inviato a 0 utenti! Riprovo senza markdown.* 💬", parse_mode="Markdown")
+                    sent_to = self.send_msg_news(input_msg, markdown=False)
+
                 bot.sendMessage(
                     chat_id, "💬 *Messaggio inviato a {0} utenti* 💬".format(sent_to), parse_mode="Markdown")
                 self.USER_STATE[chat_id] = 0
@@ -278,12 +285,20 @@ class MessageHandler:
             photo = msg['photo'][-1]['file_id']
 
             sent_to = self.send_photo_all(photo, caption)
+
+            # Check if there was some error
+            if sent_to == 0:
+                bot.sendMessage(
+                    chat_id, "💬 *Messaggio inviato a 0 utenti! Riprovo senza markdown.* 💬", parse_mode="Markdown")
+                sent_to = self.send_photo_all(photo, caption, markdown=False)
+
             bot.sendMessage(
                 chat_id, "💬 *Messaggio inviato a {0} utenti* 💬".format(sent_to), parse_mode="Markdown")
             self.USER_STATE[chat_id] = 0
 
     #! ------------ End message handler ------------
 
+    #! ------------ Telegram stuff ------------
     def handle_start_msg(self, chat_id, msg):
         """
         Handle the first message recevied from user, saving him in the db and
@@ -364,6 +379,192 @@ class MessageHandler:
                         "*Posizione*: /posizionetridente\n\n",
                         parse_mode="Markdown")
 
+    def send_stats(self, chat_id):
+        """
+        Send a graph with monthly usage
+        """
+        now = datetime.now()
+        year = int(now.strftime("%Y"))
+        month = int(now.strftime("%m"))
+
+        # Get caption
+        caption = ("Utenti totali: {0}\nRichieste totali: {1}".format(
+                   self.dc.get_total_users(), self.dc.get_total_requests()))
+
+        # Regenerate use graph
+        fname = self.generate_use_graph(year, month)
+
+        # Send use graph
+        f = open(fname, 'rb')
+        bot.sendPhoto(chat_id, f, caption)
+        f.close()
+
+    # Telegram related functions
+
+    def send_msg_news(self, msg, markdown=True):
+        """
+        Send given message to all users
+        """
+        # Counter
+        sent_to = 0
+
+        for user in self.dc.get_user_list():
+            try:
+                # Send the message to next user
+                if markdown:
+                    sent_msg = bot.sendMessage(
+                        user, msg, parse_mode="Markdown")
+                else:
+                    sent_msg = bot.sendMessage(user, msg)
+
+                # Log it for future operations
+                self.GLOBAL_MSG[user] = {}
+                self.GLOBAL_MSG[user]['sent'] = sent_msg
+
+                # Increment users counter
+                sent_to += 1
+
+                # Wait 1 sec to don't hit the API limit
+                sleep(1)
+            except:
+                continue
+        return sent_to
+
+    def send_photo_all(self, photo, caption, markdown=True):
+        """
+        Send given photo to all users
+        """
+        # Counter
+        sent_to = 0
+
+        for user in self.dc.get_user_list():
+            try:
+                # Send the message to next user
+                if markdown:
+                    sent_msg = bot.sendPhoto(
+                        user, photo, caption=caption, parse_mode="Markdown")
+                else:
+                    sent_msg = bot.sendPhoto(
+                        user, photo, caption=caption)
+
+                # Log it for future operations
+                self.GLOBAL_MSG[user] = {}
+                self.GLOBAL_MSG[user]['sent'] = sent_msg
+
+                # Increment users counter
+                sent_to += 1
+
+                # Wait 1 sec to don't hit the API limit
+                sleep(1)
+            except:
+                continue
+        return sent_to
+
+    def edit_msg_news(self, new_msg):
+        """
+        Edit last message sent to all users
+        """
+        for user in self.dc.get_user_list():
+            try:
+                old_msg = telepot.message_identifier(
+                    self.GLOBAL_MSG[user]['sent'])
+                bot.editMessageText(old_msg, new_msg, parse_mode="Markdown")
+            except:
+                continue
+        return 1
+
+    def delete_msg_news(self):
+        """
+        Delete last message sent to all users
+        """
+        for user in self.dc.get_user_list():
+            try:
+                msg_to_delete = telepot.message_identifier(
+                    self.GLOBAL_MSG[user]['sent'])
+                bot.deleteMessage(msg_to_delete)
+            except:
+                continue
+        return 1
+
+    def send_report(self, msg):
+        """
+        Send given message to all users
+        """
+        # Get user message
+        input_msg = msg['text']
+
+        # Get user's username or name
+        try:
+            try:
+                username = "@" + msg['chat']['username']
+            except KeyError:
+                username = msg['chat']['first_name']
+                username += ' ' + msg['chat']['last_name']
+        except KeyError:
+            pass
+
+        # Send input_msg to all admins
+        for user in ADMIN:
+            try:
+                bot.sendMessage(user, "_{0}_\n\nInviato da: {1}".format(
+                    input_msg, username), parse_mode="Markdown")
+            except:
+                continue
+        return 1
+
+    #! ------------ Keyboards ------------
+    def send_kitchen_keyboard(self, chat_id):
+        """
+        Send the keyboard from which you can choose between Classic and Cibus
+        """
+        entries = [["Classico"], ["Cibus"]]
+        markup = ReplyKeyboardMarkup(keyboard=entries)
+        bot.sendMessage(chat_id, "Classico o Cibus?", reply_markup=markup)
+
+    def send_dish_keyboard(self, chat_id):
+        """
+        Send the keyboard from which you can choose between lunch and dinner
+        """
+        entries = [["Pranzo"], ["Cena"]]
+        markup = ReplyKeyboardMarkup(keyboard=entries)
+        bot.sendMessage(chat_id, "Pranzo o Cena?", reply_markup=markup)
+
+    def send_week_keyboard(self, chat_id):
+        """
+        Send the keyboard from which you can choose the day for your search
+        """
+        # Some working variables
+        counter = 0
+        entries = []
+        row = []
+
+        # Make sure the locale is set to italian
+        locale.setlocale(locale.LC_TIME, "it_IT.UTF-8")
+
+        # Get today date
+        now = datetime.now()
+        entries.append(["Oggi {0}".format(now.strftime("%d/%m"))])
+
+        # Do some magic to generate the rest of keyboard keys
+        for day in range(1, 8):
+            date = now + timedelta(day)
+            row.append(date.strftime("%A %d/%m"))
+            counter += 1
+
+            # Put 3 days every row
+            if counter > 3:
+                entries.append(row)
+                row = []
+                counter = 0
+
+        # Append the remaning days
+        entries.append(row)
+
+        # Send week keyboard
+        markup = ReplyKeyboardMarkup(keyboard=entries)
+        bot.sendMessage(chat_id, "Quando?", reply_markup=markup)
+
+    #! ------------ Data and control stuff ------------
     def handle_week_messages(self, chat_id, input_msg):
         # Convert actual user state to right place
         places = {
@@ -459,26 +660,6 @@ class MessageHandler:
 
         return msg
 
-    def send_stats(self, chat_id):
-        """
-        Send a graph with monthly usage
-        """
-        now = datetime.now()
-        year = int(now.strftime("%Y"))
-        month = int(now.strftime("%m"))
-
-        # Get caption
-        caption = ("Utenti totali: {0}\nRichieste totali: {1}".format(
-                   self.dc.get_total_users(), self.dc.get_total_requests()))
-
-        # Regenerate use graph
-        fname = self.generate_use_graph(year, month)
-
-        # Send use graph
-        f = open(fname, 'rb')
-        bot.sendPhoto(chat_id, f, caption)
-        f.close()
-
     def generate_use_graph(self, year, month):
         """
         Return the uses graph of given month
@@ -525,161 +706,6 @@ class MessageHandler:
         plt.savefig(fname)
 
         return fname
-
-    def send_kitchen_keyboard(self, chat_id):
-        """
-        Send the keyboard from which you can choose between Classic and Cibus
-        """
-        entries = [["Classico"], ["Cibus"]]
-        markup = ReplyKeyboardMarkup(keyboard=entries)
-        bot.sendMessage(chat_id, "Classico o Cibus?", reply_markup=markup)
-
-    def send_dish_keyboard(self, chat_id):
-        """
-        Send the keyboard from which you can choose between lunch and dinner
-        """
-        entries = [["Pranzo"], ["Cena"]]
-        markup = ReplyKeyboardMarkup(keyboard=entries)
-        bot.sendMessage(chat_id, "Pranzo o Cena?", reply_markup=markup)
-
-    def send_week_keyboard(self, chat_id):
-        """
-        Send the keyboard from which you can choose the day for your search
-        """
-        # Some working variables
-        counter = 0
-        entries = []
-        row = []
-
-        # Make sure the locale is set to italian
-        locale.setlocale(locale.LC_TIME, "it_IT.UTF-8")
-
-        # Get today date
-        now = datetime.now()
-        entries.append(["Oggi {0}".format(now.strftime("%d/%m"))])
-
-        # Do some magic to generate the rest of keyboard keys
-        for day in range(1, 8):
-            date = now + timedelta(day)
-            row.append(date.strftime("%A %d/%m"))
-            counter += 1
-
-            # Put 3 days every row
-            if counter > 3:
-                entries.append(row)
-                row = []
-                counter = 0
-
-        # Append the remaning days
-        entries.append(row)
-
-        # Send week keyboard
-        markup = ReplyKeyboardMarkup(keyboard=entries)
-        bot.sendMessage(chat_id, "Quando?", reply_markup=markup)
-
-    # Telegram related functions
-    def send_msg_news(self, msg):
-        """
-        Send given message to all users
-        """
-        # Counter
-        sent_to = 0
-
-        for user in self.dc.get_user_list():
-            try:
-                # Send the message to next user
-                sent_msg = bot.sendMessage(user, msg, parse_mode="Markdown")
-
-                # Log it for future operations
-                self.GLOBAL_MSG[user] = {}
-                self.GLOBAL_MSG[user]['sent'] = sent_msg
-
-                # Increment users counter
-                sent_to += 1
-
-                # Wait 1 sec to don't hit the API limit
-                sleep(1)
-            except:
-                continue
-        return sent_to
-
-    def send_photo_all(self, photo, caption):
-        """
-        Send given photo to all users
-        """
-        # Counter
-        sent_to = 0
-
-        for user in self.dc.get_user_list():
-            try:
-                # Send the message to next user
-                sent_msg = bot.sendPhoto(
-                    user, photo, caption=caption, parse_mode="Markdown")
-
-                # Log it for future operations
-                self.GLOBAL_MSG[user] = {}
-                self.GLOBAL_MSG[user]['sent'] = sent_msg
-
-                # Increment users counter
-                sent_to += 1
-
-                # Wait 1 sec to don't hit the API limit
-                sleep(1)
-            except:
-                continue
-        return sent_to
-
-    def edit_msg_news(self, new_msg):
-        """
-        Edit last message sent to all users
-        """
-        for user in self.dc.get_user_list():
-            try:
-                old_msg = telepot.message_identifier(
-                    self.GLOBAL_MSG[user]['sent'])
-                bot.editMessageText(old_msg, new_msg, parse_mode="Markdown")
-            except:
-                continue
-        return 1
-
-    def delete_msg_news(self):
-        """
-        Delete last message sent to all users
-        """
-        for user in self.dc.get_user_list():
-            try:
-                msg_to_delete = telepot.message_identifier(
-                    self.GLOBAL_MSG[user]['sent'])
-                bot.deleteMessage(msg_to_delete)
-            except:
-                continue
-        return 1
-
-    def send_report(self, msg):
-        """
-        Send given message to all users
-        """
-        # Get user message
-        input_msg = msg['text']
-
-        # Get user's username or name
-        try:
-            try:
-                username = "@" + msg['chat']['username']
-            except KeyError:
-                username = msg['chat']['first_name']
-                username += ' ' + msg['chat']['last_name']
-        except KeyError:
-            pass
-
-        # Send input_msg to all admins
-        for user in ADMIN:
-            try:
-                bot.sendMessage(user, "_{0}_\n\nInviato da: {1}".format(
-                    input_msg, username), parse_mode="Markdown")
-            except:
-                continue
-        return 1
 
 
 # Main
