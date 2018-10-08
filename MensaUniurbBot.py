@@ -587,10 +587,18 @@ class MessageHandler:
 
         for user in self.dc.get_user_list():
             try:
+                # Send the message to next user
                 sent_msg = bot.sendMessage(user, msg, parse_mode="Markdown")
+
+                # Log it for future operations
                 self.GLOBAL_MSG[user] = {}
                 self.GLOBAL_MSG[user]['sent'] = sent_msg
+
+                # Increment users counter
                 sent_to += 1
+
+                # Wait 1 sec to don't hit the API limit
+                sleep(1)
             except:
                 continue
         return sent_to
@@ -604,11 +612,19 @@ class MessageHandler:
 
         for user in self.dc.get_user_list():
             try:
+                # Send the message to next user
                 sent_msg = bot.sendPhoto(
                     user, photo, caption=caption, parse_mode="Markdown")
+
+                # Log it for future operations
                 self.GLOBAL_MSG[user] = {}
                 self.GLOBAL_MSG[user]['sent'] = sent_msg
+
+                # Increment users counter
                 sent_to += 1
+
+                # Wait 1 sec to don't hit the API limit
+                sleep(1)
             except:
                 continue
         return sent_to
