@@ -156,6 +156,6 @@ api.add_resource(Tridente, '/tridente/<date>/<meal>')
 # api.add_resource(Sogesta, '/sogesta/<date>/<meal>')
 
 
-# Run this sh*t
+# Run API
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=PORT)
