@@ -17,5 +17,5 @@ requests==2.21.0
 six==1.12.0
 soupsieve==1.9
 telepot==12.7
-urllib3==1.24.1
+urllib3==1.24.2
 yarl==1.3.0
