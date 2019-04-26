@@ -5,17 +5,12 @@ from bs4 import BeautifulSoup
 from flask import Flask
 from flask_restful import Resource, Api
 
-# Init flask
-app = Flask(__name__)
-api = Api(app)
-
-PORT = 9543
 
 def get_menu(place, date, meal):
     """
-    Return the menu from ERSU page in JSON format
+    Return the menu in JSON format
     """
-    # Request the raw information from ERSU
+    # Request the raw data
     r = requests.post("http://menu.ersurb.it/menum/menu.asp",
                       data={'mensa': place, 'da': date, 'a': date})
 
@@ -108,7 +103,7 @@ def get_menu(place, date, meal):
 
 class Duca(Resource):
     def get(self, date, meal):
-        # We can't use slashes in links so we replace them
+        # Replace slashes with dashes
         date = date.replace('-', '/')
 
         return get_menu('duca', date, meal)
@@ -116,7 +111,7 @@ class Duca(Resource):
 
 class CibusDuca(Resource):
     def get(self, date):
-        # We can't use slashes in links so we replace them
+        # Replace slashes with dashes
         date = date.replace('-', '/')
 
         return get_menu('cibus', date, 'lunch')
@@ -124,7 +119,7 @@ class CibusDuca(Resource):
 
 class Tridente(Resource):
     def get(self, date, meal):
-        # We can't use slashes in links so we replace them
+        # Replace slashes with dashes
         date = date.replace('-', '/')
 
         return get_menu('tridente', date, meal)
@@ -132,7 +127,7 @@ class Tridente(Resource):
 
 class CibusTridente(Resource):
     def get(self, date, meal):
-        # We can't use slashes in links so we replace them
+        # Replace slashes with dashes
         date = date.replace('-', '/')
 
         return get_menu('cibustr', date, 'lunch')
@@ -140,22 +135,28 @@ class CibusTridente(Resource):
 
 class Sogesta(Resource):
     def get(self, date, meal):
-        # We can't use slashes in links so we replace them
+        # Replace slashes with dashes
         date = date.replace('-', '/')
 
         return get_menu('sogesta', date, meal)
 
 
-# Routes configuration
-api.add_resource(Duca, '/duca/<date>/<meal>')
-api.add_resource(Tridente, '/tridente/<date>/<meal>')
-
-# Disabled routes
-# api.add_resource(CibusDuca, '/cibusduca/<date>')
-# api.add_resource(CibusTridente, '/cibustr/<date>')
-# api.add_resource(Sogesta, '/sogesta/<date>/<meal>')
-
-
-# Run API
 if __name__ == '__main__':
+    # Init flask
+    app = Flask(__name__)
+    api = Api(app)
+
+    # Config port
+    PORT = 9543
+
+    # Routes configuration
+    api.add_resource(Duca, '/duca/<date>/<meal>')
+    api.add_resource(Tridente, '/tridente/<date>/<meal>')
+
+    # Disabled routes
+    # api.add_resource(CibusDuca, '/cibusduca/<date>')
+    # api.add_resource(CibusTridente, '/cibustr/<date>')
+    # api.add_resource(Sogesta, '/sogesta/<date>/<meal>')
+
+    # Start API
     app.run(host='0.0.0.0', port=PORT)
