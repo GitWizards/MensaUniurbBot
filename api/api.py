@@ -11,10 +11,13 @@ def get_menu(place, date, meal):
     Return the menu in JSON format
     """
     # Request the raw data
-    r = requests.post("http://menu.ersurb.it/menum/menu.asp",
-                      data={'mensa': place, 'da': date, 'a': date})
+    r = requests.post("http://menu.ersurb.it/menum/menu.asp", data={
+        'mensa': place,
+        'da': date,
+        'a': date
+    })
 
-    # Prepare some containers for all these data
+    # Prepare structure for data
     data = {}
     data['place'] = place
     data['meal'] = meal
@@ -31,17 +34,17 @@ def get_menu(place, date, meal):
     soup = BeautifulSoup(r.text, 'html.parser')
 
     # Some working variables
-    prev_id = '0'
-    state_dinner = False
+    prev = '0'
+    dinner = False
 
     # Parse all food entries :P
     for link in soup.find_all('a')[1:]:
         # Clean out some HTML
         app = link.get('onclick').replace('showModal', '')
 
-        # Get ID
-        idi = app.split()[1]
-        idi = idi.replace('"', '').replace(',', '')
+        # Get plate ID
+        plate_id = app.split()[1]
+        plate_id = plate_id.replace('"', '').replace(',', '')
 
         # Get name
         name = app.split(', ')[2]
@@ -56,45 +59,44 @@ def get_menu(place, date, meal):
         # Check if we are searching for a lunch menu
         if meal == 'lunch':
             # Check if we finished working
-            if prev_id == '40' and idi == '10':
-                # We are sure that the set is not empty
+            if prev == '40' and plate_id == '10':
+                # Stop checking, next plate is from dinner block
+                # At this point we are sure that the set is not empty
                 data['not_empty'] = True
-
-                # Stop searching, next stuff is dinner
                 break
             else:
-                prev_id = idi
+                prev = plate_id
 
             # Put dish in right position
-            if idi == '10':
+            if plate_id == '10':
                 data['menu']['first'].append(name)
-            elif idi == '20':
+            elif plate_id == '20':
                 data['menu']['second'].append(name)
-            elif idi == '30':
+            elif plate_id == '30':
                 data['menu']['side'].append(name)
-            elif idi == '40':
+            elif plate_id == '40':
                 data['menu']['fruit'].append(name)
 
         # Check if we are searching for a dinner menu
         elif meal == 'dinner':
             # Check if we can start working
-            if prev_id == '40' and idi == '10':
+            if prev == '40' and plate_id == '10':
                 # We are sure that the set is not empty
                 data['not_empty'] = True
 
-                state_dinner = True
+                dinner = True
             else:
-                prev_id = idi
+                prev = plate_id
 
-            if state_dinner:
+            if dinner:
                 # Put dish in right position
-                if idi == '10':
+                if plate_id == '10':
                     data['menu']['first'].append(name)
-                elif idi == '20':
+                elif plate_id == '20':
                     data['menu']['second'].append(name)
-                elif idi == '30':
+                elif plate_id == '30':
                     data['menu']['side'].append(name)
-                elif idi == '40':
+                elif plate_id == '40':
                     data['menu']['fruit'].append(name)
 
     # Return the JSON menu

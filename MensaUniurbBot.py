@@ -5,27 +5,29 @@ Authors: Radeox (dawid.weglarz95@gmail.com)
          Fast0n (theplayergame97@gmail.com)
 """
 
-import os
-import sys
-import re
-import json
-import gettext
-import locale
 import calendar
-import telepot
-from time import sleep
+import gettext
+import json
+import locale
+import os
+import re
+import sys
 from datetime import datetime, timedelta
 from random import randint
+from time import sleep
 
-import requests
-from bs4 import BeautifulSoup
 import matplotlib
-matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
+import requests
+import telepot
+from bs4 import BeautifulSoup
+from telepot.namedtuple import (InlineKeyboardButton, InlineKeyboardMarkup,
+                                ReplyKeyboardMarkup, ReplyKeyboardRemove)
 
-from database_connector import DatabaseConnector
-from settings import TOKEN, PASSWORD, ADMIN, DB_NAME
+from db_manager import DBManager
+from settings import ADMIN, DB_NAME, PASSWORD, TOKEN
+
+matplotlib.use('Agg')
 
 
 class MessageHandler:
@@ -33,7 +35,7 @@ class MessageHandler:
     USER_STATE = {}
 
     # Connector manages all interactions with the database
-    dc = DatabaseConnector(DB_NAME)
+    dc = DBManager(DB_NAME)
 
     # Store the info about last message sent to all users
     GLOBAL_MSG = {}
@@ -62,17 +64,17 @@ class MessageHandler:
             # Send info about bot
             elif input_msg == "/info":
                 self.send_info(chat_id)
-                self.dc.register_request(chat_id, input_msg)
+                self.dc.log_request(input_msg)
 
             # Send prices table
             elif input_msg == "/prezzi":
                 self.send_price_table(chat_id)
-                self.dc.register_request(chat_id, input_msg)
+                self.dc.log_request(input_msg)
 
             # Send opening hours
             elif input_msg == "/orari":
                 self.send_opening_hours(chat_id)
-                self.dc.register_request(chat_id, input_msg)
+                self.dc.log_request(input_msg)
 
             # Send statistics about monthly use
             elif input_msg == "/statistiche":
@@ -82,7 +84,7 @@ class MessageHandler:
             elif input_msg == "/allergeni":
                 bot.sendPhoto(chat_id,
                               "http://menu.ersurb.it/menum/Allergeni_legenda.png")
-                self.dc.register_request(chat_id, input_msg)
+                self.dc.log_request(input_msg)
 
             # Send location Duca
             elif input_msg == "/posizioneduca":
@@ -111,7 +113,7 @@ class MessageHandler:
 
                 #! Skip here
                 self.send_dish_keyboard(chat_id)
-                self.dc.register_request(chat_id, input_msg)
+                self.dc.log_request(input_msg)
 
             elif input_msg == "/tridente":
                 #! Skipping this choice as it was removed on website
@@ -123,7 +125,7 @@ class MessageHandler:
 
                 #! Skip here
                 self.send_dish_keyboard(chat_id)
-                self.dc.register_request(chat_id, input_msg)
+                self.dc.log_request(input_msg)
 
             #! Disabled for now
             # elif input_msg == "/sogesta":
@@ -131,7 +133,7 @@ class MessageHandler:
 
             #     # Send moment (lunch/dinner) keyboard
             #     self.send_dish_keyboard(chat_id)
-            #     self.dc.register_request(chat_id, input_msg)
+            #     self.dc.log_request(input_msg)
 
             # User can write a report to admins
             elif input_msg == "/segnala":
@@ -233,7 +235,7 @@ class MessageHandler:
                 self.USER_STATE[chat_id] = 0
 
             elif self.USER_STATE[chat_id] == 90:
-            # The message will be delivered to all registred admins
+                # The message will be delivered to all registred admins
                 self.send_report(msg)
                 # Return to initial state
                 self.USER_STATE[chat_id] = 0
@@ -679,7 +681,7 @@ class MessageHandler:
         radius = [1] * days_month
 
         for day in enumerate(month_counters):
-            month_counters[day[0]] = self.dc.get_use_in_day(
+            month_counters[day[0]] = self.dc.get_requests_in_day(
                 date + str(day[0]).zfill(2))
 
         # Clear plot
