@@ -183,16 +183,21 @@ class ResultScreen extends StatelessWidget {
             );
           } else {
             List content = snapshot.data;
+
+            return new Column(
+              children: <Widget>[
+                Expanded(child: ListView(children: content)),
+              ],
+            );
             // If some content exists
-            if (content.isNotEmpty) {
-              // Create and return the list
-              return new ListView(children: content);
-            } else {
-              // If the result is empty display something else
-              return new Center(
-                child: Icon(Icons.local_dining),
-              );
-            }
+            // if (content.isNotEmpty) {
+            //   // Create and return the list
+            // } else {
+            //   // If the result is empty display something else
+            //   return new Center(
+            //     child: Icon(Icons.local_dining),
+            //   );
+            // }
           }
         },
       ),
@@ -201,12 +206,17 @@ class ResultScreen extends StatelessWidget {
 
   // Create a list from the result
   Future<List<Widget>> getList(SearchArguments args) async {
+    // Result of the request to API
     Map result = {};
 
+    // Create an empty list
+    List<Widget> list = new List();
+
+    // Make the url with the arguments from the previous screen
     var url =
         'http://51.158.173.57:9543/${args.kitchen}/${args.date}/${args.meal}';
-    print(url);
 
+    // Send the request
     var response = await http.get(url);
 
     // Try decoding results
@@ -215,33 +225,42 @@ class ResultScreen extends StatelessWidget {
       result = json.decode(response.body);
     } on Exception {}
 
-    List<Widget> list = new List();
-
+    // If no results then return the empty list
     if (result.isEmpty) return list;
 
-    for (var item in result['menu']['first'])
-      list.add(ListTile(
-        title: Text('$item'),
-        leading: Icon(Icons.kitchen),
-      ));
+    // Loop through keys of the json
+    for (String type in result['menu'].keys) {
+      // Loop through each item and add them to list
+      for (String item in result['menu'][type]) {
+        // Extract last part of the string
+        String infos = item.split(" ").removeLast();
 
-    for (var item in result['menu']['second'])
-      list.add(ListTile(
-        title: Text('$item'),
-        leading: Icon(Icons.event_seat),
-      ));
+        // Check if it contains allergry infos
+        RegExp filter = RegExp('([1-9])');
 
-    for (var item in result['menu']['side'])
-      list.add(ListTile(
-        title: Text('$item'),
-        leading: Icon(Icons.adb),
-      ));
+        if (filter.hasMatch(infos)) {
+          // Remove them from the original string
+          // and add them as subtitle
+          item = item.replaceAll(infos, '');
+          infos = infos.toUpperCase();
+        } else {
+          // Otherwise just put a place holder
+          infos = '-';
+        }
 
-    for (var item in result['menu']['fruit'])
-      list.add(ListTile(
-        title: Text('$item'),
-        leading: Icon(Icons.pets),
-      ));
+        // Add the item to the list
+        list.add(Card(
+          child: ListTile(
+            title: Text('$item'),
+            subtitle: Text('$infos'),
+            leading: Icon(Icons.local_dining),
+          ),
+        ));
+      }
+
+      // Put a divider after each group
+      list.add(Divider(height: 25));
+    }
 
     return list;
   }
