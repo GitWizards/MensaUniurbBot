@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
@@ -17,11 +18,14 @@ class MensaUniurb extends StatelessWidget {
     return MaterialApp(
       title: title,
       theme: ThemeData(
-        // Primary color
+        // Primary colors
         primarySwatch: Colors.blue,
+        accentColor: Colors.blue,
 
         // Dark mode
         // brightness: Brightness.dark,
+
+        fontFamily: 'Noto',
       ),
 
       // Define application routes to various screens
@@ -57,82 +61,89 @@ class _SearchScreenState extends State<SearchScreen> {
     return Scaffold(
       // Top appbar with title
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(
+          widget.title,
+          style: TextStyle(fontSize: 24),
+        ),
         centerTitle: true,
-        leading: IconButton(icon: Icon(Icons.settings)),
+        // leading: IconButton(
+        //   icon: Icon(Icons.menu),
+        // ),
+        flexibleSpace: CustomPaint(painter: CircleAppBar()),
       ),
       // Body of the screen
-      body: Container(
-        child: Column(
-          // crossAxisAlignment: CrossAxisAlignment.center,
+      body: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            new Row(
-              // Select kitchen
+            Column(
               children: <Widget>[
-                DropdownButton(
-                  value: kitchen,
-                  items: [
-                    DropdownMenuItem(
-                      value: "duca",
-                      child: Text("Duca"),
-                    ),
-                    DropdownMenuItem(
-                      value: "tridente",
-                      child: Text("Tridente"),
+                new Row(
+                  // Select kitchen
+                  children: <Widget>[
+                    DropdownButton(
+                      value: kitchen,
+                      items: [
+                        DropdownMenuItem(
+                          value: "duca",
+                          child: Text("Duca"),
+                        ),
+                        DropdownMenuItem(
+                          value: "tridente",
+                          child: Text("Tridente"),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        setState(() {
+                          kitchen = value;
+                        });
+                      },
                     ),
                   ],
-                  onChanged: (value) {
-                    setState(() {
-                      kitchen = value;
-                    });
-                  },
+                  mainAxisAlignment: MainAxisAlignment.center,
                 ),
-              ],
-              mainAxisAlignment: MainAxisAlignment.center,
-            ),
-            new Row(
-              children: <Widget>[
-                new Container(
-                  child: Text(
-                    "$date",
-                    style: TextStyle(fontSize: 18),
-                  ),
-                ),
-                new IconButton(
-                  icon: new Icon(
-                    Icons.date_range,
-                  ),
-                  onPressed: () => _showDateTimePicker(context),
-                ),
-              ],
-              mainAxisAlignment: MainAxisAlignment.center,
-            ),
-            new Row(
-              children: <Widget>[
-                DropdownButton(
-                  value: meal,
-                  items: [
-                    DropdownMenuItem(
-                      value: "lunch",
-                      child: Text("Pranzo"),
+                new Row(
+                  children: <Widget>[
+                    new Container(
+                      child: Text(
+                        "$date",
+                        style: TextStyle(fontSize: 18),
+                      ),
                     ),
-                    DropdownMenuItem(
-                      value: "dinner",
-                      child: Text("Cena"),
+                    new IconButton(
+                      icon: new Icon(
+                        Icons.date_range,
+                      ),
+                      onPressed: () => _showDateTimePicker(context),
                     ),
                   ],
-                  onChanged: (value) {
-                    setState(() {
-                      meal = value;
-                    });
-                  },
+                  mainAxisAlignment: MainAxisAlignment.center,
                 ),
+                new Row(
+                  children: <Widget>[
+                    DropdownButton(
+                      value: meal,
+                      items: [
+                        DropdownMenuItem(
+                          value: "lunch",
+                          child: Text("Pranzo"),
+                        ),
+                        DropdownMenuItem(
+                          value: "dinner",
+                          child: Text("Cena"),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        setState(() {
+                          meal = value;
+                        });
+                      },
+                    ),
+                  ],
+                  mainAxisAlignment: MainAxisAlignment.center,
+                )
               ],
-              mainAxisAlignment: MainAxisAlignment.center,
-            )
-          ],
-        ),
-      ),
+            ),
+          ]),
 
       // Button to start query
       floatingActionButton: FloatingActionButton(
@@ -184,20 +195,18 @@ class ResultScreen extends StatelessWidget {
           } else {
             List content = snapshot.data;
 
-            return new Column(
-              children: <Widget>[
-                Expanded(child: ListView(children: content)),
-              ],
-            );
             // If some content exists
-            // if (content.isNotEmpty) {
-            //   // Create and return the list
-            // } else {
-            //   // If the result is empty display something else
-            //   return new Center(
-            //     child: Icon(Icons.local_dining),
-            //   );
-            // }
+            if (content.isNotEmpty) {
+              // Create and return the list
+              return new Column(children: <Widget>[
+                Expanded(child: ListView(children: content)),
+              ]);
+            } else {
+              // If the result is empty display something else
+              return new Center(
+                child: Text("Empty"),
+              );
+            }
           }
         },
       ),
@@ -226,7 +235,7 @@ class ResultScreen extends StatelessWidget {
     } on Exception {}
 
     // If no results then return the empty list
-    if (result.isEmpty) return list;
+    if (result['menu']['first'].isEmpty) return list;
 
     // Loop through keys of the json
     for (String type in result['menu'].keys) {
@@ -243,19 +252,23 @@ class ResultScreen extends StatelessWidget {
           // and add them as subtitle
           item = item.replaceAll(infos, '');
           infos = infos.toUpperCase();
-        } else {
-          // Otherwise just put a place holder
-          infos = '-';
-        }
 
-        // Add the item to the list
-        list.add(Card(
-          child: ListTile(
-            title: Text('$item'),
-            subtitle: Text('$infos'),
-            leading: Icon(Icons.local_dining),
-          ),
-        ));
+          // Add the item to the list with subtitle
+          list.add(Card(
+            child: ListTile(
+              title: Text('$item'),
+              subtitle: Text('$infos'),
+              // leading: Icon(Icons.local_dining),
+            ),
+          ));
+        } else {
+          // Otherwise add it without anything
+          list.add(Card(
+            child: ListTile(
+              title: Text('$item'),
+            ),
+          ));
+        }
       }
 
       // Put a divider after each group
@@ -278,4 +291,28 @@ class SearchArguments {
   final String meal;
 
   SearchArguments(this.kitchen, this.date, this.meal);
+}
+
+class CircleAppBar extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint();
+    // set the color property of the paint
+    paint.color = Colors.blue;
+
+    // center of the canvas is (x,y) => (width/2, height/2)
+    var shape =
+        Rect.fromLTWH(-size.width / 2, -10, size.width * 2, size.width / 2);
+
+    canvas.drawArc(shape, 0, 10, true, paint);
+
+    paint.color = Colors.lightBlue;
+
+    var middle = Offset(size.width / 2, size.width / 2);
+
+    canvas.drawCircle(middle, 100.0, paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
