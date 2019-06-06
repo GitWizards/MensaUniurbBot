@@ -2,14 +2,13 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
 void main() => runApp(MensaUniurb());
 
 class MensaUniurb extends StatelessWidget {
-  // Title
+  // Appbar title
   final String title = "MensaUniurb";
 
   // Root of the application
@@ -22,7 +21,7 @@ class MensaUniurb extends StatelessWidget {
         primarySwatch: Colors.blue,
 
         // Dark mode
-        brightness: Brightness.dark,
+        // brightness: Brightness.dark,
       ),
 
       // Define application routes to various screens
@@ -59,62 +58,78 @@ class _SearchScreenState extends State<SearchScreen> {
       // Top appbar with title
       appBar: AppBar(
         title: Text(widget.title),
-        // actions: <Widget>[
-        //   Icon(Icons.info)
-        // ],
+        centerTitle: true,
+        leading: IconButton(icon: Icon(Icons.settings)),
       ),
       // Body of the screen
-      body: Center(
+      body: Container(
         child: Column(
-          // Select kitchen
+          // crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            DropdownButton(
-              value: kitchen,
-              items: [
-                DropdownMenuItem(
-                  value: "duca",
-                  child: Text("Duca"),
-                ),
-                DropdownMenuItem(
-                  value: "tridente",
-                  child: Text("Tridente"),
-                ),
-              ],
-              onChanged: (value) {
-                setState(() {
-                  kitchen = value;
-                });
-              },
-            ),
-            new SizedBox(
-              height: 30,
-              child: Text("$date"),
-            ),
-            new IconButton(
-              icon: new Icon(
-                Icons.date_range,
-                color: Colors.white,
-              ),
-              onPressed: () => _showDateTimePicker(context),
-            ),
-            DropdownButton(
-              value: meal,
-              items: [
-                DropdownMenuItem(
-                  value: "lunch",
-                  child: Text("Pranzo"),
-                ),
-                DropdownMenuItem(
-                  value: "dinner",
-                  child: Text("Cena"),
+            new Row(
+              // Select kitchen
+              children: <Widget>[
+                DropdownButton(
+                  value: kitchen,
+                  items: [
+                    DropdownMenuItem(
+                      value: "duca",
+                      child: Text("Duca"),
+                    ),
+                    DropdownMenuItem(
+                      value: "tridente",
+                      child: Text("Tridente"),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      kitchen = value;
+                    });
+                  },
                 ),
               ],
-              onChanged: (value) {
-                setState(() {
-                  meal = value;
-                });
-              },
+              mainAxisAlignment: MainAxisAlignment.center,
             ),
+            new Row(
+              children: <Widget>[
+                new Container(
+                  child: Text(
+                    "$date",
+                    style: TextStyle(fontSize: 18),
+                  ),
+                ),
+                new IconButton(
+                  icon: new Icon(
+                    Icons.date_range,
+                  ),
+                  onPressed: () => _showDateTimePicker(context),
+                ),
+              ],
+              mainAxisAlignment: MainAxisAlignment.center,
+            ),
+            new Row(
+              children: <Widget>[
+                DropdownButton(
+                  value: meal,
+                  items: [
+                    DropdownMenuItem(
+                      value: "lunch",
+                      child: Text("Pranzo"),
+                    ),
+                    DropdownMenuItem(
+                      value: "dinner",
+                      child: Text("Cena"),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      meal = value;
+                    });
+                  },
+                ),
+              ],
+              mainAxisAlignment: MainAxisAlignment.center,
+            )
           ],
         ),
       ),
@@ -164,10 +179,7 @@ class ResultScreen extends StatelessWidget {
             // Display during loading
             return new Center(
               // Loading animation
-              child: SpinKitDualRing(
-                color: Colors.white,
-                size: 75.0,
-              ),
+              child: CircularProgressIndicator(),
             );
           } else {
             List content = snapshot.data;
