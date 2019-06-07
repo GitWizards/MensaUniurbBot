@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -55,62 +56,45 @@ class _SearchScreenState extends State<SearchScreen> {
   String date = DateFormat('MM-dd-yyyy').format(DateTime.now());
   String meal = "lunch";
 
+  bool kitchenButton = true;
+
   // Build widget function
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       // Top appbar with title
       appBar: AppBar(
-        title: Text(
-          widget.title,
-          style: TextStyle(fontSize: 24),
-        ),
+        title: Text(widget.title, style: TextStyle(fontSize: 24)),
         centerTitle: true,
-        // leading: IconButton(
-        //   icon: Icon(Icons.menu),
-        // ),
-        flexibleSpace: CustomPaint(painter: CircleAppBar()),
+        leading: IconButton(icon: Icon(Icons.menu)),
+        flexibleSpace: CustomPaint(
+          painter: CircleAppBar(),
+          child: Padding(
+            padding: const EdgeInsets.only(top: 80.0),
+            child: CircleAvatar(
+              backgroundColor: Colors.black,
+            ),
+          ),
+        ),
       ),
+
       // Body of the screen
       body: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Column(
               children: <Widget>[
-                new Row(
-                  // Select kitchen
+                buttonPair("Duca", "duca", "Tridente", "tridente"),
+                Row(
                   children: <Widget>[
-                    DropdownButton(
-                      value: kitchen,
-                      items: [
-                        DropdownMenuItem(
-                          value: "duca",
-                          child: Text("Duca"),
-                        ),
-                        DropdownMenuItem(
-                          value: "tridente",
-                          child: Text("Tridente"),
-                        ),
-                      ],
-                      onChanged: (value) {
-                        setState(() {
-                          kitchen = value;
-                        });
-                      },
-                    ),
-                  ],
-                  mainAxisAlignment: MainAxisAlignment.center,
-                ),
-                new Row(
-                  children: <Widget>[
-                    new Container(
+                    Container(
                       child: Text(
                         "$date",
                         style: TextStyle(fontSize: 18),
                       ),
                     ),
-                    new IconButton(
-                      icon: new Icon(
+                    IconButton(
+                      icon: Icon(
                         Icons.date_range,
                       ),
                       onPressed: () => _showDateTimePicker(context),
@@ -118,29 +102,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   ],
                   mainAxisAlignment: MainAxisAlignment.center,
                 ),
-                new Row(
-                  children: <Widget>[
-                    DropdownButton(
-                      value: meal,
-                      items: [
-                        DropdownMenuItem(
-                          value: "lunch",
-                          child: Text("Pranzo"),
-                        ),
-                        DropdownMenuItem(
-                          value: "dinner",
-                          child: Text("Cena"),
-                        ),
-                      ],
-                      onChanged: (value) {
-                        setState(() {
-                          meal = value;
-                        });
-                      },
-                    ),
-                  ],
-                  mainAxisAlignment: MainAxisAlignment.center,
-                )
+                buttonPair("Pranzo", "lunch", "Cena", "dinner"),
               ],
             ),
           ]),
@@ -173,6 +135,74 @@ class _SearchScreenState extends State<SearchScreen> {
       if (selected != null) date = DateFormat('MM-dd-yyyy').format(selected);
     });
   }
+
+  Widget buttonPair(String text1, String value1, String text2, String value2) {
+    return Row(
+      // Select kitchen
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Container(
+            child: RaisedButton(
+              child: Text(
+                text1,
+                style: TextStyle(
+                  fontSize: 25,
+                  color: Colors.white,
+                  shadows: <Shadow>[
+                    Shadow(
+                        color: Colors.black54,
+                        offset: Offset(2.0, 2.0),
+                        blurRadius: 5.0)
+                  ],
+                ),
+              ),
+              shape: StadiumBorder(),
+              color: Colors.blue,
+              disabledColor: Colors.grey,
+              onPressed: !kitchenButton ? null : () => setKitchen(value1),
+            ),
+            width: MediaQuery.of(context).size.width * 0.4,
+            height: MediaQuery.of(context).size.height * 0.08,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Container(
+            child: RaisedButton(
+              child: Text(
+                text2,
+                style: TextStyle(
+                  fontSize: 25,
+                  color: Colors.white,
+                  shadows: <Shadow>[
+                    Shadow(
+                        color: Colors.black54,
+                        offset: Offset(2.0, 2.0),
+                        blurRadius: 5.0)
+                  ],
+                ),
+              ),
+              shape: StadiumBorder(),
+              color: Colors.blue,
+              disabledColor: Colors.grey,
+              onPressed: kitchenButton ? null : () => setKitchen(value2),
+            ),
+            width: MediaQuery.of(context).size.width * 0.4,
+            height: MediaQuery.of(context).size.height * 0.08,
+          ),
+        ),
+      ],
+      mainAxisAlignment: MainAxisAlignment.center,
+    );
+  }
+
+  void setKitchen(String value) {
+    setState(() {
+      kitchenButton = !kitchenButton;
+      kitchen = value;
+    });
+  }
 }
 
 class ResultScreen extends StatelessWidget {
@@ -183,12 +213,12 @@ class ResultScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(),
-      body: new FutureBuilder(
+      body: FutureBuilder(
         future: getList(args),
         builder: (BuildContext context, AsyncSnapshot<List> snapshot) {
           if (!snapshot.hasData) {
             // Display during loading
-            return new Center(
+            return Center(
               // Loading animation
               child: CircularProgressIndicator(),
             );
@@ -198,12 +228,12 @@ class ResultScreen extends StatelessWidget {
             // If some content exists
             if (content.isNotEmpty) {
               // Create and return the list
-              return new Column(children: <Widget>[
+              return Column(children: <Widget>[
                 Expanded(child: ListView(children: content)),
               ]);
             } else {
               // If the result is empty display something else
-              return new Center(
+              return Center(
                 child: Text("Empty"),
               );
             }
@@ -219,12 +249,13 @@ class ResultScreen extends StatelessWidget {
     Map result = {};
 
     // Create an empty list
-    List<Widget> list = new List();
+    List<Widget> list = List();
 
     // Make the url with the arguments from the previous screen
     var url =
         'http://51.158.173.57:9543/${args.kitchen}/${args.date}/${args.meal}';
 
+    print(url);
     // Send the request
     var response = await http.get(url);
 

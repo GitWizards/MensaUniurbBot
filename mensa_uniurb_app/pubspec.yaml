@@ -19,9 +19,9 @@ dev_dependencies:
     sdk: flutter
 
 
-# The following section is specific to Flutter.
 flutter:
   uses-material-design: true
+
   fonts:
     - family: Noto
       fonts:
