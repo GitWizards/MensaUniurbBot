@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:ui';
 
@@ -56,8 +57,6 @@ class _SearchScreenState extends State<SearchScreen> {
   String date = DateFormat('MM-dd-yyyy').format(DateTime.now());
   String meal = "lunch";
 
-  bool kitchenButton = true;
-
   // Build widget function
   @override
   Widget build(BuildContext context) {
@@ -80,32 +79,45 @@ class _SearchScreenState extends State<SearchScreen> {
 
       // Body of the screen
       body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Column(
-              children: <Widget>[
-                buttonPair("Duca", "duca", "Tridente", "tridente"),
-                Row(
-                  children: <Widget>[
-                    Container(
-                      child: Text(
-                        "$date",
-                        style: TextStyle(fontSize: 18),
-                      ),
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Column(
+            children: <Widget>[
+              RadioButtons(
+                textButton1: "Duca",
+                valueButton1: "duca",
+                textButton2: "Tridente",
+                valueButton2: "tridente",
+                setValue: _setKitchen,
+              ),
+              Row(
+                children: <Widget>[
+                  Container(
+                    child: Text(
+                      "$date",
+                      style: TextStyle(fontSize: 18),
                     ),
-                    IconButton(
-                      icon: Icon(
-                        Icons.date_range,
-                      ),
-                      onPressed: () => _showDateTimePicker(context),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      Icons.date_range,
                     ),
-                  ],
-                  mainAxisAlignment: MainAxisAlignment.center,
-                ),
-                buttonPair("Pranzo", "lunch", "Cena", "dinner"),
-              ],
-            ),
-          ]),
+                    onPressed: () => _showDateTimePicker(context),
+                  ),
+                ],
+                mainAxisAlignment: MainAxisAlignment.center,
+              ),
+              RadioButtons(
+                textButton1: "Pranzo",
+                valueButton1: "lunch",
+                textButton2: "Cena",
+                valueButton2: "dinner",
+                setValue: _setMeal,
+              ),
+            ],
+          ),
+        ],
+      ),
 
       // Button to start query
       floatingActionButton: FloatingActionButton(
@@ -117,6 +129,14 @@ class _SearchScreenState extends State<SearchScreen> {
         },
       ),
     );
+  }
+
+  _setKitchen(value) {
+    kitchen = value;
+  }
+
+  _setMeal(value) {
+    meal = value;
   }
 
   _showDateTimePicker(BuildContext context) async {
@@ -135,72 +155,82 @@ class _SearchScreenState extends State<SearchScreen> {
       if (selected != null) date = DateFormat('MM-dd-yyyy').format(selected);
     });
   }
+}
 
-  Widget buttonPair(String text1, String value1, String text2, String value2) {
+class RadioButtons extends StatefulWidget {
+  RadioButtons({
+    @required this.textButton1,
+    @required this.valueButton1,
+    @required this.textButton2,
+    @required this.valueButton2,
+    @required this.setValue,
+  });
+
+  final String textButton1;
+  final String textButton2;
+  final String valueButton1;
+  final String valueButton2;
+  final Function setValue;
+
+  @override
+  _RadioButtonsState createState() => _RadioButtonsState();
+}
+
+class _RadioButtonsState extends State<RadioButtons> {
+  bool selected = true;
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       // Select kitchen
       children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Container(
-            child: RaisedButton(
-              child: Text(
-                text1,
-                style: TextStyle(
-                  fontSize: 25,
-                  color: Colors.white,
-                  shadows: <Shadow>[
-                    Shadow(
-                        color: Colors.black54,
-                        offset: Offset(2.0, 2.0),
-                        blurRadius: 5.0)
-                  ],
-                ),
-              ),
-              shape: StadiumBorder(),
-              color: Colors.blue,
-              disabledColor: Colors.grey,
-              onPressed: !kitchenButton ? null : () => setKitchen(value1),
-            ),
-            width: MediaQuery.of(context).size.width * 0.4,
-            height: MediaQuery.of(context).size.height * 0.08,
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Container(
-            child: RaisedButton(
-              child: Text(
-                text2,
-                style: TextStyle(
-                  fontSize: 25,
-                  color: Colors.white,
-                  shadows: <Shadow>[
-                    Shadow(
-                        color: Colors.black54,
-                        offset: Offset(2.0, 2.0),
-                        blurRadius: 5.0)
-                  ],
-                ),
-              ),
-              shape: StadiumBorder(),
-              color: Colors.blue,
-              disabledColor: Colors.grey,
-              onPressed: kitchenButton ? null : () => setKitchen(value2),
-            ),
-            width: MediaQuery.of(context).size.width * 0.4,
-            height: MediaQuery.of(context).size.height * 0.08,
-          ),
-        ),
+        _singleButton(
+            context, widget.textButton1, widget.valueButton1, selected),
+        _singleButton(
+            context, widget.textButton2, widget.valueButton2, !selected),
       ],
       mainAxisAlignment: MainAxisAlignment.center,
     );
   }
 
-  void setKitchen(String value) {
+  Widget _singleButton(context, text, value, active) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+        child: RaisedButton(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 25,
+              color: Colors.white,
+              shadows: <Shadow>[
+                Shadow(
+                  color: Colors.black54,
+                  offset: Offset(2.0, 2.0),
+                  blurRadius: 5.0,
+                )
+              ],
+            ),
+          ),
+          shape: StadiumBorder(),
+          color: Colors.blue,
+          disabledColor: Colors.grey,
+          onPressed: active ? null : () => _changeActiveButton(),
+        ),
+        width: MediaQuery.of(context).size.width * 0.4,
+        height: MediaQuery.of(context).size.height * 0.08,
+      ),
+    );
+  }
+
+  _changeActiveButton() {
     setState(() {
-      kitchenButton = !kitchenButton;
-      kitchen = value;
+      selected = !selected;
+
+      if (selected)
+        widget.setValue(widget.valueButton1);
+      else
+        widget.setValue(widget.valueButton2);
     });
   }
 }
@@ -332,16 +362,16 @@ class CircleAppBar extends CustomPainter {
     paint.color = Colors.blue;
 
     // center of the canvas is (x,y) => (width/2, height/2)
-    var shape =
-        Rect.fromLTWH(-size.width / 2, -10, size.width * 2, size.width / 2);
+    // var shape = Rect.fromLTWH(
+    //     -size.width * 0.5, -100, size.width * 2, size.width * 0.5);
 
-    canvas.drawArc(shape, 0, 10, true, paint);
+    var middle = Offset(size.width / 2, size.height * 0.1);
+    // canvas.drawArc(shape, 0, 10, true, paint);
+    canvas.drawCircle(middle, 250, paint);
 
-    paint.color = Colors.lightBlue;
+    // paint.color = Colors.lightBlue;
 
-    var middle = Offset(size.width / 2, size.width / 2);
-
-    canvas.drawCircle(middle, 100.0, paint);
+    // canvas.drawCircle(middle, 100.0, paint);
   }
 
   @override
