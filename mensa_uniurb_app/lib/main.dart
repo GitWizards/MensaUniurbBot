@@ -1,4 +1,3 @@
-import 'dart:collection';
 import 'dart:convert';
 import 'dart:ui';
 
@@ -7,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+
+import 'myWidgets.dart';
 
 void main() => runApp(MensaUniurb());
 
@@ -78,45 +79,39 @@ class _SearchScreenState extends State<SearchScreen> {
       ),
 
       // Body of the screen
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Column(
-            children: <Widget>[
-              RadioButtons(
+      body: Padding(
+        padding: const EdgeInsets.only(top: 70.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: RadioButtons(
                 textButton1: "Duca",
                 valueButton1: "duca",
                 textButton2: "Tridente",
                 valueButton2: "tridente",
-                setValue: _setKitchen,
+                setFunc: _setKitchen,
               ),
-              Row(
-                children: <Widget>[
-                  Container(
-                    child: Text(
-                      "$date",
-                      style: TextStyle(fontSize: 18),
-                    ),
-                  ),
-                  IconButton(
-                    icon: Icon(
-                      Icons.date_range,
-                    ),
-                    onPressed: () => _showDateTimePicker(context),
-                  ),
-                ],
-                mainAxisAlignment: MainAxisAlignment.center,
-              ),
-              RadioButtons(
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: RadioButtons(
                 textButton1: "Pranzo",
                 valueButton1: "lunch",
                 textButton2: "Cena",
                 valueButton2: "dinner",
-                setValue: _setMeal,
+                setFunc: _setMeal,
               ),
-            ],
-          ),
-        ],
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: DataPicker(
+                setFunc: _setDate,
+              ),
+            ),
+          ],
+        ),
       ),
 
       // Button to start query
@@ -135,103 +130,12 @@ class _SearchScreenState extends State<SearchScreen> {
     kitchen = value;
   }
 
+  _setDate(value) {
+    date = value;
+  }
+
   _setMeal(value) {
     meal = value;
-  }
-
-  _showDateTimePicker(BuildContext context) async {
-    DateTime selected;
-    DateTime today = DateTime.now();
-    Duration week = Duration(days: 7);
-
-    selected = await showDatePicker(
-      context: context,
-      initialDate: today,
-      firstDate: today,
-      lastDate: today.add(week),
-    );
-
-    setState(() {
-      if (selected != null) date = DateFormat('MM-dd-yyyy').format(selected);
-    });
-  }
-}
-
-class RadioButtons extends StatefulWidget {
-  RadioButtons({
-    @required this.textButton1,
-    @required this.valueButton1,
-    @required this.textButton2,
-    @required this.valueButton2,
-    @required this.setValue,
-  });
-
-  final String textButton1;
-  final String textButton2;
-  final String valueButton1;
-  final String valueButton2;
-  final Function setValue;
-
-  @override
-  _RadioButtonsState createState() => _RadioButtonsState();
-}
-
-class _RadioButtonsState extends State<RadioButtons> {
-  bool selected = true;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      // Select kitchen
-      children: <Widget>[
-        _singleButton(
-            context, widget.textButton1, widget.valueButton1, selected),
-        _singleButton(
-            context, widget.textButton2, widget.valueButton2, !selected),
-      ],
-      mainAxisAlignment: MainAxisAlignment.center,
-    );
-  }
-
-  Widget _singleButton(context, text, value, active) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Container(
-        child: RaisedButton(
-          child: Text(
-            text,
-            style: TextStyle(
-              fontSize: 25,
-              color: Colors.white,
-              shadows: <Shadow>[
-                Shadow(
-                  color: Colors.black54,
-                  offset: Offset(2.0, 2.0),
-                  blurRadius: 5.0,
-                )
-              ],
-            ),
-          ),
-          shape: StadiumBorder(),
-          color: Colors.blue,
-          disabledColor: Colors.grey,
-          onPressed: active ? null : () => _changeActiveButton(),
-        ),
-        width: MediaQuery.of(context).size.width * 0.4,
-        height: MediaQuery.of(context).size.height * 0.08,
-      ),
-    );
-  }
-
-  _changeActiveButton() {
-    setState(() {
-      selected = !selected;
-
-      if (selected)
-        widget.setValue(widget.valueButton1);
-      else
-        widget.setValue(widget.valueButton2);
-    });
   }
 }
 
