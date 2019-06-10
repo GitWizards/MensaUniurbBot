@@ -54,7 +54,7 @@ class _DataPickerState extends State<DataPicker> {
           mainAxisAlignment: MainAxisAlignment.center,
         ),
         shape: StadiumBorder(),
-        color: Colors.blue,
+        color: Theme.of(context).accentColor,
         disabledColor: Colors.grey,
         onPressed: () => _showDateTimePicker(context),
       ),
@@ -154,7 +154,7 @@ class _RadioButtonsState extends State<RadioButtons> {
             ),
           ),
           shape: StadiumBorder(),
-          color: Colors.blue,
+          color: Theme.of(context).accentColor,
           disabledColor: Colors.grey,
 
           // Check if the buttons is active and take action

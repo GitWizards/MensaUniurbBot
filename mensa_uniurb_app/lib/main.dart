@@ -3,10 +3,9 @@ import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart' as prefix0;
-// import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:intl/intl.dart';
+import 'package:dynamic_theme/dynamic_theme.dart';
 
 import 'myWidgets.dart';
 
@@ -19,24 +18,28 @@ class MensaUniurb extends StatelessWidget {
   // Root of the application
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: title,
-      theme: ThemeData(
-        // Primary colors
-        primarySwatch: Colors.blue,
-        accentColor: Colors.blue,
+    return DynamicTheme(
+      // Default theme
+      defaultBrightness: Brightness.light,
+      data: (brightness) => new ThemeData(
+            primaryColor: Colors.blue,
+            primarySwatch: Colors.blue,
+            accentColor: Colors.blue,
+            brightness: brightness,
+            fontFamily: 'Noto',
+          ),
+      themedWidgetBuilder: (context, theme) {
+        return MaterialApp(
+          title: title,
+          theme: theme,
 
-        // Dark mode
-        // brightness: Brightness.dark,
-
-        fontFamily: 'Noto',
-      ),
-
-      // Define application routes to various screens
-      initialRoute: '/',
-      routes: {
-        '/': (context) => SearchScreen(title: title),
-        '/results': (context) => ResultScreen(),
+          // Define application routes to various screens
+          initialRoute: '/',
+          routes: {
+            '/': (context) => SearchScreen(title: title),
+            '/results': (context) => ResultScreen(),
+          },
+        );
       },
     );
   }
@@ -75,10 +78,9 @@ class _SearchScreenState extends State<SearchScreen> {
       appBar: AppBar(
         title: Text(widget.title, style: TextStyle(fontSize: 24)),
         centerTitle: true,
-        // leading: IconButton(icon: Icon(Icons.menu)),
         // Makes the cool circle over appbar
         flexibleSpace: CustomPaint(
-          painter: CircleAppBar(),
+          painter: CircleAppBar(context: context),
           child: Padding(
             padding: const EdgeInsets.only(top: 80.0),
             child: CircleAvatar(
@@ -148,6 +150,60 @@ class _SearchScreenState extends State<SearchScreen> {
           );
         },
       ),
+
+      // Drawer on the left
+      drawer: Container(
+        color: Theme.of(context).backgroundColor,
+        width: 250,
+        child: ListView(
+          children: <Widget>[
+            ListTile(
+              leading: Icon(Icons.brightness_6),
+              title: Text(
+                'Theme',
+                style: TextStyle(fontSize: 17),
+              ),
+            ),
+            Row(
+              children: <Widget>[
+                IconButton(
+                  icon: CircleAvatar(backgroundColor: Colors.blue),
+                  onPressed: _applyBlueTheme,
+                ),
+                IconButton(
+                  icon: CircleAvatar(backgroundColor: Colors.green),
+                  onPressed: _applyGreenTheme,
+                ),
+                IconButton(
+                  icon: CircleAvatar(backgroundColor: Colors.orange),
+                  onPressed: _applyOrangeTheme,
+                ),
+              ],
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            ),
+            ListTile(
+              leading: Icon(Icons.message),
+              title: Text('Bot Telegram', style: TextStyle(fontSize: 17)),
+              onTap: () => print("info"),
+            ),
+            ListTile(
+              leading: Icon(Icons.person),
+              title: Text('Contact us', style: TextStyle(fontSize: 17)),
+              onTap: () => print("info"),
+            ),
+            ListTile(
+              leading: Icon(Icons.monetization_on),
+              title: Text('Donazioni', style: TextStyle(fontSize: 17)),
+              onTap: () => print("info"),
+            ),
+            ListTile(
+              leading: Icon(Icons.info),
+              title: Text('Info', style: TextStyle(fontSize: 17)),
+              onTap: () => print("info"),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -164,6 +220,48 @@ class _SearchScreenState extends State<SearchScreen> {
   // Function called from child widgets to set the value
   _setMeal(value) {
     meal = value;
+  }
+
+  // Apply the blue theme
+  _applyBlueTheme() {
+    DynamicTheme.of(context).setThemeData(ThemeData(
+      primaryColor: Colors.blue,
+      primarySwatch: Colors.blue,
+      accentColor: Colors.blue,
+      brightness: Brightness.light,
+      fontFamily: 'Noto',
+    ));
+
+    // Close the drawer
+    Navigator.pop(context);
+  }
+
+  // Apply the green theme
+  _applyGreenTheme() {
+    DynamicTheme.of(context).setThemeData(ThemeData(
+      primaryColor: Colors.green,
+      primarySwatch: Colors.green,
+      accentColor: Colors.green,
+      brightness: Brightness.light,
+      fontFamily: 'Noto',
+    ));
+
+    // Close the drawer
+    Navigator.pop(context);
+  }
+
+  // Apply the dark-orange theme
+  _applyOrangeTheme() {
+    DynamicTheme.of(context).setThemeData(ThemeData(
+      primaryColor: Colors.orange,
+      primarySwatch: Colors.orange,
+      accentColor: Colors.orange,
+      brightness: Brightness.dark,
+      fontFamily: 'Noto',
+    ));
+
+    // Close the drawer
+    Navigator.pop(context);
   }
 }
 
@@ -221,8 +319,10 @@ class ResultScreen extends StatelessWidget {
                         right: 40,
                       ),
                       child: Text(
-                        "Sembra che la mensa sia chiusa!",
-                        style: TextStyle(fontSize: 20),
+                        "Sembra che la mensa sia chiusa.",
+                        style: TextStyle(
+                          fontSize: 20,
+                        ),
                       ),
                     ),
                   ],
@@ -348,13 +448,17 @@ class SearchArguments {
 
 // Custom painter that creates the blue circle over the appBar
 class CircleAppBar extends CustomPainter {
+  CircleAppBar({this.context});
+
+  final BuildContext context;
+
   @override
   void paint(Canvas canvas, Size size) {
     // Create painter
     final paint = Paint();
 
-    // Set the color
-    paint.color = Colors.blue;
+    // Set the color based of accent
+    paint.color = Theme.of(context).accentColor;
 
     // Compute the center where the circle should be drawn
     Offset center = Offset(size.width / 2, size.height * 0.1);
@@ -364,5 +468,5 @@ class CircleAppBar extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
+  bool shouldRepaint(CustomPainter oldDelegate) => true;
 }
