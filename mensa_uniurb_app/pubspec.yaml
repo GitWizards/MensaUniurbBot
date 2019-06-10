@@ -21,6 +21,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+  flutter_launcher_icons: ^0.7.2
 
 flutter:
   uses-material-design: true
@@ -30,3 +31,8 @@ flutter:
       fonts:
         - asset: fonts/NotoSans-Bold.ttf
         - asset: fonts/NotoSans-Regular.ttf
+
+flutter_icons:
+  android: true 
+  ios: true
+  image_path: "assets/icon/icon.png"

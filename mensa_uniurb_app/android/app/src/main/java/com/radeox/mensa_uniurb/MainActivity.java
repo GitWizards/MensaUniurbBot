@@ -1,4 +1,4 @@
-package com.example.mensa_uniurb_app;
+package com.radeox.mensa_uniurb;
 
 import android.os.Bundle;
 import io.flutter.app.FlutterActivity;
