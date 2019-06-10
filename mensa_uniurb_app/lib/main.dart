@@ -3,8 +3,8 @@ import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
+// import 'package:flutter/services.dart';
+import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 
 import 'myWidgets.dart';
@@ -42,7 +42,7 @@ class MensaUniurb extends StatelessWidget {
 }
 
 class SearchScreen extends StatefulWidget {
-  // Search screen arguments
+  // Constructor of the screen
   SearchScreen({Key key, this.title}) : super(key: key);
 
   // Title of the screen
@@ -54,11 +54,19 @@ class SearchScreen extends StatefulWidget {
 
 // Widget that creates the form search and send the query to the result widget
 class _SearchScreenState extends State<SearchScreen> {
+  // Variables that stores user choices for later use
   String kitchen = "duca";
   String date = DateFormat('MM-dd-yyyy').format(DateTime.now());
   String meal = "lunch";
 
-  // Build widget function
+  // Translates values from buttons to prettier form
+  Map dict = {
+    'duca': "Duca",
+    'tridente': "Tridente",
+    'lunch': "Pranzo",
+    'dinner': "Cena",
+  };
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,7 +74,8 @@ class _SearchScreenState extends State<SearchScreen> {
       appBar: AppBar(
         title: Text(widget.title, style: TextStyle(fontSize: 24)),
         centerTitle: true,
-        leading: IconButton(icon: Icon(Icons.menu)),
+        // leading: IconButton(icon: Icon(Icons.menu)),
+        // Makes the cool circle over appbar
         flexibleSpace: CustomPaint(
           painter: CircleAppBar(),
           child: Padding(
@@ -86,6 +95,7 @@ class _SearchScreenState extends State<SearchScreen> {
           children: <Widget>[
             Padding(
               padding: const EdgeInsets.all(8.0),
+              // Custom radio buttons
               child: RadioButtons(
                 textButton1: "Duca",
                 valueButton1: "duca",
@@ -94,6 +104,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 setFunc: _setKitchen,
               ),
             ),
+            // Custom radio buttons
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: RadioButtons(
@@ -104,6 +115,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 setFunc: _setMeal,
               ),
             ),
+            // Custom data picker
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: DataPicker(
@@ -118,35 +130,56 @@ class _SearchScreenState extends State<SearchScreen> {
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.search),
         onPressed: () {
-          // Navigate to ResultScreen when tapped.
-          Navigator.pushNamed(context, '/results',
-              arguments: SearchArguments(kitchen, date, meal));
+          // Translates values from buttons to prettier form
+          String kName = dict['$kitchen'];
+          String mName = dict['$meal'];
+
+          // Navigate to ResultScreen when tapped
+          Navigator.pushNamed(
+            context,
+            '/results',
+            arguments: SearchArguments(
+              title: "$kName - $mName",
+              kitchen: kitchen,
+              date: date,
+              meal: meal,
+            ),
+          );
         },
       ),
     );
   }
 
+  // Function called from child widgets to set the value
   _setKitchen(value) {
     kitchen = value;
   }
 
+  // Function called from child widgets to set the value
   _setDate(value) {
     date = value;
   }
 
+  // Function called from child widgets to set the value
   _setMeal(value) {
     meal = value;
   }
 }
 
 class ResultScreen extends StatelessWidget {
+  // Constructor of the screen
+  ResultScreen({Key key, this.title}) : super(key: key);
+
+  // Title of the screen
+  final String title;
+
   @override
   Widget build(BuildContext context) {
-    // Extract arguments passed from search screen
+    // Extract arguments passed from the search screen
     final SearchArguments args = ModalRoute.of(context).settings.arguments;
 
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(title: Text("${args.title}")),
       body: FutureBuilder(
         future: getList(args),
         builder: (BuildContext context, AsyncSnapshot<List> snapshot) {
@@ -167,6 +200,7 @@ class ResultScreen extends StatelessWidget {
               ]);
             } else {
               // If the result is empty display something else
+              // TODO: something better here
               return Center(
                 child: Text("Empty"),
               );
@@ -185,13 +219,19 @@ class ResultScreen extends StatelessWidget {
     // Create an empty list
     List<Widget> list = List();
 
+    Map names = {
+      'first': "Primi",
+      'second': "Secondi",
+      'side': "Contorno",
+      'fruit': "Frutta",
+    };
+
     // Make the url with the arguments from the previous screen
-    var url =
+    String url =
         'http://51.158.173.57:9543/${args.kitchen}/${args.date}/${args.meal}';
 
-    print(url);
     // Send the request
-    var response = await http.get(url);
+    Response response = await get(url);
 
     // Try decoding results
     // If they are empty the result will not be a JSON
@@ -199,11 +239,14 @@ class ResultScreen extends StatelessWidget {
       result = json.decode(response.body);
     } on Exception {}
 
-    // If no results then return the empty list
-    if (result['menu']['first'].isEmpty) return list;
+    // If no results (network/request error) or the
+    //results are empty (closing day) then return the empty list
+    if ((result.isEmpty) || (result['menu']['first'].isEmpty)) return list;
 
     // Loop through keys of the json
     for (String type in result['menu'].keys) {
+      list.add(namedSpacer('${names[type]}'));
+
       // Loop through each item and add them to list
       for (String item in result['menu'][type]) {
         // Extract last part of the string
@@ -223,29 +266,52 @@ class ResultScreen extends StatelessWidget {
             child: ListTile(
               title: Text('$item'),
               subtitle: Text('$infos'),
-              // leading: Icon(Icons.local_dining),
             ),
           ));
         } else {
           // Otherwise add it without anything
           list.add(Card(
-            child: ListTile(
-              title: Text('$item'),
-            ),
+            child: ListTile(title: Text('$item')),
           ));
         }
       }
-
-      // Put a divider after each group
-      list.add(Divider(height: 25));
     }
 
     return list;
+  }
+
+  // Custom widget - Spacer with name and icon
+  Widget namedSpacer(value, {icon = Icons.local_dining}) {
+    return Row(
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Icon(icon),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(value, style: TextStyle(fontSize: 25)),
+        ),
+      ],
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+    );
   }
 }
 
 // Class that incapsulates the arguments required for the search query
 class SearchArguments {
+  // Constructor of the arguments
+  SearchArguments({
+    this.title,
+    @required this.kitchen,
+    @required this.date,
+    @required this.meal,
+  });
+
+  // Kitchen name
+  final String title;
+
   // Kitchen name
   final String kitchen;
 
@@ -254,28 +320,23 @@ class SearchArguments {
 
   // Meal (lunch or dinner)
   final String meal;
-
-  SearchArguments(this.kitchen, this.date, this.meal);
 }
 
+// Custom painter that creates the blue circle over the appBar
 class CircleAppBar extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
+    // Create painter
     final paint = Paint();
-    // set the color property of the paint
+
+    // Set the color
     paint.color = Colors.blue;
 
-    // center of the canvas is (x,y) => (width/2, height/2)
-    // var shape = Rect.fromLTWH(
-    //     -size.width * 0.5, -100, size.width * 2, size.width * 0.5);
+    // Compute the center where the circle should be drawn
+    Offset center = Offset(size.width / 2, size.height * 0.1);
 
-    var middle = Offset(size.width / 2, size.height * 0.1);
-    // canvas.drawArc(shape, 0, 10, true, paint);
-    canvas.drawCircle(middle, 250, paint);
-
-    // paint.color = Colors.lightBlue;
-
-    // canvas.drawCircle(middle, 100.0, paint);
+    // Draw the circle
+    canvas.drawCircle(center, 250, paint);
   }
 
   @override
