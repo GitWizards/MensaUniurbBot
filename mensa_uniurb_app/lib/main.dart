@@ -7,27 +7,29 @@ import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 
-import 'myWidgets.dart';
+import 'package:MensaUniurb/themes.dart';
+import 'package:MensaUniurb/myWidgets.dart';
 
-void main() => runApp(MensaUniurb());
+void main() async {
+  ThemeData theme = await Themes.load();
+  runApp(MensaUniurb(theme: theme));
+}
 
 class MensaUniurb extends StatelessWidget {
+  MensaUniurb({this.theme});
+
   // Appbar title
   final String title = "MensaUniurb";
+
+  // Theme to be set
+  final ThemeData theme;
 
   // Root of the application
   @override
   Widget build(BuildContext context) {
     return DynamicTheme(
       // Default theme
-      defaultBrightness: Brightness.light,
-      data: (brightness) => new ThemeData(
-            primaryColor: Colors.blue,
-            primarySwatch: Colors.blue,
-            accentColor: Colors.blue,
-            brightness: brightness,
-            fontFamily: 'Noto',
-          ),
+      data: (brightness) => theme,
       themedWidgetBuilder: (context, theme) {
         return MaterialApp(
           title: title,
@@ -153,8 +155,8 @@ class _SearchScreenState extends State<SearchScreen> {
 
       // Drawer on the left
       drawer: Container(
-        color: Theme.of(context).backgroundColor,
         width: 250,
+        color: Theme.of(context).backgroundColor,
         child: ListView(
           children: <Widget>[
             ListTile(
@@ -168,15 +170,15 @@ class _SearchScreenState extends State<SearchScreen> {
               children: <Widget>[
                 IconButton(
                   icon: CircleAvatar(backgroundColor: Colors.blue),
-                  onPressed: _applyBlueTheme,
+                  onPressed: () => applyTheme('blue'),
                 ),
                 IconButton(
                   icon: CircleAvatar(backgroundColor: Colors.green),
-                  onPressed: _applyGreenTheme,
+                  onPressed: () => applyTheme('green'),
                 ),
                 IconButton(
                   icon: CircleAvatar(backgroundColor: Colors.orange),
-                  onPressed: _applyOrangeTheme,
+                  onPressed: () => applyTheme('orange'),
                 ),
               ],
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -207,6 +209,29 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
+  applyTheme(theme) {
+    // Check and update theme
+    setState(() {
+      switch (theme) {
+        case 'blue':
+          DynamicTheme.of(context).setThemeData(Themes.blue());
+          break;
+        case 'green':
+          DynamicTheme.of(context).setThemeData(Themes.green());
+          break;
+        case 'orange':
+          DynamicTheme.of(context).setThemeData(Themes.orange());
+          break;
+      }
+    });
+
+    // Save selected theme
+    Themes.save(theme);
+
+    // CLose the drawer
+    Navigator.pop(context);
+  }
+
   // Function called from child widgets to set the value
   _setKitchen(value) {
     kitchen = value;
@@ -220,48 +245,6 @@ class _SearchScreenState extends State<SearchScreen> {
   // Function called from child widgets to set the value
   _setMeal(value) {
     meal = value;
-  }
-
-  // Apply the blue theme
-  _applyBlueTheme() {
-    DynamicTheme.of(context).setThemeData(ThemeData(
-      primaryColor: Colors.blue,
-      primarySwatch: Colors.blue,
-      accentColor: Colors.blue,
-      brightness: Brightness.light,
-      fontFamily: 'Noto',
-    ));
-
-    // Close the drawer
-    Navigator.pop(context);
-  }
-
-  // Apply the green theme
-  _applyGreenTheme() {
-    DynamicTheme.of(context).setThemeData(ThemeData(
-      primaryColor: Colors.green,
-      primarySwatch: Colors.green,
-      accentColor: Colors.green,
-      brightness: Brightness.light,
-      fontFamily: 'Noto',
-    ));
-
-    // Close the drawer
-    Navigator.pop(context);
-  }
-
-  // Apply the dark-orange theme
-  _applyOrangeTheme() {
-    DynamicTheme.of(context).setThemeData(ThemeData(
-      primaryColor: Colors.orange,
-      primarySwatch: Colors.orange,
-      accentColor: Colors.orange,
-      brightness: Brightness.dark,
-      fontFamily: 'Noto',
-    ));
-
-    // Close the drawer
-    Navigator.pop(context);
   }
 }
 

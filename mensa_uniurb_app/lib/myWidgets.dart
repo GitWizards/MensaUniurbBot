@@ -154,8 +154,8 @@ class _RadioButtonsState extends State<RadioButtons> {
             ),
           ),
           shape: StadiumBorder(),
-          color: Theme.of(context).accentColor,
-          disabledColor: Colors.grey,
+          color: Colors.grey,
+          disabledColor: Theme.of(context).accentColor,
 
           // Check if the buttons is active and take action
           onPressed: active ? null : () => _changeActiveButton(),
