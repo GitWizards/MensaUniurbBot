@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:MensaUniurb/themes.dart';
 import 'package:MensaUniurb/myWidgets.dart';
@@ -83,12 +84,7 @@ class _SearchScreenState extends State<SearchScreen> {
         // Makes the cool circle over appbar
         flexibleSpace: CustomPaint(
           painter: CircleAppBar(context: context),
-          child: Padding(
-            padding: const EdgeInsets.only(top: 80.0),
-            child: CircleAvatar(
-              backgroundColor: Colors.black,
-            ),
-          ),
+          child: Padding(padding: const EdgeInsets.only(top: 80.0)),
         ),
       ),
 
@@ -186,29 +182,30 @@ class _SearchScreenState extends State<SearchScreen> {
             ListTile(
               leading: Icon(Icons.message),
               title: Text('Bot Telegram', style: TextStyle(fontSize: 17)),
-              onTap: () => print("info"),
+              onTap: () => _launchURL("https://t.me/MensaUniurb_Bot"),
             ),
             ListTile(
               leading: Icon(Icons.person),
               title: Text('Contact us', style: TextStyle(fontSize: 17)),
-              onTap: () => print("info"),
+              onTap: () => _launchURL("https://t.me/Radeox"),
             ),
             ListTile(
               leading: Icon(Icons.monetization_on),
               title: Text('Donazioni', style: TextStyle(fontSize: 17)),
-              onTap: () => print("info"),
+              onTap: () => _launchURL("https://www.paypal.me/Radeox"),
             ),
-            ListTile(
-              leading: Icon(Icons.info),
-              title: Text('Info', style: TextStyle(fontSize: 17)),
-              onTap: () => print("info"),
-            ),
+            // ListTile(
+            //   leading: Icon(Icons.info),
+            //   title: Text('Info', style: TextStyle(fontSize: 17)),
+            //   onTap: () => print("info"),
+            // ),
           ],
         ),
       ),
     );
   }
 
+  // Function to apply and save the selected theme
   applyTheme(theme) {
     // Check and update theme
     setState(() {
@@ -228,7 +225,7 @@ class _SearchScreenState extends State<SearchScreen> {
     // Save selected theme
     Themes.save(theme);
 
-    // CLose the drawer
+    // Close the drawer
     Navigator.pop(context);
   }
 
@@ -245,6 +242,18 @@ class _SearchScreenState extends State<SearchScreen> {
   // Function called from child widgets to set the value
   _setMeal(value) {
     meal = value;
+  }
+
+  // Open URL in browser
+  _launchURL(url) async {
+    // Check if can launch URL
+    if (await canLaunch(url))
+      await launch(url);
+    else
+      throw 'Could not launch $url';
+
+    // Close the drawer
+    Navigator.pop(context);
   }
 }
 
