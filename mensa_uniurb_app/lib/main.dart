@@ -20,7 +20,7 @@ class MensaUniurb extends StatelessWidget {
   MensaUniurb({this.theme});
 
   // Appbar title
-  final String title = "MensaUniurb";
+  final String title = "Mensa Uniurb";
 
   // Theme to be set
   final ThemeData theme;
