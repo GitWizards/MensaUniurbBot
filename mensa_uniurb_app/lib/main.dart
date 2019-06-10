@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart' as prefix0;
 // import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:intl/intl.dart';
@@ -199,10 +200,33 @@ class ResultScreen extends StatelessWidget {
                 Expanded(child: ListView(children: content)),
               ]);
             } else {
-              // If the result is empty display something else
-              // TODO: something better here
+              // If the result is empty display alert
               return Center(
-                child: Text("Empty"),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Icon(
+                      Icons.error,
+                      size: 100,
+                      color: Colors.red,
+                    ),
+                    Text(
+                      "Ops!",
+                      style: TextStyle(fontSize: 50),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        top: 10,
+                        left: 40,
+                        right: 40,
+                      ),
+                      child: Text(
+                        "Sembra che la mensa sia chiusa!",
+                        style: TextStyle(fontSize: 20),
+                      ),
+                    ),
+                  ],
+                ),
               );
             }
           }
