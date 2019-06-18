@@ -22,11 +22,11 @@ class Themes {
     );
   }
 
-  static ThemeData orange() {
+  static ThemeData teal() {
     return ThemeData(
-      primaryColor: Colors.orange,
-      primarySwatch: Colors.orange,
-      accentColor: Colors.orange,
+      primaryColor: Colors.teal,
+      primarySwatch: Colors.teal,
+      accentColor: Colors.teal,
       brightness: Brightness.dark,
       fontFamily: 'Noto',
     );
@@ -54,8 +54,8 @@ class Themes {
         return green();
         break;
 
-      case 'orange':
-        return orange();
+      case 'teal':
+        return teal();
         break;
 
       default:

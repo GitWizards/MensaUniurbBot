@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:ui';
 
+import 'package:MensaUniurb/ads.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
@@ -12,7 +13,13 @@ import 'package:MensaUniurb/themes.dart';
 import 'package:MensaUniurb/myWidgets.dart';
 
 void main() async {
+  // Initialize interstitial ad
+  InterAd.init();
+
+  // Load selected theme
   ThemeData theme = await Themes.load();
+
+  // Run app
   runApp(MensaUniurb(theme: theme));
 }
 
@@ -128,8 +135,9 @@ class _SearchScreenState extends State<SearchScreen> {
       ),
 
       // Button to start query
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.search),
+      floatingActionButton: FloatingActionButton.extended(
+        label: Text("Cerca"),
+        icon: Icon(Icons.search),
         onPressed: () {
           // Translates values from buttons to prettier form
           String kName = dict['$kitchen'];
@@ -173,8 +181,8 @@ class _SearchScreenState extends State<SearchScreen> {
                   onPressed: () => applyTheme('green'),
                 ),
                 IconButton(
-                  icon: CircleAvatar(backgroundColor: Colors.orange),
-                  onPressed: () => applyTheme('orange'),
+                  icon: CircleAvatar(backgroundColor: Colors.teal),
+                  onPressed: () => applyTheme('teal'),
                 ),
               ],
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -216,8 +224,8 @@ class _SearchScreenState extends State<SearchScreen> {
         case 'green':
           DynamicTheme.of(context).setThemeData(Themes.green());
           break;
-        case 'orange':
-          DynamicTheme.of(context).setThemeData(Themes.orange());
+        case 'teal':
+          DynamicTheme.of(context).setThemeData(Themes.teal());
           break;
       }
     });
@@ -268,6 +276,9 @@ class ResultScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // Extract arguments passed from the search screen
     final SearchArguments args = ModalRoute.of(context).settings.arguments;
+
+    // Dipslay interstitial ad
+    InterAd.showAd();
 
     return Scaffold(
       appBar: AppBar(title: Text("${args.title}")),
