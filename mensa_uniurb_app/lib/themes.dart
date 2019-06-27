@@ -22,11 +22,11 @@ class Themes {
     );
   }
 
-  static ThemeData teal() {
+  static ThemeData orange() {
     return ThemeData(
-      primaryColor: Colors.teal,
-      primarySwatch: Colors.teal,
-      accentColor: Colors.teal,
+      primaryColor: Colors.orange,
+      primarySwatch: Colors.orange,
+      accentColor: Colors.orange,
       brightness: Brightness.dark,
       fontFamily: 'Noto',
     );
@@ -35,7 +35,6 @@ class Themes {
   // Save the theme to shared preferences
   static save(theme) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-
     await prefs.setString('theme', theme);
   }
 
@@ -54,8 +53,8 @@ class Themes {
         return green();
         break;
 
-      case 'teal':
-        return teal();
+      case 'orange':
+        return orange();
         break;
 
       default:

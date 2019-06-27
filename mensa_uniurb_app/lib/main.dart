@@ -181,26 +181,32 @@ class _SearchScreenState extends State<SearchScreen> {
                   onPressed: () => applyTheme('green'),
                 ),
                 IconButton(
-                  icon: CircleAvatar(backgroundColor: Colors.teal),
-                  onPressed: () => applyTheme('teal'),
+                  icon: CircleAvatar(backgroundColor: Colors.orange),
+                  onPressed: () => applyTheme('orange'),
                 ),
               ],
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             ),
             ListTile(
-              leading: Icon(Icons.message),
-              title: Text('Bot Telegram', style: TextStyle(fontSize: 17)),
-              onTap: () => _launchURL("https://t.me/MensaUniurb_Bot"),
+              leading: Icon(Icons.person),
+              title: Text('Get in touch', style: TextStyle(fontSize: 17)),
+              onTap: () => _launchURL("https://t.me/Radeox"),
             ),
             ListTile(
-              leading: Icon(Icons.person),
-              title: Text('Contact us', style: TextStyle(fontSize: 17)),
-              onTap: () => _launchURL("https://t.me/Radeox"),
+              leading: Icon(Icons.settings_backup_restore),
+              title: Text('Source code', style: TextStyle(fontSize: 17)),
+              onTap: () =>
+                  _launchURL("https://github.com/FastRadeox/MensaUniurbBot"),
             ),
             ListTile(
               leading: Icon(Icons.monetization_on),
               title: Text('Donazioni', style: TextStyle(fontSize: 17)),
               onTap: () => _launchURL("https://www.paypal.me/Radeox"),
+            ),
+            ListTile(
+              leading: Icon(Icons.message),
+              title: Text('Bot Telegram', style: TextStyle(fontSize: 17)),
+              onTap: () => _launchURL("https://t.me/MensaUniurb_Bot"),
             ),
             // ListTile(
             //   leading: Icon(Icons.info),
@@ -224,8 +230,8 @@ class _SearchScreenState extends State<SearchScreen> {
         case 'green':
           DynamicTheme.of(context).setThemeData(Themes.green());
           break;
-        case 'teal':
-          DynamicTheme.of(context).setThemeData(Themes.teal());
+        case 'orange':
+          DynamicTheme.of(context).setThemeData(Themes.orange());
           break;
       }
     });
@@ -238,19 +244,13 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   // Function called from child widgets to set the value
-  _setKitchen(value) {
-    kitchen = value;
-  }
+  _setKitchen(value) => kitchen = value;
 
   // Function called from child widgets to set the value
-  _setDate(value) {
-    date = value;
-  }
+  _setDate(value) => date = value;
 
   // Function called from child widgets to set the value
-  _setMeal(value) {
-    meal = value;
-  }
+  _setMeal(value) => meal = value;
 
   // Open URL in browser
   _launchURL(url) async {

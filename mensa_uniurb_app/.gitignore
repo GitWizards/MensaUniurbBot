@@ -1,5 +1,6 @@
 # Configurations
 google-services.json
+config.dart
 
 # Miscellaneous
 *.class

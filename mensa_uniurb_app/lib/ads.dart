@@ -1,24 +1,25 @@
 import 'dart:math';
+import 'config.dart';
 
 import 'package:firebase_admob/firebase_admob.dart';
 
 class InterAd {
-  static const appId = "ca-app-pub-8838692391489199~9266274568";
-  static const adUnitId = "ca-app-pub-8838692391489199/5757434072";
-  static const testDevices = ["CE744815682B17D9BF5B571E1F92478F"];
-  static const test = false;
+  static final appId = Config.appId;
+  static final adUnitId = Config.adUnitId;
+  static final testDevices = Config.testDevices;
+  static final test = false;
 
   static InterstitialAd _ad;
 
-  static const MobileAdTargetingInfo targetInfo = MobileAdTargetingInfo(
-    testDevices: testDevices,
-  );
+  static final targetInfo = MobileAdTargetingInfo(testDevices: testDevices);
 
   static init() {
+    // Init AdMob with testId or the actual appId
     FirebaseAdMob.instance.initialize(
       appId: test ? FirebaseAdMob.testAppId : appId,
     );
 
+    // Init ad with test value or the actual appUnitId and load it
     _ad = InterstitialAd(
       adUnitId: test ? InterstitialAd.testAdUnitId : adUnitId,
       targetingInfo: targetInfo,
@@ -28,7 +29,7 @@ class InterAd {
   static showAd() {
     var rng = Random();
 
-    // 50% that an Ad start
+    // 50% that an ad pops up
     if (50 > rng.nextInt(100))
       _ad..show(anchorOffset: 0.0, anchorType: AnchorType.bottom);
   }
