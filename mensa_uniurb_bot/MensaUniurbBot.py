@@ -104,36 +104,16 @@ class MessageHandler:
             #! ------------ State transition handler ------------
             #! ------------ Entry points ------------
             elif input_msg == "/duca":
-                #! Skipping this choice as it was removed on website
-                # self.USER_STATE[chat_id] = 1
                 self.USER_STATE[chat_id] = 11
 
-                # Send classic/cibus keyboard
-                # self.send_kitchen_keyboard(chat_id)
-
-                #! Skip here
                 self.send_dish_keyboard(chat_id)
                 self.dc.log_request(input_msg)
 
             elif input_msg == "/tridente":
-                #! Skipping this choice as it was removed on website
-                # self.USER_STATE[chat_id] = 2
                 self.USER_STATE[chat_id] = 21
 
-                # Send classic/cibus keyboard
-                # self.send_kitchen_keyboard(chat_id)
-
-                #! Skip here
                 self.send_dish_keyboard(chat_id)
                 self.dc.log_request(input_msg)
-
-            #! Disabled for now
-            # elif input_msg == "/sogesta":
-            #     self.USER_STATE[chat_id] = 3
-
-            #     # Send moment (lunch/dinner) keyboard
-            #     self.send_dish_keyboard(chat_id)
-            #     self.dc.log_request(input_msg)
 
             # User can write a report to admins
             elif input_msg == "/segnala":
@@ -321,21 +301,16 @@ class MessageHandler:
         self.dc.register_user(chat_id, username, full_name)
 
         # Answer to user
-        #! Changed
-        # bot.sendMessage(chat_id, "*Benvenuto su @MensaUniurbBot*\n"
-        #                 "Qui troverai il menù offerto dal ERSU per gli studenti di Uniurb per il ristorante /duca, /tridente e /sogesta.\n\n"
-        #                 "_Il bot è stato creato in modo non ufficiale nè ERSU Urbino nè UNIURB sono responsabili in alcun modo._",
-        #                 parse_mode='Markdown')
         bot.sendMessage(chat_id, "*Benvenuto su @MensaUniurbBot*\n"
-                        "Qui troverai il menù offerto dal ERSU per gli studenti di Uniurb per il ristorante /duca e /tridente.\n\n"
-                        "_Il bot è stato creato in modo non ufficiale nè ERSU Urbino nè UNIURB sono responsabili in alcun modo._",
+                        "Qui troverai il menù offerto da Erdis per gli studenti di Uniurb per il ristorante /duca e /tridente.\n\n"
+                        "_Il bot è stato creato in modo non ufficiale nè Erdis March nè Uniurb sono responsabili in alcun modo._",
                         parse_mode='Markdown')
 
     def send_price_table(self, chat_id):
         """
         Send an image with the prices of each dish
         """
-        with open("price_list_it.png", 'rb') as f:
+        with open("assets/price_list.png", 'rb') as f:
             bot.sendPhoto(chat_id, f)
             f.close()
 
@@ -359,19 +334,6 @@ class MessageHandler:
         """
         Send the opening hours for each kitchen
         """
-        #! Changed
-        # bot.sendMessage(chat_id, "🍝*Duca*\nAperta tutti i giorni della settimana,"
-        #                 "esclusi sabato e domenica, dalle *12:00* alle *14:00* "
-        #                 "e dalle *19:00* alle *21:00*.\n*Cibus* dalle *12:00* alle *14:30* e dalle *19:00* alle *21:30*.\n"
-        #                 "*Posizione*: /posizioneduca\n\n"
-        #                 "*🍖Tridente*\nAperta tutti i giorni della settimana dalle *12:00* alle *14:00* "
-        #                 "e dalle *19:00* alle *21:00*.\n"
-        #                 "*Cibus* esclusi sabato e domenica, stessi orari.\n"
-        #                 "*Posizione*: /posizionetridente\n\n"
-        #                 "🍟*Sogesta*\nAperta da Ottobre a Giugno, tutti i giorni della settimana "
-        #                 "esclusa la domenica, dalle *12:30* alle *14:00* e dalle *19:30* "
-        #                 "alle *21:00*.\n*Posizione*: /posizionesogesta",
-        #                 parse_mode="Markdown")
         bot.sendMessage(chat_id, "🍝*Duca*\nAperta tutti i giorni della settimana, "
                         "esclusi sabato e domenica, dalle *12:00* alle *14:00* "
                         "e dalle *19:00* alle *21:00*.\n"
