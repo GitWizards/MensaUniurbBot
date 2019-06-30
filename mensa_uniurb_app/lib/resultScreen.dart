@@ -6,7 +6,7 @@ import 'package:http/http.dart';
 
 import 'ads.dart';
 
-class ResultScreen extends StatelessWidget {
+class ResultScreen extends StatefulWidget {
   // Constructor of the screen
   ResultScreen({Key key, this.title}) : super(key: key);
 
@@ -14,9 +14,29 @@ class ResultScreen extends StatelessWidget {
   final String title;
 
   @override
+  _ResultScreenState createState() => _ResultScreenState();
+}
+
+class _ResultScreenState extends State<ResultScreen> {
+  // Flag to check if data has been already requested
+  bool needData = true;
+
+  // Arguments of the search
+  SearchArguments args;
+
+  // Future list of widgets that will be made in the getList function
+  Future<List<Widget>> results;
+
+  @override
   Widget build(BuildContext context) {
-    // Extract arguments passed from the search screen
-    final SearchArguments args = ModalRoute.of(context).settings.arguments;
+    if (needData) {
+      // Extract arguments passed from the search screen
+      args = ModalRoute.of(context).settings.arguments;
+      results = getList(args);
+
+      // Set flag to false
+      needData = false;
+    }
 
     // Dipslay interstitial ad
     InterAd.showAd();
@@ -24,7 +44,7 @@ class ResultScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text("${args.title}")),
       body: FutureBuilder(
-        future: getList(args),
+        future: results,
         builder: (BuildContext context, AsyncSnapshot<List> snapshot) {
           if (!snapshot.hasData) {
             // Display during loading
@@ -38,9 +58,13 @@ class ResultScreen extends StatelessWidget {
             // If some content exists
             if (content.isNotEmpty) {
               // Create and return the list
-              return Column(children: <Widget>[
-                Expanded(child: ListView(children: content)),
-              ]);
+              return Column(
+                children: <Widget>[
+                  Expanded(
+                    child: ListView(children: content),
+                  ),
+                ],
+              );
             } else {
               // If the result is empty display alert
               return Center(
@@ -64,9 +88,7 @@ class ResultScreen extends StatelessWidget {
                       ),
                       child: Text(
                         "Sembra che la mensa sia chiusa.",
-                        style: TextStyle(
-                          fontSize: 20,
-                        ),
+                        style: TextStyle(fontSize: 20),
                       ),
                     ),
                   ],
@@ -79,7 +101,6 @@ class ResultScreen extends StatelessWidget {
     );
   }
 
-  // Create a list from the result
   Future<List<Widget>> getList(SearchArguments args) async {
     // Result of the request to API
     Map result = {};
@@ -130,16 +151,20 @@ class ResultScreen extends StatelessWidget {
           infos = infos.toUpperCase();
 
           // Add the item to the list with subtitle
-          list.add(Card(
-            child: ListTile(
-              title: Text('$item'),
-              subtitle: Text('$infos'),
+          list.add(
+            Card(
+              child: ListTile(
+                title: Text('$item'),
+                subtitle: Text('$infos'),
+              ),
             ),
-          ));
+          );
         } else {
           // Otherwise add it without anything
           list.add(Card(
-            child: ListTile(title: Text('$item')),
+            child: ListTile(
+              title: Text('$item'),
+            ),
           ));
         }
       }
@@ -148,7 +173,6 @@ class ResultScreen extends StatelessWidget {
     return list;
   }
 
-  // Custom widget - Spacer with name and icon
   Widget namedSpacer(value, {icon = Icons.local_dining}) {
     return Row(
       children: <Widget>[
