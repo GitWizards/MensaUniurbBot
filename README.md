@@ -1,9 +1,9 @@
-# Mensa Uniurb Bot #
+# Mensa Uniurb #
 
 <img src="img/logo.png" alt="logo" width="250" style="display: block;margin-left: auto; margin-right: auto;"/>
 
 Il progetto serve a semplificare e rendere più immediata la consultazione del menù della mensa Uniurb, che attualmente corrisponde a un brutto form e una tabella HTML.
-Nel tempo abbiamo sviluppato diverse componenti per rendere questo progetto didattico e riutilizzabile oltre al semplice utilizzo.
+Nel tempo abbiamo sviluppato diverse componenti per rendere questo progetto didattico e riutilizzabile oltre alla semplice consultazione da parte degli utenti.
 
 Questa repository è composta da tre parti principali:
 
