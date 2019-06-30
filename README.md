@@ -1,22 +1,22 @@
 # Mensa Uniurb Bot #
 
-![Uniurb](http://informatica.uniurb.it/assets/logo_sti_new.png)
+<img src="img/logo.png" alt="logo" width="250" style="display: block;margin-left: auto; margin-right: auto;"/>
 
-Semplice Bot Telegram per la visualizzazione del menù della mensa offerta dall'ERSU di Urbino.
+Il progetto serve a semplificare e rendere più immediata la consultazione del menù della mensa Uniurb, che attualmente corrisponde a un brutto form e una tabella HTML.
+Nel tempo abbiamo sviluppato diverse componenti per rendere questo progetto didattico e riutilizzabile oltre al semplice utilizzo.
 
-Ora gli studenti di Uniurb, ma anche altri, potranno controllare in tempo reale il menu settimanale della mensa con un semplice messaggio.
+Questa repository è composta da tre parti principali:
 
-![Uniurb](img/banner_small.png)
+* Bot &rarr; Bot telegram realizzato in Python tramite la libreria [Telepot](https://github.com/nickoala/telepot).
+* App &rarr; Mobile app realizzata in [Flutter](https://flutter.dev).
+* API &rarr; Acquisisce e converte i dati in un formato facilmente utilizzabile e accessibile. Realizzato in Python con l'ausilio della liberia [Flask](http://flask.pocoo.org).
 
-## Se il bot vi è stato utile, offriteci una birra ##
+<img src="img/screenshots.png" alt="logo" width="600" style="display: block;margin-left: auto; margin-right: auto;"/>
+
+## Se il progetto ti è stato utile in qualunque modo, offrici una birra ##
 
 [![Donate](https://img.shields.io/badge/Dona-Paypal-blue.svg)](https://paypal.me/radeox)
 
 ------------------------------------------------------------------------------------
 
-This bot is realized with [Telepot](https://github.com/nickoala/telepot).
-
-This is an unofficial bot developed to learn. Uniurb or ERSU is not responsible in any way.
-
-This program comes with ABSOLUTELY NO WARRANTY.
-This is free software, and you are welcome to redistribute it.
+Tutto quello che trovate in questa repository è stato sviluppato da noi a scopo educativo. Ne Uniurb ne Erdis Urbino sono responsabili in alcun modo.

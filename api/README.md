@@ -1,6 +1,6 @@
 # Mensa Uniurb API #
 
-Simple API written in flask parse the ERDIS menu directly from their webpage.
+Simple API written in Flask scrap data from the Erdis menu webpage.
 Every request is logged to generate some statistic data.
 
 ## Usage ##
