@@ -4,6 +4,7 @@ import 'package:MensaUniurb/ads.dart';
 import 'package:MensaUniurb/resultScreen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -17,6 +18,9 @@ void main() async {
 
   // Load selected theme
   ThemeData theme = await Themes.load();
+
+  // Lock app in portrait mode
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
   // Run app
   runApp(MensaUniurb(theme: theme));
