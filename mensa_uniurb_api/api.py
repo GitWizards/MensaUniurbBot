@@ -4,6 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 from flask import Flask
 from flask_restful import Api, Resource
+from waitress import serve
 
 from logger import Logger
 
@@ -24,7 +25,7 @@ class RequestStats(Resource):
     def get(self):
         logger.log_request('stats', '-')
         return logger.get_stats()
-       
+
 
 def get_menu(place, date, meal):
     """
@@ -140,5 +141,7 @@ if __name__ == '__main__':
     api.add_resource(Tridente, '/tridente/<date>/<meal>')
     api.add_resource(RequestStats, '/stats/')
 
+    # DEBUG: app.run(host='0.0.0.0', port=PORT)
+
     # Start API
-    app.run(host='0.0.0.0', port=PORT)
+    serve(app, host='0.0.0.0', port=PORT)
