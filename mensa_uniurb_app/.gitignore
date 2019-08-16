@@ -1,6 +1,7 @@
 # Configurations
 google-services.json
 config.dart
+key.properties
 
 # Miscellaneous
 *.class
