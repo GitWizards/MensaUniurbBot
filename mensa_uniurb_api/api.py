@@ -23,7 +23,6 @@ class Tridente(Resource):
 
 class RequestStats(Resource):
     def get(self):
-        logger.log_request('stats', '-')
         return logger.get_stats()
 
 
