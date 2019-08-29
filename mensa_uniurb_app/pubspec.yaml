@@ -1,7 +1,7 @@
 name: MensaUniurb
 description: Check what's for launch from a beautiful app
 
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: ">=2.1.0 <3.0.0"
