@@ -111,7 +111,7 @@ class _ResultScreenState extends State<ResultScreen> {
     Map names = {
       'first': "Primi",
       'second': "Secondi",
-      'side': "Contorno",
+      'side': "Contorni",
       'fruit': "Frutta",
     };
 

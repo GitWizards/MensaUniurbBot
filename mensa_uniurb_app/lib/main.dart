@@ -5,6 +5,7 @@ import 'package:MensaUniurb/resultScreen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -162,14 +163,14 @@ class _SearchScreenState extends State<SearchScreen> {
 
       // Drawer on the left
       drawer: Container(
-        width: 250,
+        width: 270,
         color: Theme.of(context).backgroundColor,
         child: ListView(
           children: <Widget>[
             ListTile(
-              leading: Icon(Icons.brightness_6),
+              leading: Icon(FontAwesomeIcons.palette),
               title: Text(
-                'Theme',
+                'Tema',
                 style: TextStyle(fontSize: 17),
               ),
             ),
@@ -190,32 +191,28 @@ class _SearchScreenState extends State<SearchScreen> {
               ],
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             ),
+            Divider(),
             ListTile(
-              leading: Icon(Icons.person),
-              title: Text('Get in touch', style: TextStyle(fontSize: 17)),
-              onTap: () => _launchURL("https://t.me/Radeox"),
+              leading: Icon(Icons.mail),
+              title: Text('Email', style: TextStyle(fontSize: 17)),
+              onTap: () => _launchURL("mailto:dawid.weglarz95@gmail.com"),
             ),
             ListTile(
-              leading: Icon(Icons.settings_backup_restore),
-              title: Text('Source code', style: TextStyle(fontSize: 17)),
+              leading: Icon(FontAwesomeIcons.github),
+              title: Text('Github', style: TextStyle(fontSize: 17)),
               onTap: () =>
                   _launchURL("https://github.com/FastRadeox/MensaUniurbBot"),
             ),
             ListTile(
-              leading: Icon(Icons.monetization_on),
-              title: Text('Donazioni', style: TextStyle(fontSize: 17)),
+              leading: Icon(FontAwesomeIcons.paypal),
+              title: Text('Paypal', style: TextStyle(fontSize: 17)),
               onTap: () => _launchURL("https://www.paypal.me/Radeox"),
             ),
             ListTile(
-              leading: Icon(Icons.message),
+              leading: Icon(FontAwesomeIcons.telegramPlane),
               title: Text('Bot Telegram', style: TextStyle(fontSize: 17)),
               onTap: () => _launchURL("https://t.me/MensaUniurb_Bot"),
             ),
-            // ListTile(
-            //   leading: Icon(Icons.info),
-            //   title: Text('Info', style: TextStyle(fontSize: 17)),
-            //   onTap: () => print("info"),
-            // ),
           ],
         ),
       ),
