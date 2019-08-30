@@ -362,7 +362,7 @@ class MessageHandler:
                             "(https://paypal.me/Radeox/2) oppure [dona 5 Euro](https://paypal.me/Radeox/5)."
                             "\nGrazie del sostegno🍻")
                 if num == 2:
-                    msg += ("\n\n📱Siamo anche sul [Google Play](https://play.google.com/store/apps/details?id=com.radeox.mensa_uniurb)!")
+                    msg += ("\n\n📱Siamo anche su [Google Play](https://play.google.com/store/apps/details?id=com.radeox.mensa_uniurb)!")
 
                 # Send message
                 bot.sendMessage(chat_id, msg, parse_mode="Markdown",
