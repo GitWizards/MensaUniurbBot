@@ -175,11 +175,9 @@ class MessageHandler:
                 text="🍺 " + "Offrici una birra" + " 🍺", url="https://paypal.me/Radeox/")],
         ])
 
-        bot.sendMessage(chat_id, "Codice sorgente:" + "\n" +
-                        "https://github.com/FastRadeox/MensaUniurbBot\n\n" +
-                        "Sviluppato da:" + "\n" +
-                        "https://github.com/Radeox\n" +
-                        "https://github.com/Fast0n\n\n",
+        bot.sendMessage(chat_id, "Playstore:\nhttps://play.google.com/store/apps/details?id=com.radeox.mensa_uniurb\n\n" +
+                        "Codice sorgente:\nhttps://github.com/FastRadeox/MensaUniurbBot\n\n" +
+                        "Sviluppato da:\nhttps://github.com/Radeox\nhttps://github.com/Fast0n",
                         reply_markup=keyboard)
 
     def send_opening_hours(self, chat_id):
@@ -356,11 +354,15 @@ class MessageHandler:
 
             # Check if menu is not empty
             if msg:
-                # Randomly add paypal link to donate
-                if randint(1, 5) == 3:
+                # Randomly add paypal link to donate or link to playstore app
+                num = randint(1, 4)
+
+                if num == 1:
                     msg += ("\n\n💙Aiutaci a sostenere le spese di @MensaUniurb\_Bot.\n[Dona 2 Euro]"
                             "(https://paypal.me/Radeox/2) oppure [dona 5 Euro](https://paypal.me/Radeox/5)."
                             "\nGrazie del sostegno🍻")
+                if num == 2:
+                    msg += ("\n\n📱Siamo anche sul [Playstore](https://play.google.com/store/apps/details?id=com.radeox.mensa_uniurb)!")
 
                 # Send message
                 bot.sendMessage(chat_id, msg, parse_mode="Markdown",
