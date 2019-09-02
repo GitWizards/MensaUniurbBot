@@ -201,7 +201,7 @@ class MessageHandler:
         now = datetime.now()
         year = now.strftime("%Y")
         month = now.strftime("%-m")
-        day = now.strftime("%d")
+        day = now.strftime("%-d")
 
         # Requests statistics from the API
         r = requests.get("http://127.0.0.1:9543/stats/")
