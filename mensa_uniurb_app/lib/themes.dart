@@ -22,11 +22,11 @@ class Themes {
     );
   }
 
-  static ThemeData orange() {
+  static ThemeData red() {
     return ThemeData(
-      primaryColor: Colors.orange,
-      primarySwatch: Colors.orange,
-      accentColor: Colors.orange,
+      primaryColor: Colors.red,
+      primarySwatch: Colors.red,
+      accentColor: Colors.red,
       brightness: Brightness.dark,
       fontFamily: 'Noto',
     );
@@ -53,8 +53,8 @@ class Themes {
         return green();
         break;
 
-      case 'orange':
-        return orange();
+      case 'red':
+        return red();
         break;
 
       default:

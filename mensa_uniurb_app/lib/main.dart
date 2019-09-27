@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
+import 'package:share/share.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:MensaUniurb/themes.dart';
@@ -194,8 +195,8 @@ class _SearchScreenState extends State<SearchScreen> {
                   onPressed: () => applyTheme('green'),
                 ),
                 IconButton(
-                  icon: CircleAvatar(backgroundColor: Colors.orange),
-                  onPressed: () => applyTheme('orange'),
+                  icon: CircleAvatar(backgroundColor: Colors.red),
+                  onPressed: () => applyTheme('red'),
                 ),
               ],
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -214,8 +215,14 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
             ListTile(
               leading: Icon(FontAwesomeIcons.paypal),
-              title: Text('Paypal', style: TextStyle(fontSize: 17)),
+              title: Text('Donazioni', style: TextStyle(fontSize: 17)),
               onTap: () => _launchURL("https://www.paypal.me/Radeox"),
+            ),
+            ListTile(
+              leading: Icon(FontAwesomeIcons.googlePlay),
+              title: Text('Condividi', style: TextStyle(fontSize: 17)),
+              onTap: () => Share.share(
+                  "https://play.google.com/store/apps/details?id=com.radeox.mensa_uniurb"),
             ),
             ListTile(
               leading: Icon(FontAwesomeIcons.telegramPlane),
@@ -239,8 +246,8 @@ class _SearchScreenState extends State<SearchScreen> {
         case 'green':
           DynamicTheme.of(context).setThemeData(Themes.green());
           break;
-        case 'orange':
-          DynamicTheme.of(context).setThemeData(Themes.orange());
+        case 'red':
+          DynamicTheme.of(context).setThemeData(Themes.red());
           break;
       }
     });
