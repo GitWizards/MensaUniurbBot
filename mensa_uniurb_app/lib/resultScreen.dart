@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart';
 
 import 'ads.dart';
@@ -47,11 +48,8 @@ class _ResultScreenState extends State<ResultScreen> {
         future: results,
         builder: (BuildContext context, AsyncSnapshot<List> snapshot) {
           if (!snapshot.hasData) {
-            // Display during loading
-            return Center(
-              // Loading animation
-              child: CircularProgressIndicator(),
-            );
+            // Display loading animation
+            return Center(child: CircularProgressIndicator());
           } else {
             List content = snapshot.data;
 
@@ -60,9 +58,7 @@ class _ResultScreenState extends State<ResultScreen> {
               // Create and return the list
               return Column(
                 children: <Widget>[
-                  Expanded(
-                    child: ListView(children: content),
-                  ),
+                  Expanded(child: ListView(children: content)),
                 ],
               );
             } else {
@@ -76,10 +72,7 @@ class _ResultScreenState extends State<ResultScreen> {
                       size: 100,
                       color: Colors.red,
                     ),
-                    Text(
-                      "Ops!",
-                      style: TextStyle(fontSize: 50),
-                    ),
+                    Text("Ops!", style: TextStyle(fontSize: 50)),
                     Padding(
                       padding: const EdgeInsets.only(
                         top: 10,
@@ -108,11 +101,29 @@ class _ResultScreenState extends State<ResultScreen> {
     // Create an empty list
     List<Widget> list = List();
 
-    Map names = {
+    const Map names = {
       'first': "Primi",
       'second': "Secondi",
       'side': "Contorni",
       'fruit': "Frutta",
+    };
+
+// Map allergens codes to correct string
+    const Map allergensMap = {
+      "1": "Glutine",
+      "2": "Corstacei",
+      "3": "Uova",
+      "4": "Pesce",
+      "5": "Arachidi",
+      "6": "Soia",
+      "7": "Latte",
+      "8": "Frutta a guscio",
+      "9": "Sedano",
+      "10": "Senape",
+      "11": "Semi di sesamo",
+      "12": "Anidirde solforosa e solfiti",
+      "13": "Lupini",
+      "14": "Molluschi",
     };
 
     // Make the url with the arguments from the previous screen
@@ -145,26 +156,52 @@ class _ResultScreenState extends State<ResultScreen> {
         RegExp filter = RegExp('([1-9])');
 
         if (filter.hasMatch(infos)) {
-          // Remove them from the original string
-          // and add them as subtitle
+          // Remove info about allergens from the original string
+          // and add them in the exapanded tile child
           item = item.replaceAll(infos, '');
           infos = infos.toUpperCase();
 
-          // Add the item to the list with subtitle
-          list.add(
-            Card(
-              child: ListTile(
-                title: Text('$item'),
-                subtitle: Text('$infos'),
-              ),
+          // Create a list with all the allergens
+          List<Widget> infoList = [];
+          infos.split('-').forEach((info) => {
+                // Remove the 'F' from the info (optional)
+                if (info.contains("F"))
+                  {
+                    info = info.replaceAll("F", ""),
+                    if (allergensMap.containsKey(info))
+                      infoList.add(
+                        ListTile(
+                          title: Text(
+                            "+ " + allergensMap[info],
+                            style: TextStyle(
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
+                      )
+                  }
+                else
+                  {
+                    if (allergensMap.containsKey(info))
+                      infoList.add(
+                        ListTile(
+                          title: Text("• " + allergensMap[info]),
+                        ),
+                      )
+                  }
+              });
+
+          // Add the new item
+          list.add(Card(
+            child: ExpansionTile(
+              title: Text('$item'),
+              children: infoList,
             ),
-          );
+          ));
         } else {
           // Otherwise add it without anything
           list.add(Card(
-            child: ListTile(
-              title: Text('$item'),
-            ),
+            child: ListTile(title: Text('$item')),
           ));
         }
       }
@@ -173,18 +210,23 @@ class _ResultScreenState extends State<ResultScreen> {
     return list;
   }
 
-  Widget namedSpacer(value, {icon = Icons.local_dining}) {
+  Widget namedSpacer(value) {
     return Row(
       children: <Widget>[
+        // Icon
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Icon(icon),
+          child: Icon(FontAwesomeIcons.utensils),
         ),
+
+        // Text
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Text(value, style: TextStyle(fontSize: 25)),
         ),
       ],
+
+      // Allignment
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
     );
