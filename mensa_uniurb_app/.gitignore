@@ -2,6 +2,7 @@
 google-services.json
 config.dart
 key.properties
+flutter_export_environment.sh
 
 # Miscellaneous
 *.class
