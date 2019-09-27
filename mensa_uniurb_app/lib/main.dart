@@ -2,7 +2,6 @@ import 'dart:ui';
 
 import 'package:MensaUniurb/ads.dart';
 import 'package:MensaUniurb/resultScreen.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -12,6 +11,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'package:MensaUniurb/themes.dart';
 import 'package:MensaUniurb/myWidgets.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() async {
   // Initialize interstitial ad
@@ -53,6 +53,15 @@ class MensaUniurb extends StatelessWidget {
             '/': (context) => SearchScreen(title: title),
             '/results': (context) => ResultScreen(),
           },
+
+          // Set locale stuff
+          localizationsDelegates: [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+
+          // Set italian as only locale
+          supportedLocales: [const Locale('it', 'IT')],
         );
       },
     );

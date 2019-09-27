@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 // date text and a dataPicker
 class DataPicker extends StatefulWidget {
   // Constructor
-  DataPicker({Key key, @required this.setFunc}) : super(key: key);
+  DataPicker({Key key, this.setFunc}) : super(key: key);
 
   // The 'setFunc' is the function used to set a variable in the parent widget
   final Function setFunc;
@@ -92,11 +92,11 @@ class RadioButtons extends StatefulWidget {
   // The constructor requires the text and the value of the two buttons
   RadioButtons({
     Key key,
-    @required this.textButton1,
-    @required this.valueButton1,
-    @required this.textButton2,
-    @required this.valueButton2,
-    @required this.setFunc,
+    this.textButton1,
+    this.valueButton1,
+    this.textButton2,
+    this.valueButton2,
+    this.setFunc,
   }) : super(key: key);
 
   // Texts of the buttons

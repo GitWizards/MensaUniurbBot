@@ -196,9 +196,9 @@ class SearchArguments {
   // Constructor of the arguments
   SearchArguments({
     this.title,
-    @required this.kitchen,
-    @required this.date,
-    @required this.meal,
+    this.kitchen,
+    this.date,
+    this.meal,
   });
 
   // Kitchen name
