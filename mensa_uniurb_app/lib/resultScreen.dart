@@ -121,7 +121,7 @@ class _ResultScreenState extends State<ResultScreen> {
       "9": "Sedano",
       "10": "Senape",
       "11": "Semi di sesamo",
-      "12": "Anidirde solforosa e solfiti",
+      "12": "Anidride solforosa e solfiti",
       "13": "Lupini",
       "14": "Molluschi",
     };
