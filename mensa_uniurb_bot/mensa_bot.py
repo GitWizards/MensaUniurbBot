@@ -19,6 +19,7 @@ from time import sleep
 
 import matplotlib
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 import requests
 import telepot
 from telepot.namedtuple import (InlineKeyboardButton, InlineKeyboardMarkup,
@@ -220,9 +221,15 @@ class MessageHandler:
         # Clear plot
         plt.clf()
 
+        # Make the grid steps integers
+        ax = plt.figure().gca()
+        ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+
         # Set grid
         plt.grid()
         month_requests = []
+
+        month_requests.append(0)
 
         for day in data['requests'][year][month]:
             if day != "total":
@@ -235,7 +242,7 @@ class MessageHandler:
 
         # Add plots
         plt.plot(month_requests, color='#DB4437', linewidth=2)
-        plt.fill_between(range(len(data['requests'][year][month]) - 1),
+        plt.fill_between(range(len(data['requests'][year][month])),
                          month_requests, 0, color='#d8655b')
 
         # Store the image in memory
@@ -362,7 +369,8 @@ class MessageHandler:
                             "(https://paypal.me/Radeox/2) oppure [dona 5 Euro](https://paypal.me/Radeox/5)."
                             "\nGrazie del sostegno🍻")
                 if num == 2:
-                    msg += ("\n\n📱Siamo anche su [Google Play](https://play.google.com/store/apps/details?id=com.radeox.mensa_uniurb)!")
+                    msg += (
+                        "\n\n📱Siamo anche su [Google Play](https://play.google.com/store/apps/details?id=com.radeox.mensa_uniurb)!")
 
                 # Send message
                 bot.sendMessage(chat_id, msg, parse_mode="Markdown",
