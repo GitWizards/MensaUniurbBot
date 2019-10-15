@@ -26,12 +26,12 @@ class _DataPickerState extends State<DataPicker> {
       child: RaisedButton(
         child: Row(
           children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(8.0),
+            Container(
+              padding: EdgeInsets.all(7),
               child: Text(
                 date,
                 style: TextStyle(
-                  fontSize: 25,
+                  fontSize: MediaQuery.of(context).size.width * 0.07,
                   color: Colors.white,
                   shadows: <Shadow>[
                     Shadow(
@@ -43,8 +43,7 @@ class _DataPickerState extends State<DataPicker> {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
+            Container(
               child: Icon(
                 Icons.date_range,
                 color: Colors.white,
@@ -125,9 +124,17 @@ class _RadioButtonsState extends State<RadioButtons> {
       // Create the two buttons
       children: <Widget>[
         _singleButton(
-            context, widget.textButton1, widget.valueButton1, selected),
+          context,
+          widget.textButton1,
+          widget.valueButton1,
+          selected,
+        ),
         _singleButton(
-            context, widget.textButton2, widget.valueButton2, !selected),
+          context,
+          widget.textButton2,
+          widget.valueButton2,
+          !selected,
+        ),
       ],
       mainAxisAlignment: MainAxisAlignment.center,
     );
@@ -135,14 +142,14 @@ class _RadioButtonsState extends State<RadioButtons> {
 
   // Generate a single button
   Widget _singleButton(context, text, value, active) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
+    return Container(
+      padding: EdgeInsets.only(left: 8, right: 8),
       child: Container(
         child: RaisedButton(
           child: Text(
             text,
             style: TextStyle(
-              fontSize: 25,
+              fontSize: MediaQuery.of(context).size.width * 0.07,
               color: Colors.white,
               shadows: <Shadow>[
                 Shadow(

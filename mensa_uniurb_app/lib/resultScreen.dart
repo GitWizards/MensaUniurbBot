@@ -73,8 +73,8 @@ class _ResultScreenState extends State<ResultScreen> {
                       color: Colors.red,
                     ),
                     Text("Ops!", style: TextStyle(fontSize: 50)),
-                    Padding(
-                      padding: const EdgeInsets.only(
+                    Container(
+                      padding: EdgeInsets.only(
                         top: 10,
                         left: 40,
                         right: 40,
@@ -101,7 +101,7 @@ class _ResultScreenState extends State<ResultScreen> {
     // Create an empty list
     List<Widget> list = List();
 
-    const Map names = {
+    Map names = {
       'first': "Primi",
       'second': "Secondi",
       'side': "Contorni",
@@ -109,7 +109,7 @@ class _ResultScreenState extends State<ResultScreen> {
     };
 
 // Map allergens codes to correct string
-    const Map allergensMap = {
+    Map allergensMap = {
       "1": "Glutine",
       "2": "Corstacei",
       "3": "Uova",
@@ -214,14 +214,14 @@ class _ResultScreenState extends State<ResultScreen> {
     return Row(
       children: <Widget>[
         // Icon
-        Padding(
-          padding: const EdgeInsets.all(8.0),
+        Container(
+          padding: EdgeInsets.all(8.0),
           child: Icon(FontAwesomeIcons.utensils),
         ),
 
         // Text
-        Padding(
-          padding: const EdgeInsets.all(8.0),
+        Container(
+          padding: EdgeInsets.all(8.0),
           child: Text(value, style: TextStyle(fontSize: 25)),
         ),
       ],

@@ -15,17 +15,17 @@ import 'package:MensaUniurb/myWidgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() async {
-  // Initialize interstitial ad
-  InterAd.init();
+  // Lock app in portrait mode
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
   // Load selected theme
   ThemeData theme = await Themes.load();
 
-  // Lock app in portrait mode
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-
   // Run app
   runApp(MensaUniurb(theme: theme));
+
+  // Initialize interstitial ad
+  InterAd.init();
 }
 
 class MensaUniurb extends StatelessWidget {
@@ -48,6 +48,8 @@ class MensaUniurb extends StatelessWidget {
           title: title,
           theme: theme,
 
+          debugShowCheckedModeBanner: false,
+
           // Define application routes to various screens
           initialRoute: '/',
           routes: {
@@ -62,7 +64,7 @@ class MensaUniurb extends StatelessWidget {
           ],
 
           // Set italian as only locale
-          supportedLocales: [const Locale('it', 'IT')],
+          supportedLocales: [Locale('it', 'IT')],
         );
       },
     );
@@ -105,18 +107,18 @@ class _SearchScreenState extends State<SearchScreen> {
         // Makes the cool circle over appbar
         flexibleSpace: CustomPaint(
           painter: CircleAppBar(context: context),
-          child: Padding(padding: const EdgeInsets.only(top: 80.0)),
+          child: Container(padding: EdgeInsets.only(top: 80.0)),
         ),
       ),
 
       // Body of the screen
-      body: Padding(
-        padding: const EdgeInsets.only(top: 70.0),
+      body: Container(
+        padding: EdgeInsets.only(top: 90),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(8.0),
+            Container(
+              padding: EdgeInsets.only(top: 12, bottom: 12),
               // Custom radio buttons
               child: RadioButtons(
                 textButton1: "Duca",
@@ -127,8 +129,8 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
             ),
             // Custom radio buttons
-            Padding(
-              padding: const EdgeInsets.all(8.0),
+            Container(
+              padding: EdgeInsets.only(top: 12, bottom: 12),
               child: RadioButtons(
                 textButton1: "Pranzo",
                 valueButton1: "lunch",
@@ -138,8 +140,8 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
             ),
             // Custom data picker
-            Padding(
-              padding: const EdgeInsets.all(8.0),
+            Container(
+              padding: EdgeInsets.only(top: 12, bottom: 12),
               child: DataPicker(
                 setFunc: _setDate,
               ),
@@ -306,10 +308,10 @@ class CircleAppBar extends CustomPainter {
     paint.color = Theme.of(context).accentColor;
 
     // Compute the center where the circle should be drawn
-    Offset center = Offset(size.width / 2, size.height * 0.1);
+    Offset center = Offset(size.width * 0.5, 0);
 
     // Draw the circle
-    canvas.drawCircle(center, 250, paint);
+    canvas.drawCircle(center, size.width * 0.7, paint);
   }
 
   @override
