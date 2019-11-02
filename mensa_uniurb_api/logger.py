@@ -45,6 +45,66 @@ class Logger:
             conn.commit()
 
     def get_stats(self):
+        # Get today's date
+        month = datetime.now().month
+        year = datetime.now().year
+
+        results = {}
+
+        with sqlite3.connect(self.DATABASE) as conn:
+            cursor = conn.cursor()
+
+            # Count total amount of requests
+            query = 'SELECT count(*) FROM request'
+            cursor.execute(query)
+            results['total'] = cursor.fetchone()[0]
+
+            results['requests'] = {}
+
+
+            # Total requests in the current year
+            year_total = 0
+
+            results['requests'][year] = {}
+
+            # Total requests in the current month
+            month_total = 0
+
+            # Struct to store the data
+            results['requests'][year][month] = {}
+
+            # Check how many days are in current month
+            month_days = calendar.monthrange(int(year), month)[1] + 1
+
+            # Loop through month days
+            for day in range(1, month_days):
+                # Prepare data for query
+                curr_month = str(month).zfill(2)
+                next_day = str(day+1).zfill(2)
+                today = str(day).zfill(2)
+                data = (
+                    "{0}-{1}-{2}".format(year, curr_month, today),
+                    "{0}-{1}-{2}".format(year, curr_month, next_day)
+                )
+
+                # Create query to get requests in given day
+                query = ('SELECT count(*) FROM request WHERE '
+                         'date BETWEEN ? AND ?')
+                cursor.execute(query, data)
+
+                # Put the result in the dict
+                req = cursor.fetchone()[0]
+                results['requests'][year][month][day] = req
+
+                # Sum the requests
+                month_total += req
+
+                # Store the total in the result
+                results['requests'][year][month]["total"] = month_total
+
+        return results
+
+    def get_full_stats(self):
         results = {}
 
         with sqlite3.connect(self.DATABASE) as conn:

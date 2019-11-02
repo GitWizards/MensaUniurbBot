@@ -26,6 +26,11 @@ class RequestStats(Resource):
         return logger.get_stats()
 
 
+class RequestFullStats(Resource):
+    def get(self):
+        return logger.get_full_stats()
+
+
 def get_menu(place, date, meal):
     """
     Return the menu in JSON format
@@ -139,8 +144,10 @@ if __name__ == '__main__':
     api.add_resource(Duca, '/duca/<date>/<meal>')
     api.add_resource(Tridente, '/tridente/<date>/<meal>')
     api.add_resource(RequestStats, '/stats/')
+    api.add_resource(RequestFullStats, '/full_stats/')
 
-    # DEBUG: app.run(host='0.0.0.0', port=PORT)
+    # DEBUG
+    # app.run(host='0.0.0.0', port=PORT)
 
     # Start API
     serve(app, host='0.0.0.0', port=PORT)
