@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:MensaUniurb/ads.dart';
 import 'package:MensaUniurb/resultScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,6 +15,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() async {
   // Lock app in portrait mode
+  WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
   // Load selected theme
@@ -23,9 +23,6 @@ void main() async {
 
   // Run app
   runApp(MensaUniurb(theme: theme));
-
-  // Initialize interstitial ad
-  InterAd.init();
 }
 
 class MensaUniurb extends StatelessWidget {

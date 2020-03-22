@@ -5,8 +5,6 @@ import 'package:flutter/widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart';
 
-import 'ads.dart';
-
 class ResultScreen extends StatefulWidget {
   // Constructor of the screen
   ResultScreen({Key key, this.title}) : super(key: key);
@@ -38,9 +36,6 @@ class _ResultScreenState extends State<ResultScreen> {
       // Set flag to false
       needData = false;
     }
-
-    // Dipslay interstitial ad
-    InterAd.showAd();
 
     return Scaffold(
       appBar: AppBar(title: Text("${args.title}")),
