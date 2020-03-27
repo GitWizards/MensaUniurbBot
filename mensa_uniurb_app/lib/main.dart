@@ -170,7 +170,7 @@ class _SearchScreenState extends State<SearchScreen> {
         },
       ),
 
-      // Drawer on the left
+      // Drawer
       drawer: Container(
         width: 250,
         color: Theme.of(context).backgroundColor,
@@ -202,34 +202,12 @@ class _SearchScreenState extends State<SearchScreen> {
 
             Divider(),
 
-            // Mail to devs
-            ListTile(
-              leading: Icon(Icons.mail),
-              title: Text('Email', style: TextStyle(fontSize: 17)),
-              onTap: () => _launchURL("mailto:dawid.weglarz95@gmail.com"),
-            ),
-
             // Open github repo
             ListTile(
               leading: Icon(FontAwesomeIcons.github),
               title: Text('Github', style: TextStyle(fontSize: 17)),
               onTap: () =>
                   _launchURL("https://github.com/FastRadeox/MensaUniurbBot"),
-            ),
-
-            // Open paypal.me page
-            ListTile(
-              leading: Icon(FontAwesomeIcons.paypal),
-              title: Text('Donazioni', style: TextStyle(fontSize: 17)),
-              onTap: () => _launchURL("https://www.paypal.me/Radeox"),
-            ),
-
-            // Share google play link
-            ListTile(
-              leading: Icon(FontAwesomeIcons.googlePlay),
-              title: Text('Condividi', style: TextStyle(fontSize: 17)),
-              onTap: () => Share.share(
-                  "https://play.google.com/store/apps/details?id=com.radeox.mensa_uniurb"),
             ),
 
             // Open telegram bot page
