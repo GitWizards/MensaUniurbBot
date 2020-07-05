@@ -250,6 +250,8 @@ class MessageHandler:
         plt.savefig(output, format='png')
         output.seek(0)
 
+        plt.close()
+
         # Send it to the user
         bot.sendPhoto(chat_id, output, caption)
 
