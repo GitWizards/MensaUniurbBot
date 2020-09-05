@@ -201,7 +201,7 @@ class MessageHandler:
         day = now.strftime("%-d")
 
         # Requests statistics from the API
-        r = requests.get("http://127.0.0.1:9543/stats/")
+        r = requests.get("http://api:9543/stats/")
 
         # Convert the data to Json
         data = json.loads(r.text)
@@ -363,7 +363,7 @@ class MessageHandler:
         """
         Request the menu and prepare the message to be sent
         """
-        r = requests.get("http://127.0.0.1:9543/{0}/{1}/{2}".format(place,
+        r = requests.get("http://api:9543/{0}/{1}/{2}".format(place,
                                                                     date,
                                                                     meal))
 

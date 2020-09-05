@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  bot:
+    build: ./bot/
+    command: python bot/bot.py
+    env_file:
+      .env
+    volumes:
+      - .:/app/
+    restart: unless-stopped
+    depends_on:
+      - api
+  api:
+    build: ./api/
+    command: python api/api.py
+    env_file:
+      .env
+    ports:
+      - "9543:9543"
+    volumes:
+      - .:/app/
+    restart: unless-stopped
