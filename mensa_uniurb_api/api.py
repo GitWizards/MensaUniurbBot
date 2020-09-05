@@ -1,3 +1,4 @@
+import os
 from flask import Flask
 from flask_restful import Api, Resource
 from waitress import serve
@@ -27,7 +28,6 @@ class RequestFullStats(Resource):
         return logger.get_full_stats()
 
 
-
 if __name__ == '__main__':
     # Init database
     logger = Logger("mensa_requests.db")
@@ -36,17 +36,17 @@ if __name__ == '__main__':
     app = Flask(__name__)
     api = Api(app)
 
-    # Config port
-    PORT = 9543
-
     # Routes configuration
     api.add_resource(Duca, '/duca/<date>/<meal>')
     api.add_resource(Tridente, '/tridente/<date>/<meal>')
     api.add_resource(RequestStats, '/stats/')
     api.add_resource(RequestFullStats, '/full_stats/')
 
-    # DEBUG
-    # app.run(host='0.0.0.0', port=PORT)
+    # Config port
+    PORT = os.environ['PORT']
 
     # Start API
-    serve(app, host='0.0.0.0', port=PORT)
+    if os.environ['DEBUG']:
+        app.run(host='0.0.0.0', port=PORT)
+    else:
+        serve(app, host='0.0.0.0', port=PORT)
