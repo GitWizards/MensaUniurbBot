@@ -11,19 +11,13 @@ import os
 import re
 import sys
 from datetime import datetime, timedelta
-from io import BytesIO
 from random import randint
 from time import sleep
 
-import matplotlib
-import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
 import requests
 import telepot
 from telepot.namedtuple import (InlineKeyboardButton, InlineKeyboardMarkup,
                                 ReplyKeyboardMarkup, ReplyKeyboardRemove)
-
-matplotlib.use('Agg')
 
 
 class MessageHandler:
@@ -214,42 +208,8 @@ class MessageHandler:
                                                 data['requests'][year][month]['total'],
                                                 data['requests'][year][month][day]))
 
-        # Clear plot
-        plt.clf()
-
-        # Make the grid steps integers
-        ax = plt.figure().gca()
-        ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-
-        # Set grid
-        plt.grid()
-        month_requests = []
-
-        month_requests.append(0)
-
-        for day in data['requests'][year][month]:
-            if day != "total":
-                month_requests.append(data['requests'][year][month][day])
-
-        # Add titles
-        plt.xlabel("Giorno")
-        plt.ylabel("Richieste")
-        plt.xlim([1, 31])
-
-        # Add plots
-        plt.plot(month_requests, color='#DB4437', linewidth=2)
-        plt.fill_between(range(len(data['requests'][year][month])),
-                         month_requests, 0, color='#d8655b')
-
-        # Store the image in memory
-        output = BytesIO()
-        plt.savefig(output, format='png')
-        output.seek(0)
-
-        plt.close()
-
         # Send it to the user
-        bot.sendPhoto(chat_id, output, caption)
+        bot.sendMessage(chat_id, caption)
 
 
     #! ------------ Keyboards ------------
