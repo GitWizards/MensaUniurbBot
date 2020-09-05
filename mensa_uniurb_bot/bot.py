@@ -5,7 +5,6 @@ Authors: Radeox (dawid.weglarz95@gmail.com)
          Fast0n (theplayergame97@gmail.com)
 """
 
-import calendar
 import json
 import locale
 import os
@@ -16,7 +15,6 @@ from io import BytesIO
 from random import randint
 from time import sleep
 
-
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
@@ -24,8 +22,6 @@ import requests
 import telepot
 from telepot.namedtuple import (InlineKeyboardButton, InlineKeyboardMarkup,
                                 ReplyKeyboardMarkup, ReplyKeyboardRemove)
-
-from settings import ADMIN, TOKEN
 
 matplotlib.use('Agg')
 
@@ -255,31 +251,6 @@ class MessageHandler:
         # Send it to the user
         bot.sendPhoto(chat_id, output, caption)
 
-    def send_report(self, msg):
-        """
-        Send given message to all users
-        """
-        # Get user message
-        input_msg = msg['text']
-
-        # Get user's username or name
-        try:
-            try:
-                username = "@" + msg['chat']['username']
-            except KeyError:
-                username = msg['chat']['first_name']
-                username += ' ' + msg['chat']['last_name']
-        except KeyError:
-            pass
-
-        # Send input_msg to all admins
-        for user in ADMIN:
-            try:
-                bot.sendMessage(user, "_{0}_\n\nInviato da: {1}".format(
-                    input_msg, username), parse_mode="Markdown")
-            except:
-                continue
-        return 1
 
     #! ------------ Keyboards ------------
 
@@ -424,28 +395,10 @@ class MessageHandler:
 # Main
 print("Starting MensaUniurbBot...")
 
-
-# PID file
-PID = str(os.getpid())
-PIDFILE = "/tmp/mensa_uniurb_bot.pid"
-
-# Check if PID exist
-if os.path.isfile(PIDFILE):
-    print("%s already exists, exiting!" % PIDFILE)
-    sys.exit()
-
-# Create PID file
-with open(PIDFILE, 'w') as f:
-    f.write(PID)
-
 # Start working
-try:
-    handler = MessageHandler()
-    bot = telepot.Bot(TOKEN)
-    bot.message_loop(handler.handle)
+handler = MessageHandler()
+bot = telepot.Bot(os.environ['TOKEN'])
+bot.message_loop(handler.handle)
 
-    while 1:
-        sleep(10)
-finally:
-    # Remove PID file on exit
-    os.unlink(PIDFILE)
+while 1:
+    sleep(10)
