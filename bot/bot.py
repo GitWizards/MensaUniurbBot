@@ -86,19 +86,14 @@ class MessageHandler:
             #! ------------ Entry points ------------
             elif input_msg == "/duca":
                 self.USER_STATE[chat_id] = 10
-
                 self.send_dish_keyboard(chat_id)
 
             elif input_msg == "/tridente":
                 self.USER_STATE[chat_id] = 20
-
                 self.send_dish_keyboard(chat_id)
 
-            # User can write a report to admins
             elif input_msg == "/segnala":
-                self.USER_STATE[chat_id] = 100
-                bot.sendMessage(chat_id, "⚙️*Descrivi il tuo problema*🔧\n\nSe non hai impostato un username fornisci "
-                                "un altro modo per contattarti altrimenti contatta direttamente @radeox o @fast0n.",
+                bot.sendMessage(chat_id, "⚙️*Descrivi il tuo problema*🔧\n\nContatta direttamente @radeox o @fast0n e spiegaci il tuo problema.",
                                 parse_mode="Markdown")
 
             #! ------------ Intermediate stages ------------
