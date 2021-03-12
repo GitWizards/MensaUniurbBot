@@ -1,4 +1,5 @@
 import os
+from dotenv import load_dotenv
 from flask import Flask
 from flask_restful import Api, Resource
 from waitress import serve
@@ -29,8 +30,10 @@ class RequestFullStats(Resource):
 
 
 if __name__ == '__main__':
-    # Init database
-    logger = Logger("mensa_requests.db")
+    # Load env variables
+    load_dotenv()
+    PORT = os.environ['PORT']
+    DEBUG = eval(os.environ['DEBUG'])
 
     # Init flask
     app = Flask(__name__)
@@ -42,11 +45,11 @@ if __name__ == '__main__':
     api.add_resource(RequestStats, '/stats/')
     api.add_resource(RequestFullStats, '/full_stats/')
 
-    # Config port
-    PORT = os.environ['PORT']
+    # Init database
+    logger = Logger("mensa_requests.db")
 
-    # Start API
-    if os.environ['DEBUG']:
+    if DEBUG:
         app.run(host='0.0.0.0', port=PORT)
     else:
+        print("Starting API...")
         serve(app, host='0.0.0.0', port=PORT)
