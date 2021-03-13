@@ -77,20 +77,19 @@ def send_menu(update: Update, context: CallbackContext) -> int:
     complete_date = f"{date.split('/')[1]}-{date.split('/')[0]}-{now.strftime('%Y')}"
 
     msg = get_menu_msg(context.user_data['place'], complete_date, context.user_data['meal'])
-    print(msg)
     if msg:
-        update.message.reply_text(msg, reply_markup=ReplyKeyboardRemove, parse_mode="Markdown")
+        update.message.reply_text(msg, reply_markup=ReplyKeyboardRemove(), parse_mode="Markdown")
     else:
         update.message.reply_text("*Non ho trovato nulla 🤷🏻‍♂️ *\n\nControlla gli /orari",
-                                  reply_markup=ReplyKeyboardRemove,
+                                  reply_markup=ReplyKeyboardRemove(),
                                   parse_mode="Markdown")
     return ConversationHandler.END
 
 
 def conversation_fallback(update: Update, context: CallbackContext) -> int:
     update.message.reply_text("*Non ho capito! Riprova da capo 😕*\n\nOpzioni:\n/duca\n/tridente",
-                              reply_markup=ReplyKeyboardRemove,
-                              parse_mode="Markdown", )
+                              reply_markup=ReplyKeyboardRemove(),
+                              parse_mode="Markdown")
     return ConversationHandler.END
 
 
