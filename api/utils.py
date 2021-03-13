@@ -206,7 +206,7 @@ def get_menu(place, date, meal):
     data['place'] = place
     data['meal'] = meal
     data['date'] = datetime.now().isoformat()
-    data['not_empty'] = False
+    data['empty'] = True
     data['menu'] = {}
     data['menu']['first'] = []
     data['menu']['second'] = []
@@ -245,7 +245,6 @@ def get_menu(place, date, meal):
             if prev == '40' and plate_id == '10':
                 # Stop checking, next plate is from dinner block
                 # At this point we are sure that the set is not empty
-                data['not_empty'] = True
                 break
             else:
                 prev = plate_id
@@ -265,7 +264,6 @@ def get_menu(place, date, meal):
             # Check if we can start
             if prev == '40' and plate_id == '10':
                 # We are sure that the set is not empty
-                data['not_empty'] = True
                 dinner = True
             else:
                 prev = plate_id
@@ -280,6 +278,10 @@ def get_menu(place, date, meal):
                     data['menu']['side'].append(name)
                 elif plate_id == '40':
                     data['menu']['fruit'].append(name)
+
+    for meal in data['menu']:
+        if data['menu'][meal] != []:
+            data['empty'] = False
 
     # Return the JSON menu
     return data
