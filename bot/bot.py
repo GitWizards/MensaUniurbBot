@@ -159,7 +159,7 @@ def send_credits(update: Update, context: CallbackContext) -> None:
     ])
 
     update.message.reply_text("*Link*:\n"
-                              "[Google Play](https://play.google.com/store/apps/details?id=com.radeox.mensai\_uniurb)\n"
+                              "[Google Play](https://play.google.com/store/apps/details?id=com.radeox.mensa_uniurb)\n"
                               "[Codice sorgente](https://github.com/FastRadeox/MensaUniurbBot)\n\n"
                               "*Developers*:\n"
                               "[Radeox - Github](https://github.com/Radeox)\n"
