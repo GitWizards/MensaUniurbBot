@@ -8,9 +8,10 @@ Authors: Radeox (dawid.weglarz95@gmail.com)
 import os
 import logging
 from datetime import datetime
+from random import randint
 
 from dotenv import load_dotenv
-from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
 from telegram.ext import (Filters, CommandHandler, ConversationHandler,
                           CallbackContext, MessageHandler, Updater)
 from pid import PidFile
@@ -77,6 +78,17 @@ def send_menu(update: Update, context: CallbackContext) -> int:
     complete_date = f"{date.split('/')[1]}-{date.split('/')[0]}-{now.strftime('%Y')}"
 
     msg = get_menu_msg(context.user_data['place'], complete_date, context.user_data['meal'])
+
+    # Randomly add paypal link to donate or link to playstore app
+    num = randint(1, 4)
+
+    if num == 1:
+        msg += ("\n\n💙 Aiutaci a sostenere le spese di @MensaUniurb\_Bot.\n[Dona 2 Euro]"
+                "(https://paypal.me/Radeox/2) oppure [dona 5 Euro](https://paypal.me/Radeox/5).")
+    elif num == 2:
+        msg += (
+            "\n\n📱Siamo anche su [Google Play](https://play.google.com/store/apps/details?id=com.radeox.mensa_uniurb)!")
+
     if msg:
         update.message.reply_text(msg, reply_markup=ReplyKeyboardRemove(), parse_mode="Markdown")
     else:
@@ -128,19 +140,32 @@ def send_tridente_location(update: Update, context: CallbackContext) -> None:
 
 
 def send_pricelist(update: Update, context: CallbackContext) -> None:
-    pass
+    with open("assets/price_list.png", 'rb') as f:
+        update.message.reply_photo(f, quote=True)
 
 
 def send_allergylist(update: Update, context: CallbackContext) -> None:
-    pass
+    update.message.reply_photo("http://menu.ersurb.it/menum/Allergeni_legenda.png")
 
 
 def send_credits(update: Update, context: CallbackContext) -> None:
-    pass
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(
+                text="☕ Offrici un caffè o una birra 🍺",
+                url="https://paypal.me/Radeox/"
+            )
+        ],
+    ])
 
-
-def send_donate(update: Update, context: CallbackContext) -> None:
-    pass
+    update.message.reply_text("*Link*:\n"
+                              "[Google Play](https://play.google.com/store/apps/details?id=com.radeox.mensai\_uniurb)\n"
+                              "[Codice sorgente](https://github.com/FastRadeox/MensaUniurbBot)\n\n"
+                              "*Developers*:\n"
+                              "[Radeox - Github](https://github.com/Radeox)\n"
+                              "[Fast0n - Github](https://github.com/Fast0n)",
+                              reply_markup=keyboard,
+                              parse_mode="Markdown")
 
 
 def main():
@@ -159,7 +184,7 @@ def main():
     pricelist_handler = CommandHandler('prezzi', send_pricelist)
     allergylist_handler = CommandHandler('allergeni', send_allergylist)
     credits_handler = CommandHandler('crediti', send_credits)
-    donate_handler = CommandHandler('dona', send_donate)
+    donate_handler = CommandHandler('dona', send_credits)
     location_duca_handler = CommandHandler("posizione_duca", send_duca_location)
     location_tridente_handler = CommandHandler("posizione_tridente", send_tridente_location)
 
@@ -182,6 +207,10 @@ def main():
     dispatcher.add_handler(timetable_handler)
     dispatcher.add_handler(location_duca_handler)
     dispatcher.add_handler(location_tridente_handler)
+    dispatcher.add_handler(pricelist_handler)
+    dispatcher.add_handler(allergylist_handler)
+    dispatcher.add_handler(credits_handler)
+    dispatcher.add_handler(donate_handler)
 
     # TODO: Remove me when everything is implemented
     backup_handler = MessageHandler(Filters.regex('[/]'), unimplemented_fallback)
