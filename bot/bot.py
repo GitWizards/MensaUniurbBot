@@ -15,7 +15,7 @@ from telegram.ext import (Updater, CommandHandler, MessageHandler,
                           Filters, ConversationHandler, CallbackContext)
 from pid import PidFile
 
-from utils import get_menu_msg, prepare_week_keyboard
+from utils import get_menu_msg, get_monthly_stats, prepare_week_keyboard
 
 # Enable logging
 logging.basicConfig(
@@ -93,9 +93,33 @@ def conversation_fallback(update: Update, context: CallbackContext) -> int:
     return ConversationHandler.END
 
 
-def unimplemented_fallback(update: Update, context: CallbackContext) -> int:
+def unimplemented_fallback(update: Update, context: CallbackContext) -> None:
     update.message.reply_text("*Questa funzione potrebbe essere ancora rotta, "
                               "ma ci stiamo lavorando 😕*", parse_mode="Markdown")
+
+
+def send_stats(update: Update, context: CallbackContext) -> None:
+    update.message.reply_text(get_monthly_stats())
+
+
+def send_timetable(update: Update, context: CallbackContext) -> None:
+    pass
+
+
+def send_pricelist(update: Update, context: CallbackContext) -> None:
+    pass
+
+
+def send_allergylist(update: Update, context: CallbackContext) -> None:
+    pass
+
+
+def send_credits(update: Update, context: CallbackContext) -> None:
+    pass
+
+
+def send_donate(update: Update, context: CallbackContext) -> None:
+    pass
 
 
 def main():
@@ -109,6 +133,12 @@ def main():
 
     # Add command handlers
     start_handler = CommandHandler('start', start)
+    stats_handler = CommandHandler('statistiche', send_stats)
+    timetable_handler = CommandHandler('orari', send_timetable)
+    pricelist_handler = CommandHandler('prezzi', send_pricelist)
+    allergylist_handler = CommandHandler('allergeni', send_allergylist)
+    credits_handler = CommandHandler('crediti', send_credits)
+    donate_handler = CommandHandler('dona', send_donate)
 
     menu_handler = ConversationHandler(
         entry_points=[CommandHandler(['duca', 'tridente', 'cibus'], meal_choice)],
@@ -125,7 +155,9 @@ def main():
 
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(menu_handler)
+    dispatcher.add_handler(stats_handler)
 
+    # TODO: Remove me when everything is implemented
     backup_handler = MessageHandler(Filters.regex('[/]'), unimplemented_fallback)
     dispatcher.add_handler(backup_handler)
 

@@ -62,10 +62,6 @@ class Logger:
 
             results['requests'] = {}
 
-
-            # Total requests in the current year
-            year_total = 0
-
             results['requests'][year] = {}
 
             # Total requests in the current month
@@ -186,6 +182,7 @@ class Logger:
                 results['requests'][year]["total"] = year_total
 
         return results
+
 
 def get_menu(place, date, meal):
     """

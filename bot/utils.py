@@ -38,6 +38,24 @@ def get_menu_msg(place, date, meal) -> str:
     return rv
 
 
+def get_monthly_stats() -> str:
+    now = datetime.now()
+    year = now.strftime("%Y")
+    month = now.strftime("%-m")
+    day = now.strftime("%-d")
+
+    # Requests statistics from the API
+    r = requests.get("http://api:9543/stats/")
+
+    # Convert the data to Json
+    data = json.loads(r.text)
+
+    rv = (f"Richieste totali: {data['total']}\n"
+          f"Richieste {month.zfill(2)}/{year}: {data['requests'][year][month]['total']}\n"
+          f"Richieste oggi: {data['requests'][year][month][day]}")
+    return rv
+
+
 def prepare_week_keyboard() -> list:
     keyboard = []
     row = []
