@@ -1,8 +1,13 @@
 APScheduler==3.6.3
 certifi==2020.12.5
+chardet==4.0.0
+idna==2.10
+pid==3.0.4
 python-dotenv==0.15.0
 python-telegram-bot==13.3
 pytz==2021.1
+requests==2.25.1
 six==1.15.0
 tornado==6.1
 tzlocal==2.1
+urllib3==1.26.3
