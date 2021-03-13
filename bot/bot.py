@@ -11,8 +11,8 @@ from datetime import datetime
 
 from dotenv import load_dotenv
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
-from telegram.ext import (Updater, CommandHandler, MessageHandler,
-                          Filters, ConversationHandler, CallbackContext)
+from telegram.ext import (Filters, CommandHandler, ConversationHandler,
+                          CallbackContext, MessageHandler, Updater)
 from pid import PidFile
 
 from utils import get_menu_msg, get_monthly_stats, prepare_week_keyboard
@@ -103,7 +103,28 @@ def send_stats(update: Update, context: CallbackContext) -> None:
 
 
 def send_timetable(update: Update, context: CallbackContext) -> None:
-    pass
+    update.message.reply_text("🍝 *Duca*\nAperta tutti i giorni, "
+                              "esclusi Sabato e Domenica, dalle *12:00* alle *14:00* "
+                              "e dalle *19:00* alle *21:00*.\n\n"
+                              "🍔 *Cibus Duca*\n"
+                              "Dalle ore *12:00* alle ore *14:30*.\n"
+                              "*Posizione*: /posizione\_duca\n\n"
+                              "🍖 *Tridente*\n"
+                              "Aperta tutti i giorni dalle *12:00* alle *14:00* "
+                              "e dalle *19:00* alle *21:00*.\n"
+                              "*Posizione*: /posizione\_tridente\n\n",
+                              parse_mode="Markdown")
+
+
+def send_duca_location(update: Update, context: CallbackContext) -> None:
+    update.message.reply_location("43.72640143124929", "12.63739407389494", quote=True)
+    update.message.reply_text("📍 *Indirizzo*: Via Budassi n° 3", parse_mode="Markdown")
+
+
+def send_tridente_location(update: Update, context: CallbackContext) -> None:
+    update.message.reply_location("43.720036", "12.623293", quote=True)
+    update.message.reply_text("📍 *Indirizzo*: Zona dei collegi del Colle dei Cappuccini, "
+                              "Via Giancarlo De Carlo n° 7", parse_mode="Markdown")
 
 
 def send_pricelist(update: Update, context: CallbackContext) -> None:
@@ -139,6 +160,8 @@ def main():
     allergylist_handler = CommandHandler('allergeni', send_allergylist)
     credits_handler = CommandHandler('crediti', send_credits)
     donate_handler = CommandHandler('dona', send_donate)
+    location_duca_handler = CommandHandler("posizione_duca", send_duca_location)
+    location_tridente_handler = CommandHandler("posizione_tridente", send_tridente_location)
 
     menu_handler = ConversationHandler(
         entry_points=[CommandHandler(['duca', 'tridente', 'cibus'], meal_choice)],
@@ -156,6 +179,9 @@ def main():
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(menu_handler)
     dispatcher.add_handler(stats_handler)
+    dispatcher.add_handler(timetable_handler)
+    dispatcher.add_handler(location_duca_handler)
+    dispatcher.add_handler(location_tridente_handler)
 
     # TODO: Remove me when everything is implemented
     backup_handler = MessageHandler(Filters.regex('[/]'), unimplemented_fallback)
