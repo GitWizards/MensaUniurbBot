@@ -79,17 +79,18 @@ def send_menu(update: Update, context: CallbackContext) -> int:
 
     msg = get_menu_msg(context.user_data['place'], complete_date, context.user_data['meal'])
 
-    # Randomly add paypal link to donate or link to playstore app
-    num = randint(1, 4)
-
-    if num == 1:
-        msg += ("\n\n💙 Aiutaci a sostenere le spese di @MensaUniurb\_Bot.\n[Dona 2 Euro]"
-                "(https://paypal.me/Radeox/2) oppure [dona 5 Euro](https://paypal.me/Radeox/5).")
-    elif num == 2:
-        msg += (
-            "\n\n📱Siamo anche su [Google Play](https://play.google.com/store/apps/details?id=com.radeox.mensa_uniurb)!")
-
     if msg:
+        # Randomly add paypal link to donate or link to playstore app
+        num = randint(1, 4)
+
+        if num == 1:
+            msg += ("\n\n💙 Aiutaci a sostenere le spese di @MensaUniurb\_Bot.\n[Dona 2 Euro]"
+                    "(https://paypal.me/Radeox/2) oppure [dona 5 Euro](https://paypal.me/Radeox/5).")
+        elif num == 2:
+            msg += (
+                "\n\n📱Siamo anche su [Google Play](https://play.google.com/store/apps/details?id=com.radeox.mensa_uniurb)!")
+
+        # Send menu to user
         update.message.reply_text(msg, reply_markup=ReplyKeyboardRemove(), parse_mode="Markdown")
     else:
         update.message.reply_text("*Non ho trovato nulla 🤷🏻‍♂️ *\n\nControlla gli /orari",
