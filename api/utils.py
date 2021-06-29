@@ -188,27 +188,37 @@ def get_menu(place, date, meal):
     """
     Return the menu in JSON format
     """
-    # Convert date to the right format
-    date = date.replace('-', '/')
-
-    # Request the raw data
-    r = requests.post("http://menu.ersurb.it/menum/menu.asp", data={
-        'mensa': place,
-        'da': date,
-        'a': date
-    })
-
     # Prepare data structure
     data = {}
     data['place'] = place
     data['meal'] = meal
     data['date'] = datetime.now().isoformat()
     data['empty'] = True
+    data['error'] = False
     data['menu'] = {}
     data['menu']['first'] = []
     data['menu']['second'] = []
     data['menu']['side'] = []
     data['menu']['fruit'] = []
+
+    # Convert date to the right format
+    date = date.replace('-', '/')
+    # Convert date to the right format
+    date = date.replace('-', '/')
+
+    # Request the raw data
+    try:
+        requests.adapters.DEFAULT_RETRIES = 1
+        r = requests.post(
+            "http://menu.ersurb.it/menum/menu.asp", data={
+            'mensa': place,
+            'da': date,
+            'a': date
+        })
+    except requests.exceptions.ConnectionError:
+        print("> Connection error...")
+        data['error'] = True
+        return data
 
     # Parse HTML
     soup = BeautifulSoup(r.text, 'html.parser')

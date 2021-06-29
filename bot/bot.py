@@ -79,7 +79,16 @@ def send_menu(update: Update, context: CallbackContext) -> int:
 
     msg = get_menu_msg(context.user_data['place'], complete_date, context.user_data['meal'])
 
-    if msg:
+    if msg == "NO_DATA":
+        update.message.reply_text("*Non ho trovato nulla 🤷🏻‍♂️ *\n\nControlla gli /orari",
+                                  reply_markup=ReplyKeyboardRemove(),
+                                  parse_mode="Markdown")
+    elif msg == "ERROR":
+        update.message.reply_text("🔧 Qualcosa è andato nella comunicazione con il sito ERDIS 🔧\n\n"
+                                  "Riprova più tardi o direttamente sul loro [sito](http://menu.ersurb.it/menum/ricercamenu.asp)",
+                                  reply_markup=ReplyKeyboardRemove(),
+                                  parse_mode="Markdown")
+    else:
         # Randomly add paypal link to donate or link to playstore app
         num = randint(1, 4)
 
@@ -92,10 +101,7 @@ def send_menu(update: Update, context: CallbackContext) -> int:
 
         # Send menu to user
         update.message.reply_text(msg, reply_markup=ReplyKeyboardRemove(), parse_mode="Markdown")
-    else:
-        update.message.reply_text("*Non ho trovato nulla 🤷🏻‍♂️ *\n\nControlla gli /orari",
-                                  reply_markup=ReplyKeyboardRemove(),
-                                  parse_mode="Markdown")
+
     return ConversationHandler.END
 
 
