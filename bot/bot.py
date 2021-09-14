@@ -7,6 +7,7 @@ Authors: Radeox (dawid.weglarz95@gmail.com)
 
 import os
 import logging
+import signal
 from datetime import datetime
 from random import randint
 
@@ -14,8 +15,7 @@ from dotenv import load_dotenv
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
 from telegram.ext import (Filters, CommandHandler, ConversationHandler,
                           CallbackContext, MessageHandler, Updater)
-from pid import PidFile
-
+from telegram.error import Conflict
 from utils import get_menu_msg, get_monthly_stats, prepare_week_keyboard
 
 # Enable logging
@@ -175,6 +175,15 @@ def send_credits(update: Update, context: CallbackContext) -> None:
                               parse_mode="Markdown")
 
 
+def error_handler(update: object, context: CallbackContext) -> None:
+    if isinstance(context.error, Conflict):
+        print("[FATAL] Token conflict!")
+        os.kill(os.getpid(), signal.SIGINT)
+    else:
+        print("[ERROR] " + str(context.error))
+        pass
+
+
 def main():
     # Load env variables
     load_dotenv()
@@ -218,10 +227,7 @@ def main():
     dispatcher.add_handler(allergylist_handler)
     dispatcher.add_handler(credits_handler)
     dispatcher.add_handler(donate_handler)
-
-    # TODO: Remove me when everything is implemented
-    backup_handler = MessageHandler(Filters.regex('[/]'), unimplemented_fallback)
-    dispatcher.add_handler(backup_handler)
+    dispatcher.add_error_handler(error_handler)
 
     # Start the Bot
     updater.start_polling()
@@ -229,5 +235,4 @@ def main():
 
 
 if __name__ == '__main__':
-    with PidFile('mensa_uniurb_bot') as _:
-        main()
+    main()
