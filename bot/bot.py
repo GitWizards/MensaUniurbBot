@@ -90,14 +90,9 @@ def send_menu(update: Update, context: CallbackContext) -> int:
                                   parse_mode="Markdown")
     else:
         # Randomly add paypal link to donate or link to playstore app
-        num = randint(1, 4)
-
-        if num == 1:
-            msg += ("\n\n💙 Aiutaci a sostenere le spese di @MensaUniurb\_Bot.\n[Dona 2 Euro]"
-                    "(https://paypal.me/Radeox/2) oppure [dona 5 Euro](https://paypal.me/Radeox/5).")
-        elif num == 2:
-            msg += (
-                "\n\n📱Siamo anche su [Google Play](https://play.google.com/store/apps/details?id=com.radeox.mensa_uniurb)!")
+        if randint(1, 3) == 1:
+            msg += ("\n\n-----------------------------\n\n💙 Aiutaci a sostenere le spese di @MensaUniurb\_Bot.\n"
+                    "[Clicca qui](https://paypal.me/Radeox/) e decidi una somma. Grazie!")
 
         # Send menu to user
         update.message.reply_text(msg, reply_markup=ReplyKeyboardRemove(), parse_mode="Markdown")
@@ -122,11 +117,8 @@ def send_stats(update: Update, context: CallbackContext) -> None:
 
 
 def send_timetable(update: Update, context: CallbackContext) -> None:
-    update.message.reply_text("🍝 *Duca*\nAperta tutti i giorni, "
-                              "esclusi Sabato e Domenica, dalle *12:00* alle *14:00* "
-                              "e dalle *19:00* alle *21:00*.\n\n"
-                              "🍔 *Cibus Duca*\n"
-                              "Dalle ore *12:00* alle ore *14:30*.\n"
+    update.message.reply_text("🍝 *Duca*\nAperta tutti i giorni feriali "
+                              "dalle *12:00* alle *17:00*.\n"
                               "*Posizione*: /posizione\_duca\n\n"
                               "🍖 *Tridente*\n"
                               "Aperta tutti i giorni dalle *12:00* alle *14:00* "
@@ -142,8 +134,7 @@ def send_duca_location(update: Update, context: CallbackContext) -> None:
 
 def send_tridente_location(update: Update, context: CallbackContext) -> None:
     update.message.reply_location("43.720036", "12.623293", quote=True)
-    update.message.reply_text("📍 *Indirizzo*: Zona dei collegi del Colle dei Cappuccini, "
-                              "Via Giancarlo De Carlo n° 7", parse_mode="Markdown")
+    update.message.reply_text("📍 *Indirizzo*: Via Giancarlo De Carlo n° 7", parse_mode="Markdown")
 
 
 def send_pricelist(update: Update, context: CallbackContext) -> None:
@@ -159,7 +150,7 @@ def send_credits(update: Update, context: CallbackContext) -> None:
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [
             InlineKeyboardButton(
-                text="☕ Offrici un caffè o una birra 🍺",
+                text="☕ Offrici un caffè e/o una birra 🍺",
                 url="https://paypal.me/Radeox/"
             )
         ],
@@ -181,7 +172,6 @@ def error_handler(update: object, context: CallbackContext) -> None:
         os.kill(os.getpid(), signal.SIGINT)
     else:
         print("[ERROR] " + str(context.error))
-        pass
 
 
 def main():
