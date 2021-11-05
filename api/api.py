@@ -30,11 +30,6 @@ class RequestStats(Resource):
         return logger.get_stats()
 
 
-class RequestFullStats(Resource):
-    def get(self):
-        return logger.get_full_stats()
-
-
 if __name__ == '__main__':
     # Load env variables
     load_dotenv()
@@ -50,7 +45,6 @@ if __name__ == '__main__':
     api.add_resource(Tridente, '/tridente/<date>/<meal>')
     api.add_resource(Cibus, '/cibus/<date>/<meal>')
     api.add_resource(RequestStats, '/stats/')
-    api.add_resource(RequestFullStats, '/full_stats/')
 
     # Init database
     logger = Logger("mensa_requests.db")
