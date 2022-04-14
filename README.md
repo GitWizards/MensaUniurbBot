@@ -8,7 +8,7 @@ spunto per altri sviluppatori in cerca di un esempio semplice.
 
 Il progetto è composto da:
 
-* Bot &rarr; Realizzato in Python tramite la libreria [Telepot](https://github.com/nickoala/telepot).
+* Bot &rarr; Realizzato in Python tramite la libreria [Python-Telegram-Bot](https://github.com/python-telegram-bot/python-telegram-bot).
 * API &rarr; Acquisisce e converte i dati grezzi in un formato facilmente utilizzabile e accessibile. Realizzato in Python con l'ausilio della liberia [Flask](http://flask.pocoo.org).
 
 Inoltre abbiamo anche sviluppato:
