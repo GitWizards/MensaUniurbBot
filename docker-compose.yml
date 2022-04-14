@@ -17,7 +17,7 @@ services:
     env_file:
       .env
     ports:
-      - "9543:9543"
+      - 9543:9543
     volumes:
       - .:/app/
     restart: unless-stopped

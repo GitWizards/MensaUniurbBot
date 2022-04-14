@@ -129,10 +129,10 @@ def get_menu(place, date, meal):
         requests.adapters.DEFAULT_RETRIES = 1
         r = requests.post(
             "http://menu.ersurb.it/menum/menu.asp", data={
-            'mensa': place,
-            'da': date,
-            'a': date
-        })
+                'mensa': place,
+                'da': date,
+                'a': date
+            })
     except requests.exceptions.ConnectionError:
         print("> Connection error...")
         data['error'] = True
@@ -211,7 +211,6 @@ def get_menu(place, date, meal):
         # Check 'empty' flags
         if data['empty']:
             data['empty'] = (data['menu'][meal] == [])
-
 
     # Return the JSON menu
     return data

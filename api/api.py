@@ -1,4 +1,5 @@
 import os
+
 from dotenv import load_dotenv
 from flask import Flask
 from flask_restful import Api, Resource
@@ -33,7 +34,7 @@ class RequestStats(Resource):
 if __name__ == '__main__':
     # Load env variables
     load_dotenv()
-    PORT = os.environ['PORT']
+    PORT = int(os.environ['PORT'])
     DEBUG = eval(os.environ['DEBUG'])
 
     # Init flask
