@@ -10,9 +10,9 @@ def get_menu_msg(place, date, meal) -> str:
     data = json.loads(r.text)
     rv = ""
 
-    if data['error'] == True:
+    if data['error']:
         rv = "ERROR"
-    elif data['empty'] == True:
+    elif data['empty']:
         rv = "NO_DATA"
     else:
         menu = data['menu']

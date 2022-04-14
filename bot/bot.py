@@ -5,17 +5,19 @@ Authors: Radeox (dawid.weglarz95@gmail.com)
          Fast0n (theplayergame97@gmail.com)
 """
 
-import os
 import logging
+import os
 import signal
 from datetime import datetime
 from random import randint
 
 from dotenv import load_dotenv
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
-from telegram.ext import (Filters, CommandHandler, ConversationHandler,
-                          CallbackContext, MessageHandler, Updater)
+from telegram import (InlineKeyboardButton, InlineKeyboardMarkup,
+                      ReplyKeyboardMarkup, ReplyKeyboardRemove, Update)
 from telegram.error import Conflict
+from telegram.ext import (CallbackContext, CommandHandler, ConversationHandler,
+                          Filters, MessageHandler, Updater)
+
 from utils import get_menu_msg, get_monthly_stats, prepare_week_keyboard
 
 # Enable logging
