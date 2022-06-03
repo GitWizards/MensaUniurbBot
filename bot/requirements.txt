@@ -1,11 +1,11 @@
 APScheduler==3.6.3
 cachetools==4.2.2
-certifi==2021.10.8
+certifi==2022.5.18.1
 chardet==4.0.0
 charset-normalizer==2.0.12
 idna==3.3
 python-dotenv==0.20.0
-python-telegram-bot==13.11
+python-telegram-bot==13.12
 pytz==2022.1
 pytz-deprecation-shim==0.1.0.post0
 requests==2.27.1
