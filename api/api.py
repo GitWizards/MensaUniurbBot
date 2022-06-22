@@ -34,7 +34,6 @@ class RequestStats(Resource):
 if __name__ == '__main__':
     # Load env variables
     load_dotenv()
-    PORT = int(os.environ['PORT'])
     DEBUG = eval(os.environ['DEBUG'])
 
     # Init flask
@@ -51,7 +50,8 @@ if __name__ == '__main__':
     logger = Logger("mensa_requests.db")
 
     if DEBUG:
-        app.run(host='0.0.0.0', port=PORT)
+        print("Starting API (Debug mode)")
+        app.run(host='0.0.0.0', port=9543)
     else:
-        print("Starting API...")
-        serve(app, host='0.0.0.0', port=PORT)
+        print("Starting API")
+        serve(app, host='0.0.0.0', port=9543)

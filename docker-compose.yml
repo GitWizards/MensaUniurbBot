@@ -2,6 +2,7 @@ version: '3'
 
 services:
   bot:
+    container_name: MensaUniurbBot
     build: ./bot/
     command: python bot/bot.py
     env_file:
@@ -11,7 +12,9 @@ services:
     restart: unless-stopped
     depends_on:
       - api
+
   api:
+    container_name: MensaUniurbApi
     build: ./api/
     command: python api/api.py
     env_file:
