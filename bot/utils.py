@@ -10,31 +10,31 @@ def get_menu_msg(place, date, meal) -> str:
     data = json.loads(r.text)
     rv = ""
 
-    if data['error']:
+    if data["error"]:
         rv = "ERROR"
-    elif data['empty']:
+    elif data["empty"]:
         rv = "NO_DATA"
     else:
-        menu = data['menu']
+        menu = data["menu"]
 
-        if menu['first']:
+        if menu["first"]:
             rv += "🍝 *Primo:*\n"
-            for dish in menu['first']:
+            for dish in menu["first"]:
                 rv += f" • {dish}\n"
 
-        if menu['second']:
+        if menu["second"]:
             rv += "\n🍖 *Secondo:*\n"
-            for dish in menu['second']:
+            for dish in menu["second"]:
                 rv += f" • {dish}\n"
 
-        if menu['side']:
+        if menu["side"]:
             rv += "\n🍟 *Contorno:*\n"
-            for dish in menu['side']:
+            for dish in menu["side"]:
                 rv += f" • {dish}\n"
 
-        if menu['fruit']:
+        if menu["fruit"]:
             rv += "\n🍨 *Frutta/Dolci:*\n"
-            for dish in menu['fruit']:
+            for dish in menu["fruit"]:
                 rv += f" • {dish}\n"
 
         rv += "\n⚠️ _Il menù potrebbe subire delle variazioni_ ⚠️"
@@ -54,9 +54,11 @@ def get_monthly_stats() -> str:
     # Convert the data to Json
     data = json.loads(r.text)
 
-    rv = (f"Richieste totali: {data['total']}\n"
-          f"Richieste {month.zfill(2)}/{year}: {data['requests'][year][month]['total']}\n"
-          f"Richieste oggi: {data['requests'][year][month][day]}")
+    rv = (
+        f"Richieste totali: {data['total']}\n"
+        f"Richieste {month.zfill(2)}/{year}: {data['requests'][year][month]['total']}\n"
+        f"Richieste oggi: {data['requests'][year][month][day]}"
+    )
     return rv
 
 
