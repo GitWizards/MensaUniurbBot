@@ -1,4 +1,4 @@
-FROM python:3.11-rc-slim-bullseye
+FROM python:3.10-slim-buster
 MAINTAINER radeox "dawid.weglarz95@gmail.com"
 
 ENV PYTHONUNBUFFERED 1

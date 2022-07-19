@@ -1,6 +1,5 @@
 import os
 
-from dotenv import load_dotenv
 from flask import Flask
 from flask_restful import Api, Resource
 from waitress import serve
@@ -33,8 +32,7 @@ class RequestStats(Resource):
 
 if __name__ == "__main__":
     # Load env variables
-    load_dotenv()
-    DEBUG = eval(os.environ["DEBUG"])
+    DEBUG = os.environ["DEBUG"]
 
     # Init flask
     app = Flask(__name__)

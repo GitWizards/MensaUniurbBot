@@ -11,7 +11,6 @@ import signal
 from datetime import datetime
 from random import randint
 
-from dotenv import load_dotenv
 from telegram import (
     InlineKeyboardButton,
     InlineKeyboardMarkup,
@@ -215,7 +214,6 @@ def error_handler(update: object, context: CallbackContext) -> None:
 
 def main():
     # Load env variables
-    load_dotenv()
     TOKEN = os.environ["TOKEN"]
 
     # Setup bot
