@@ -60,8 +60,6 @@ def meal_choice(update: Update, context: CallbackContext) -> int:
         context.user_data["place"] = "duca"
     elif response == "/tridente":
         context.user_data["place"] = "tridente"
-    elif response == "/cibus":
-        context.user_data["place"] = "cibus"
 
     # Prepare keyboard
     keyboard = [["Pranzo"], ["Cena"]]
@@ -234,7 +232,7 @@ def main():
     )
 
     menu_handler = ConversationHandler(
-        entry_points=[CommandHandler(["duca", "tridente", "cibus"], meal_choice)],
+        entry_points=[CommandHandler(["duca", "tridente"], meal_choice)],
         states={
             MEAL_CHOICE: [
                 MessageHandler(Filters.regex("Pranzo|Cena"), date_choice),

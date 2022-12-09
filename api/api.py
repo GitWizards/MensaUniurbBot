@@ -19,12 +19,6 @@ class Tridente(Resource):
         return get_menu("tridente", date, meal)
 
 
-class Cibus(Resource):
-    def get(self, date, meal):
-        logger.log_request("cibus", meal)
-        return get_menu("cibus", date, meal)
-
-
 class RequestStats(Resource):
     def get(self):
         return logger.get_stats()
@@ -41,7 +35,6 @@ if __name__ == "__main__":
     # Routes configuration
     api.add_resource(Duca, "/duca/<date>/<meal>")
     api.add_resource(Tridente, "/tridente/<date>/<meal>")
-    api.add_resource(Cibus, "/cibus/<date>/<meal>")
     api.add_resource(RequestStats, "/stats/")
 
     # Init database
