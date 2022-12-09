@@ -168,6 +168,17 @@ def send_allergylist(update: Update, context: CallbackContext) -> None:
 
 
 def send_credits(update: Update, context: CallbackContext) -> None:
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="☕ Offrici un caffè e/o una birra 🍺",
+                    url="https://paypal.me/Radeox/",
+                )
+            ],
+        ]
+    )
+
     update.message.reply_text(
         "*Link*:\n"
         "[Google Play](https://play.google.com/store/apps/details?id=com.radeox.mensa_uniurb)\n"
@@ -175,6 +186,7 @@ def send_credits(update: Update, context: CallbackContext) -> None:
         "*Developers*:\n"
         "[Radeox - Github](https://github.com/Radeox)\n"
         "[Fast0n - Github](https://github.com/Fast0n)",
+        reply_markup=keyboard,
         parse_mode="Markdown",
     )
 
