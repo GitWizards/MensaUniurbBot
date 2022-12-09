@@ -133,13 +133,6 @@ def conversation_fallback(update: Update, context: CallbackContext) -> int:
     return ConversationHandler.END
 
 
-def unimplemented_fallback(update: Update, context: CallbackContext) -> None:
-    update.message.reply_text(
-        "*Questa funzione potrebbe essere ancora rotta, " "ma ci stiamo lavorando 😕*",
-        parse_mode="Markdown",
-    )
-
-
 def send_stats(update: Update, context: CallbackContext) -> None:
     update.message.reply_text(get_monthly_stats())
 
@@ -147,7 +140,8 @@ def send_stats(update: Update, context: CallbackContext) -> None:
 def send_timetable(update: Update, context: CallbackContext) -> None:
     update.message.reply_text(
         "🍝 *Duca*\nAperta tutti i giorni feriali "
-        "dalle *12:00* alle *17:00*.\n"
+        "dalle *12:00* alle *14:15* "
+        "e dalle *19:00* alle *21:00*.\n"
         "*Posizione*: /posizione\_duca\n\n"
         "🍖 *Tridente*\n"
         "Aperta tutti i giorni dalle *12:00* alle *14:00* "
@@ -169,27 +163,11 @@ def send_tridente_location(update: Update, context: CallbackContext) -> None:
     )
 
 
-def send_pricelist(update: Update, context: CallbackContext) -> None:
-    with open("assets/price_list.png", "rb") as f:
-        update.message.reply_photo(f, quote=True)
-
-
 def send_allergylist(update: Update, context: CallbackContext) -> None:
     update.message.reply_photo("http://menu.ersurb.it/menum/Allergeni_legenda.png")
 
 
 def send_credits(update: Update, context: CallbackContext) -> None:
-    keyboard = InlineKeyboardMarkup(
-        inline_keyboard=[
-            [
-                InlineKeyboardButton(
-                    text="☕ Offrici un caffè e/o una birra 🍺",
-                    url="https://paypal.me/Radeox/",
-                )
-            ],
-        ]
-    )
-
     update.message.reply_text(
         "*Link*:\n"
         "[Google Play](https://play.google.com/store/apps/details?id=com.radeox.mensa_uniurb)\n"
@@ -197,7 +175,6 @@ def send_credits(update: Update, context: CallbackContext) -> None:
         "*Developers*:\n"
         "[Radeox - Github](https://github.com/Radeox)\n"
         "[Fast0n - Github](https://github.com/Fast0n)",
-        reply_markup=keyboard,
         parse_mode="Markdown",
     )
 
@@ -222,7 +199,6 @@ def main():
     start_handler = CommandHandler("start", start)
     stats_handler = CommandHandler("statistiche", send_stats)
     timetable_handler = CommandHandler("orari", send_timetable)
-    pricelist_handler = CommandHandler("prezzi", send_pricelist)
     allergylist_handler = CommandHandler("allergeni", send_allergylist)
     credits_handler = CommandHandler("crediti", send_credits)
     donate_handler = CommandHandler("dona", send_credits)
@@ -252,7 +228,6 @@ def main():
     dispatcher.add_handler(timetable_handler)
     dispatcher.add_handler(location_duca_handler)
     dispatcher.add_handler(location_tridente_handler)
-    dispatcher.add_handler(pricelist_handler)
     dispatcher.add_handler(allergylist_handler)
     dispatcher.add_handler(credits_handler)
     dispatcher.add_handler(donate_handler)
