@@ -140,11 +140,11 @@ def send_stats(update: Update, context: CallbackContext) -> None:
 def send_timetable(update: Update, context: CallbackContext) -> None:
     update.message.reply_text(
         "🍝 *Duca*\nAperta tutti i giorni feriali "
-        "dalle *12:00* alle *14:15* "
+        "dalle *12:00* alle *14:30* "
         "e dalle *19:00* alle *21:00*.\n"
         "*Posizione*: /posizione\_duca\n\n"
         "🍖 *Tridente*\n"
-        "Aperta tutti i giorni dalle *12:00* alle *14:00* "
+        "Aperta tutti i giorni dalle *12:00* alle *14:15* "
         "e dalle *19:00* alle *21:00*.\n"
         "*Posizione*: /posizione\_tridente\n\n",
         parse_mode="Markdown",
