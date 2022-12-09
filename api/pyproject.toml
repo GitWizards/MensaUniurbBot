@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "mensauniurbapi"
+name = "mensa-uniurb-api"
 version = "1.0.0"
 description = ""
 authors = ["Dawid Weglarz <dawid.weglarz95@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.11"
 Flask = "^2.2.2"
 waitress = "^2.1.2"
 beautifulsoup4 = "^4.11.1"
