@@ -2,7 +2,7 @@ FROM python:3.11-slim-bullseye
 MAINTAINER radeox "dawid.weglarz95@gmail.com"
 
 ENV PYTHONUNBUFFERED 1
-ENV POETRY_VERSION=1.2.2
+ENV POETRY_VERSION=1.4.2
 
 WORKDIR /app/
 
