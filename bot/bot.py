@@ -41,7 +41,7 @@ logger = logging.getLogger(__name__)
 MEAL_CHOICE, DATE_CHOICE = range(2)
 
 
-def start(update: Update, context: CallbackContext) -> None:
+def start(update: Update, _) -> None:
     update.message.reply_text(
         "*Benvenuto su @MensaUniurbBot*\n"
         "Qui troverai il menù offerto troverai da "
@@ -124,7 +124,7 @@ def send_menu(update: Update, context: CallbackContext) -> int:
     return ConversationHandler.END
 
 
-def conversation_fallback(update: Update, context: CallbackContext) -> int:
+def conversation_fallback(update: Update, _) -> int:
     update.message.reply_text(
         "*Non ho capito! Riprova da capo 😕*\n\nOpzioni:\n/duca\n/tridente",
         reply_markup=ReplyKeyboardRemove(),
@@ -133,11 +133,11 @@ def conversation_fallback(update: Update, context: CallbackContext) -> int:
     return ConversationHandler.END
 
 
-def send_stats(update: Update, context: CallbackContext) -> None:
+def send_stats(update: Update, _) -> None:
     update.message.reply_text(get_monthly_stats())
 
 
-def send_timetable(update: Update, context: CallbackContext) -> None:
+def send_timetable(update: Update, _) -> None:
     update.message.reply_text(
         "🍝 *Duca*\nAperta tutti i giorni feriali "
         "dalle *12:00* alle *14:30* "
@@ -151,23 +151,23 @@ def send_timetable(update: Update, context: CallbackContext) -> None:
     )
 
 
-def send_duca_location(update: Update, context: CallbackContext) -> None:
+def send_duca_location(update: Update, _) -> None:
     update.message.reply_location("43.72640143124929", "12.63739407389494", quote=True)
     update.message.reply_text("📍 *Indirizzo*: Via Budassi n° 3", parse_mode="Markdown")
 
 
-def send_tridente_location(update: Update, context: CallbackContext) -> None:
+def send_tridente_location(update: Update, _) -> None:
     update.message.reply_location("43.720036", "12.623293", quote=True)
     update.message.reply_text(
         "📍 *Indirizzo*: Via Giancarlo De Carlo n° 7", parse_mode="Markdown"
     )
 
 
-def send_allergylist(update: Update, context: CallbackContext) -> None:
-    update.message.reply_photo("http://menu.ersurb.it/menum/Allergeni_legenda.png")
+def send_allergylist(update: Update, _) -> None:
+    update.message.reply_photo(photo=open("bot/assets/Allergeni_legenda.png", "rb"))
 
 
-def send_credits(update: Update, context: CallbackContext) -> None:
+def send_credits(update: Update, _) -> None:
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
             [
@@ -191,7 +191,7 @@ def send_credits(update: Update, context: CallbackContext) -> None:
     )
 
 
-def error_handler(update: object, context: CallbackContext) -> None:
+def error_handler(_, context: CallbackContext) -> None:
     if isinstance(context.error, Conflict):
         print("[FATAL] Token conflict!")
         os.kill(os.getpid(), signal.SIGINT)
