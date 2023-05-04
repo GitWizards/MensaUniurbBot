@@ -131,9 +131,6 @@ def get_menu(place, date, meal):
         r = requests.get(
             f"https://www.erdis.it/menu/Mensa_{place}/Menu_Del_Giorno_{date}_{place}.html"
         )
-        print(
-            f"https://www.erdis.it/menu/Mensa_{place}/Menu_Del_Giorno_{date}_{place}.html"
-        )
     except requests.exceptions.ConnectionError:
         print("> Connection error...")
         data["error"] = True
