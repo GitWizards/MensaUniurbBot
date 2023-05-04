@@ -1,4 +1,5 @@
 import calendar
+import re
 import sqlite3
 from datetime import datetime
 
@@ -106,29 +107,32 @@ def get_menu(place, date, meal):
     Return the menu in JSON format
     """
     # Prepare data structure
-    data = {}
-    data["place"] = place
-    data["meal"] = meal
-    data["date"] = datetime.now().isoformat()
-    data["empty"] = True
-    data["error"] = False
-    data["menu"] = {}
-    data["menu"]["first"] = []
-    data["menu"]["second"] = []
-    data["menu"]["side"] = []
-    data["menu"]["fruit"] = []
+    data = {
+        "menu": {
+            "first": [],
+            "second": [],
+            "side": [],
+            "fruit": [],
+        },
+        "empty": True,
+        "error": False,
+        "meal": meal,
+        "place": place,
+    }
 
     # Convert date to the right format
-    date = date.replace("-", "/")
-    # Convert date to the right format
-    date = date.replace("-", "/")
+    date = date.replace("-", "_")
+    date = date.split("_")[2] + "_" + date.split("_")[0] + "_" + date.split("_")[1]
+
+    place = place.capitalize()
 
     # Request the raw data
     try:
-        requests.adapters.DEFAULT_RETRIES = 1
-        r = requests.post(
-            "http://menu.ersurb.it/menum/menu.asp",
-            data={"mensa": place, "da": date, "a": date},
+        r = requests.get(
+            f"https://www.erdis.it/menu/Mensa_{place}/Menu_Del_Giorno_{date}_{place}.html"
+        )
+        print(
+            f"https://www.erdis.it/menu/Mensa_{place}/Menu_Del_Giorno_{date}_{place}.html"
         )
     except requests.exceptions.ConnectionError:
         print("> Connection error...")
@@ -137,77 +141,68 @@ def get_menu(place, date, meal):
 
     # Parse HTML
     soup = BeautifulSoup(r.text, "html.parser")
+    trs = soup.find_all("tr")
 
-    # Some working variables
-    prev = "0"
-    dinner = False
+    # Retrive soups
+    soups = {}
 
-    # Parse all entries
-    for link in soup.find_all("a")[1:]:
-        # Clean HTML
-        app = link.get("onclick").replace("showModal", "")
+    for tr in trs:
+        if "Pranzo" in str(tr.find("td")):
+            soups["pranzo"] = tr
+        elif "Cena" in str(tr.find("td")):
+            soups["cena"] = tr
 
-        # Get ID
-        plate_id = app.split()[1]
-        plate_id = plate_id.replace('"', "").replace(",", "")
+    target = ""
 
-        # Get name
-        name = app.split(", ")[2]
-        name = name.replace('"', "").replace(");", "")
+    # Pattern to exclude allergens
+    pattern = re.compile("([a-z]+)")
 
-        # Remove useless characters
-        name = name.replace("*", "X")
+    # Exclude what we don't need
+    wanted = ["primo", "secondo", "contorno", "frutta"]
+    not_wanted = ["pranzo", "cena", "non disponibili"]
+    menus = {
+        "pranzo": {
+            "primo": [],
+            "secondo": [],
+            "contorno": [],
+            "frutta": [],
+        },
+        "cena": {
+            "primo": [],
+            "secondo": [],
+            "contorno": [],
+            "frutta": [],
+        },
+    }
 
-        # Capitalize entries
-        name = name.capitalize()
+    # Search for what we need
+    for soup in soups:
+        for td in soups[soup].find_all("td")[1:]:
+            text = td.text.strip().lower()
 
-        # Check if we are searching for a lunch menu
-        if meal == "lunch":
-            # Check if we finished
-            if prev == "40" and plate_id == "10":
-                # Stop checking, next plate is from dinner block
-                # At this point we are sure that the set is not empty
+            if text in wanted:
+                target = text
+            elif pattern.match(text) and text not in not_wanted:
+                menus[soup][target].append(text.capitalize())
+            elif "cena" in text:
                 break
-            else:
-                prev = plate_id
 
-            # Put the dish in right position
-            if plate_id == "10":
-                data["menu"]["first"].append(name)
-            elif plate_id == "20":
-                data["menu"]["second"].append(name)
-            elif plate_id == "30":
-                data["menu"]["side"].append(name)
-            elif plate_id == "40":
-                data["menu"]["fruit"].append(name)
+    # Get desired menu
+    if meal == "lunch":
+        data["menu"]["first"] = menus["pranzo"]["primo"]
+        data["menu"]["second"] = menus["pranzo"]["secondo"]
+        data["menu"]["side"] = menus["pranzo"]["contorno"]
+        data["menu"]["fruit"] = menus["pranzo"]["frutta"]
+    elif meal == "dinner":
+        data["menu"]["first"] = menus["cena"]["primo"]
+        data["menu"]["second"] = menus["cena"]["secondo"]
+        data["menu"]["side"] = menus["cena"]["contorno"]
+        data["menu"]["fruit"] = menus["cena"]["frutta"]
 
-        # Check if we are searching for a dinner menu
-        elif meal == "dinner":
-            # Check if we can start
-            if prev == "40" and plate_id == "10":
-                # We are sure that the set is not empty
-                dinner = True
-            else:
-                prev = plate_id
-
-            if dinner:
-                # Put the dish in right position
-                if plate_id == "10":
-                    data["menu"]["first"].append(name)
-                elif plate_id == "20":
-                    data["menu"]["second"].append(name)
-                elif plate_id == "30":
-                    data["menu"]["side"].append(name)
-                elif plate_id == "40":
-                    data["menu"]["fruit"].append(name)
-
-    for meal in data["menu"]:
-        # Sort single meals by plate name
-        data["menu"][meal].sort()
-
-        # Check 'empty' flags
-        if data["empty"]:
-            data["empty"] = data["menu"][meal] == []
+    # Check if the menu is empty
+    for key in data["menu"]:
+        if data["menu"][key]:
+            data["empty"] = False
 
     # Return the JSON menu
     return data
