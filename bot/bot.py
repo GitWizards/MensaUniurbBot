@@ -20,12 +20,12 @@ from telegram import (
 )
 from telegram.error import Conflict
 from telegram.ext import (
+    Application,
     CallbackContext,
     CommandHandler,
     ConversationHandler,
-    Filters,
     MessageHandler,
-    Updater,
+    filters,
 )
 
 from utils import get_menu_msg, get_monthly_stats, prepare_week_keyboard
@@ -41,8 +41,8 @@ logger = logging.getLogger(__name__)
 MEAL_CHOICE, DATE_CHOICE = range(2)
 
 
-def start(update: Update, _) -> None:
-    update.message.reply_text(
+async def start(update: Update, _) -> None:
+    await update.message.reply_text(
         "*Benvenuto su @MensaUniurbBot*\n"
         "Qui troverai il menù offerto troverai da "
         "Uniurb nei ristoranti /duca e /tridente.\n\n"
@@ -53,7 +53,7 @@ def start(update: Update, _) -> None:
     return
 
 
-def meal_choice(update: Update, context: CallbackContext) -> int:
+async def meal_choice(update: Update, context: CallbackContext) -> int:
     response = update["message"]["text"]
 
     if response == "/duca":
@@ -65,13 +65,13 @@ def meal_choice(update: Update, context: CallbackContext) -> int:
     keyboard = [["Pranzo"], ["Cena"]]
     markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True)
 
-    update.message.reply_text(
+    await update.message.reply_text(
         "*Pranzo o Cena?* 🍔🍝", reply_markup=markup, parse_mode="Markdown"
     )
     return MEAL_CHOICE
 
 
-def date_choice(update: Update, context: CallbackContext) -> int:
+async def date_choice(update: Update, context: CallbackContext) -> int:
     response = update["message"]["text"]
 
     if response == "Pranzo":
@@ -81,11 +81,13 @@ def date_choice(update: Update, context: CallbackContext) -> int:
 
     markup = ReplyKeyboardMarkup(prepare_week_keyboard(), one_time_keyboard=True)
 
-    update.message.reply_text("*Quando?* 📅", reply_markup=markup, parse_mode="Markdown")
+    await update.message.reply_text(
+        "*Quando?* 📅", reply_markup=markup, parse_mode="Markdown"
+    )
     return DATE_CHOICE
 
 
-def send_menu(update: Update, context: CallbackContext) -> int:
+async def send_menu(update: Update, context: CallbackContext) -> int:
     # Convert date from DD/MM to MM-DD-YYYY
     now = datetime.now()
     date = update["message"]["text"].split(" ")[1].replace("[", "").replace("]", "")
@@ -96,13 +98,13 @@ def send_menu(update: Update, context: CallbackContext) -> int:
     )
 
     if msg == "NO_DATA":
-        update.message.reply_text(
+        await update.message.reply_text(
             "*Non ho trovato nulla 🤷🏻‍♂️ *\n\nControlla gli /orari",
             reply_markup=ReplyKeyboardRemove(),
             parse_mode="Markdown",
         )
     elif msg == "ERROR":
-        update.message.reply_text(
+        await update.message.reply_text(
             "🔧 Qualcosa è andato nella comunicazione con il sito ERDIS 🔧\n\n"
             "Riprova più tardi o direttamente sul loro [sito](http://menu.ersurb.it/menum/ricercamenu.asp)",
             reply_markup=ReplyKeyboardRemove(),
@@ -117,15 +119,15 @@ def send_menu(update: Update, context: CallbackContext) -> int:
             )
 
         # Send menu to user
-        update.message.reply_text(
+        await update.message.reply_text(
             msg, reply_markup=ReplyKeyboardRemove(), parse_mode="Markdown"
         )
 
     return ConversationHandler.END
 
 
-def conversation_fallback(update: Update, _) -> int:
-    update.message.reply_text(
+async def conversation_fallback(update: Update, _) -> int:
+    await update.message.reply_text(
         "*Non ho capito! Riprova da capo 😕*\n\nOpzioni:\n/duca\n/tridente",
         reply_markup=ReplyKeyboardRemove(),
         parse_mode="Markdown",
@@ -133,12 +135,12 @@ def conversation_fallback(update: Update, _) -> int:
     return ConversationHandler.END
 
 
-def send_stats(update: Update, _) -> None:
-    update.message.reply_text(get_monthly_stats())
+async def send_stats(update: Update, _) -> None:
+    await update.message.reply_text(get_monthly_stats())
 
 
-def send_timetable(update: Update, _) -> None:
-    update.message.reply_text(
+async def send_timetable(update: Update, _) -> None:
+    await update.message.reply_text(
         "🍝 *Duca*\nAperta tutti i giorni feriali "
         "dalle *12:00* alle *14:30* "
         "e dalle *19:00* alle *21:00*.\n"
@@ -151,23 +153,23 @@ def send_timetable(update: Update, _) -> None:
     )
 
 
-def send_duca_location(update: Update, _) -> None:
-    update.message.reply_location("43.72640143124929", "12.63739407389494", quote=True)
-    update.message.reply_text("📍 *Indirizzo*: Via Budassi n° 3", parse_mode="Markdown")
+async def send_duca_location(update: Update, _) -> None:
+    await update.message.reply_location(
+        "43.72640143124929", "12.63739407389494", quote=True
+    )
+    await update.message.reply_text(
+        "📍 *Indirizzo*: Via Budassi n° 3", parse_mode="Markdown"
+    )
 
 
-def send_tridente_location(update: Update, _) -> None:
-    update.message.reply_location("43.720036", "12.623293", quote=True)
-    update.message.reply_text(
+async def send_tridente_location(update: Update, _) -> None:
+    await update.message.reply_location("43.720036", "12.623293", quote=True)
+    await update.message.reply_text(
         "📍 *Indirizzo*: Via Giancarlo De Carlo n° 7", parse_mode="Markdown"
     )
 
 
-def send_allergylist(update: Update, _) -> None:
-    update.message.reply_photo(photo=open("bot/assets/Allergeni_legenda.png", "rb"))
-
-
-def send_credits(update: Update, _) -> None:
+async def send_credits(update: Update, _) -> None:
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
             [
@@ -179,10 +181,10 @@ def send_credits(update: Update, _) -> None:
         ]
     )
 
-    update.message.reply_text(
+    await update.message.reply_text(
         "*Link*:\n"
         "[Google Play](https://play.google.com/store/apps/details?id=com.radeox.mensa_uniurb)\n"
-        "[Codice sorgente](https://github.com/FastRadeox/MensaUniurbBot)\n\n"
+        "[Codice sorgente](https://github.com/GitWizards/MensaUniurbBot)\n\n"
         "*Developers*:\n"
         "[Radeox - Github](https://github.com/Radeox)\n"
         "[Fast0n - Github](https://github.com/Fast0n)",
@@ -191,7 +193,7 @@ def send_credits(update: Update, _) -> None:
     )
 
 
-def error_handler(_, context: CallbackContext) -> None:
+async def error_handler(_, context: CallbackContext) -> None:
     if isinstance(context.error, Conflict):
         print("[FATAL] Token conflict!")
         os.kill(os.getpid(), signal.SIGINT)
@@ -199,55 +201,43 @@ def error_handler(_, context: CallbackContext) -> None:
         print("[ERROR] " + str(context.error))
 
 
-def main():
+def main() -> None:
     # Load env variables
     TOKEN = os.environ["TOKEN"]
 
     # Setup bot
-    updater = Updater(TOKEN, use_context=True)
-    dispatcher = updater.dispatcher
-
-    # Add command handlers
-    start_handler = CommandHandler("start", start)
-    stats_handler = CommandHandler("statistiche", send_stats)
-    timetable_handler = CommandHandler("orari", send_timetable)
-    allergylist_handler = CommandHandler("allergeni", send_allergylist)
-    credits_handler = CommandHandler("crediti", send_credits)
-    donate_handler = CommandHandler("dona", send_credits)
-    location_duca_handler = CommandHandler("posizione_duca", send_duca_location)
-    location_tridente_handler = CommandHandler(
-        "posizione_tridente", send_tridente_location
-    )
+    application = Application.builder().token(TOKEN).build()
 
     menu_handler = ConversationHandler(
         entry_points=[CommandHandler(["duca", "tridente"], meal_choice)],
         states={
             MEAL_CHOICE: [
-                MessageHandler(Filters.regex("Pranzo|Cena"), date_choice),
+                MessageHandler(filters.Regex("Pranzo|Cena"), date_choice),
             ],
             DATE_CHOICE: [
                 MessageHandler(
-                    Filters.regex("[a-zA-Zì]+ .[0-9]+[/]+[0-9]+."), send_menu
+                    filters.Regex("[a-zA-Zì]+ .[0-9]+[/]+[0-9]+."), send_menu
                 ),
             ],
         },
-        fallbacks=[MessageHandler(Filters.update, conversation_fallback)],
+        fallbacks=[MessageHandler(filters.Update, conversation_fallback)],
     )
 
-    dispatcher.add_handler(start_handler)
-    dispatcher.add_handler(menu_handler)
-    dispatcher.add_handler(stats_handler)
-    dispatcher.add_handler(timetable_handler)
-    dispatcher.add_handler(location_duca_handler)
-    dispatcher.add_handler(location_tridente_handler)
-    dispatcher.add_handler(allergylist_handler)
-    dispatcher.add_handler(credits_handler)
-    dispatcher.add_handler(donate_handler)
-    dispatcher.add_error_handler(error_handler)
+    # Add command handlers
+    application.add_handler(CommandHandler("crediti", send_credits))
+    application.add_handler(CommandHandler("dona", send_credits))
+    application.add_handler(CommandHandler("orari", send_timetable))
+    application.add_handler(CommandHandler("posizione_duca", send_duca_location))
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("statistiche", send_stats))
+    application.add_handler(
+        CommandHandler("posizione_tridente", send_tridente_location)
+    )
+    application.add_handler(menu_handler)
+    application.add_error_handler(error_handler)
 
     # Start the Bot
-    updater.start_polling()
-    updater.idle()
+    application.run_polling()
 
 
 if __name__ == "__main__":
