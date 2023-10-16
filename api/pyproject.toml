@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-Flask = "^2.3.2"
+Flask = "^3.0.0"
 beautifulsoup4 = "^4.12.2"
 flask-restful = "^0.3.10"
 requests = "^2.31.0"

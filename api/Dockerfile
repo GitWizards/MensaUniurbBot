@@ -1,8 +1,7 @@
-FROM python:3.11-slim-bookworm
-MAINTAINER radeox "dawid.weglarz95@gmail.com"
+FROM python:3.12-slim-bookworm
 
 ENV PYTHONUNBUFFERED 1
-ENV POETRY_VERSION=1.5.1
+ENV POETRY_VERSION=1.6.1
 
 WORKDIR /app/
 
