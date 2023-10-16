@@ -99,7 +99,7 @@ async def send_menu(update: Update, context: CallbackContext) -> int:
 
     if msg == "NO_DATA":
         await update.message.reply_text(
-            "*Non ho trovato nulla 🤷🏻‍♂️ *\n\nControlla gli /orari",
+            "*Non ho trovato nulla 🤷🏻‍♂️ *\n\nControlla gli /orari\n\nOppure il [link ufficiale](https://www.erdis.it/menu/template/OpenMenuWeek.html)\n",
             reply_markup=ReplyKeyboardRemove(),
             parse_mode="Markdown",
         )
@@ -114,7 +114,7 @@ async def send_menu(update: Update, context: CallbackContext) -> int:
         # Randomly add paypal link to donate or link to playstore app
         if randint(1, 3) == 1:
             msg += (
-                "\n\n-----------------------------\n\n💙 Aiutaci a sostenere le spese di @MensaUniurb\_Bot.\n"
+                "\n\n-----------------------------\n\n💙 Aiutaci a sostenere le spese di @MensaUniurb\\_Bot.\n"
                 "[Clicca qui](https://paypal.me/Radeox/) e decidi una somma. Grazie!"
             )
 
@@ -144,11 +144,11 @@ async def send_timetable(update: Update, _) -> None:
         "🍝 *Duca*\nAperta tutti i giorni feriali "
         "dalle *12:00* alle *14:30* "
         "e dalle *19:00* alle *21:00*.\n"
-        "*Posizione*: /posizione\_duca\n\n"
+        "*Posizione*: /posizione\\_duca\n\n"
         "🍖 *Tridente*\n"
         "Aperta tutti i giorni dalle *12:00* alle *14:15* "
         "e dalle *19:00* alle *21:00*.\n"
-        "*Posizione*: /posizione\_tridente\n\n",
+        "*Posizione*: /posizione\\_tridente\n\n",
         parse_mode="Markdown",
     )
 
