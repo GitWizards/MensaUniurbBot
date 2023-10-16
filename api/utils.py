@@ -179,7 +179,7 @@ def get_menu(place, date, meal):
 
             if text in wanted:
                 target = text
-            elif pattern.match(text) and text not in not_wanted:
+            elif pattern.match(text) and text not in not_wanted and target != "":
                 menus[soup][target].append(text.capitalize())
             elif "cena" in text:
                 break
