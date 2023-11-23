@@ -124,12 +124,13 @@ def get_menu(place, date, meal):
     date = date.replace("-", "_")
     date = date.split("_")[2] + "_" + date.split("_")[0] + "_" + date.split("_")[1]
 
+    place_upper = place.upper()
     place = place.capitalize()
 
     # Request the raw data
     try:
         r = requests.get(
-            f"https://www.erdis.it/menu/Mensa_{place}/Menu_Del_Giorno_{date}_{place}.html"
+            f"https://www.erdis.it/menu/MENSA_{place_upper}/Menu_Del_Giorno_{date}_{place}.html"
         )
     except requests.exceptions.ConnectionError:
         print("> Connection error...")
@@ -151,11 +152,11 @@ def get_menu(place, date, meal):
 
     target = ""
 
-    # Pattern to exclude allergens
-    pattern = re.compile("([a-z]+)")
+    # Pattern to exclude allergens and other garbage
+    pattern = re.compile("[^A-z ]")
 
     # Exclude what we don't need
-    wanted = ["primo", "secondo", "contorno", "frutta"]
+    wanted = ["primo", "secondo", "contorno", "frutta", "salumi e formaggi"]
     not_wanted = ["pranzo", "cena", "non disponibili"]
     menus = {
         "pranzo": {
@@ -163,12 +164,14 @@ def get_menu(place, date, meal):
             "secondo": [],
             "contorno": [],
             "frutta": [],
+            "salumi e formaggi": [],
         },
         "cena": {
             "primo": [],
             "secondo": [],
             "contorno": [],
             "frutta": [],
+            "salumi e formaggi": [],
         },
     }
 
@@ -179,7 +182,9 @@ def get_menu(place, date, meal):
 
             if text in wanted:
                 target = text
-            elif pattern.match(text) and text not in not_wanted and target != "":
+            elif text not in not_wanted and target != "":
+                # Remove all non alphabetic characters
+                text = pattern.sub("", text)
                 menus[soup][target].append(text.capitalize())
             elif "cena" in text:
                 break
@@ -190,11 +195,13 @@ def get_menu(place, date, meal):
         data["menu"]["second"] = menus["pranzo"]["secondo"]
         data["menu"]["side"] = menus["pranzo"]["contorno"]
         data["menu"]["fruit"] = menus["pranzo"]["frutta"]
+        data["menu"]["cheese"] = menus["pranzo"]["salumi e formaggi"]
     elif meal == "dinner":
         data["menu"]["first"] = menus["cena"]["primo"]
         data["menu"]["second"] = menus["cena"]["secondo"]
         data["menu"]["side"] = menus["cena"]["contorno"]
         data["menu"]["fruit"] = menus["cena"]["frutta"]
+        data["menu"]["cheese"] = menus["cena"]["salumi e formaggi"]
 
     # Check if the menu is empty
     for key in data["menu"]:
