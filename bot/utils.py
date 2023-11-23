@@ -37,6 +37,11 @@ def get_menu_msg(place, date, meal) -> str:
             for dish in menu["fruit"]:
                 rv += f" • {dish}\n"
 
+        if menu["cheese"]:
+            rv += "\n🧀 *Salumi/Formaggi:*\n"
+            for dish in menu["cheese"]:
+                rv += f" • {dish}\n"
+
         rv += "\n⚠️ _Il menù potrebbe subire delle variazioni_ ⚠️"
 
     return rv
