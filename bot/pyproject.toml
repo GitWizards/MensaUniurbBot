@@ -6,7 +6,7 @@ authors = ["Dawid Weglarz <dawid.weglarz95@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.12"
 python-telegram-bot = "^20.6"
 requests = "^2.31.0"
 

@@ -7,11 +7,11 @@ services:
     build: ./bot/
     command: python bot/bot.py
     env_file: .env
+    depends_on:
+      - api
     volumes:
       - .:/app/
     restart: unless-stopped
-    depends_on:
-      - api
 
   api:
     container_name: MensaUniurbApi

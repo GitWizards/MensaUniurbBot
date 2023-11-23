@@ -6,7 +6,7 @@ authors = ["Dawid Weglarz <dawid.weglarz95@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.12"
 Flask = "^3.0.0"
 beautifulsoup4 = "^4.12.2"
 flask-restful = "^0.3.10"
