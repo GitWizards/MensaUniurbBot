@@ -185,6 +185,10 @@ def get_menu(place, date, meal):
             elif text not in not_wanted and target != "":
                 # Remove all non alphabetic characters
                 text = pattern.sub("", text)
+
+                # Clean the text
+                text = text.capitalize().strip()
+
                 menus[soup][target].append(text.capitalize())
             elif "cena" in text:
                 break
