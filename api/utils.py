@@ -185,7 +185,10 @@ def get_menu(place, date, meal):
             elif text not in not_wanted and target != "":
                 # Remove all non alphabetic characters
                 text = pattern.sub("", text)
-
+                
+                # Remove some unwanted stuff :)
+                text = text.replace("erdis", "")
+                
                 # Clean the text
                 text = text.capitalize().strip()
 
