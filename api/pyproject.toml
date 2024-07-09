@@ -10,7 +10,7 @@ python = "^3.12"
 beautifulsoup4 = "^4.12.3"
 flask = "^3.0.3"
 flask-restful = "^0.3.10"
-requests = "^2.32.0"
+requests = "^2.32.2"
 waitress = "^3.0.0"
 
 [build-system]

@@ -1,4 +1,4 @@
-.PHONY: start stop restart shell logs
+.PHONY: start stop restart build shell logs
 dc := docker compose
 
 start:
@@ -7,6 +7,8 @@ stop:
 	$(dc) down -v
 restart: stop
 	$(dc) up -d
+build: stop
+	$(dc) build
 shell:
 	$(dc) run --rm bot bash
 logs:
