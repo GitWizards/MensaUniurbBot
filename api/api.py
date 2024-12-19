@@ -20,7 +20,7 @@ class Tridente(Resource):
 
 
 class RIP(Resource):
-    def get(self, meal):
+    def get(self):
         logger.log_request("RIP", "-")
         return
 
