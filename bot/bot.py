@@ -11,22 +11,11 @@ import signal
 from datetime import datetime
 from random import randint
 
-from telegram import (
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
-    ReplyKeyboardMarkup,
-    ReplyKeyboardRemove,
-    Update,
-)
+from telegram import (InlineKeyboardButton, InlineKeyboardMarkup,
+                      ReplyKeyboardMarkup, ReplyKeyboardRemove, Update)
 from telegram.error import Conflict
-from telegram.ext import (
-    Application,
-    CallbackContext,
-    CommandHandler,
-    ConversationHandler,
-    MessageHandler,
-    filters,
-)
+from telegram.ext import (Application, CallbackContext, CommandHandler,
+                          ConversationHandler, MessageHandler, filters)
 
 from utils import get_menu_msg, get_monthly_stats, prepare_week_keyboard
 
@@ -201,6 +190,16 @@ async def error_handler(_, context: CallbackContext) -> None:
         print("[ERROR] " + str(context.error))
 
 
+async def msgHandler(update: Update, _) -> None:
+    stats = get_monthly_stats()
+    await update.message.reply_text(
+        "Ciao! A quanto sembra ERDIS ha deciso di bloccare completamente l'accesso al sito perciò non possiamo più recuperare i menù. 😢\n\n"
+        "Speriamo sia una cosa temporanea e che possano risolvere il problema al più presto. 🤞\n\n"
+        "Se vuoi che il bot continui a funzionare prova a scrivere una email a ERDIS per farli cambiare idea. 😅\n\n"
+        f"Ecco un po' di statistiche per far capire ad Erdis quanto questo bot sia importante:\n\n{stats}"
+    )
+
+
 def main() -> None:
     # Load env variables
     TOKEN = os.environ["TOKEN"]
@@ -208,32 +207,36 @@ def main() -> None:
     # Setup bot
     application = Application.builder().token(TOKEN).build()
 
-    menu_handler = ConversationHandler(
-        entry_points=[CommandHandler(["duca", "tridente"], meal_choice)],
-        states={
-            MEAL_CHOICE: [
-                MessageHandler(filters.Regex("Pranzo|Cena"), date_choice),
-            ],
-            DATE_CHOICE: [
-                MessageHandler(
-                    filters.Regex("[a-zA-Zì]+ .[0-9]+[/]+[0-9]+."), send_menu
-                ),
-            ],
-        },
-        fallbacks=[MessageHandler(filters.Update, conversation_fallback)],
-    )
+    # menu_handler = ConversationHandler(
+    #     entry_points=[CommandHandler(["duca", "tridente"], meal_choice)],
+    #     states={
+    #         MEAL_CHOICE: [
+    #             MessageHandler(filters.Regex("Pranzo|Cena"), date_choice),
+    #         ],
+    #         DATE_CHOICE: [
+    #             MessageHandler(
+    #                 filters.Regex("[a-zA-Zì]+ .[0-9]+[/]+[0-9]+."), send_menu
+    #             ),
+    #         ],
+    #     },
+    #     fallbacks=[MessageHandler(filters.Update, conversation_fallback)],
+    # )
+    #
+    # # Add command handlers
+    # application.add_handler(CommandHandler("crediti", send_credits))
+    # application.add_handler(CommandHandler("dona", send_credits))
+    # application.add_handler(CommandHandler("orari", send_timetable))
+    # application.add_handler(CommandHandler("posizione_duca", send_duca_location))
+    # application.add_handler(CommandHandler("start", start))
+    # application.add_handler(CommandHandler("statistiche", send_stats))
+    # application.add_handler(
+    #     CommandHandler("posizione_tridente", send_tridente_location)
+    # )
+    # application.add_handler(menu_handler)
 
-    # Add command handlers
-    application.add_handler(CommandHandler("crediti", send_credits))
-    application.add_handler(CommandHandler("dona", send_credits))
-    application.add_handler(CommandHandler("orari", send_timetable))
-    application.add_handler(CommandHandler("posizione_duca", send_duca_location))
-    application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler("statistiche", send_stats))
-    application.add_handler(
-        CommandHandler("posizione_tridente", send_tridente_location)
-    )
-    application.add_handler(menu_handler)
+    # Override all handler and redirect to the same function
+    application.add_handler(MessageHandler(filters.TEXT, msgHandler))
+
     application.add_error_handler(error_handler)
 
     # Start the Bot
