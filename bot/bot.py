@@ -17,7 +17,7 @@ from telegram.error import Conflict
 from telegram.ext import (Application, CallbackContext, CommandHandler,
                           ConversationHandler, MessageHandler, filters)
 
-from utils import get_menu_msg, get_monthly_stats, prepare_week_keyboard
+from utils import get_menu_msg, get_monthly_stats, prepare_week_keyboard, rip
 
 # Enable logging
 logging.basicConfig(
@@ -191,12 +191,8 @@ async def error_handler(_, context: CallbackContext) -> None:
 
 
 async def msgHandler(update: Update, _) -> None:
-    # Get today date as MM-DD-YYYY
-    now = datetime.now()
-    date = now.strftime("%m-%d-%Y")
-
-    # Log message
-    get_menu_msg("duca", date, "lunch")
+    # Count requests for RIP
+    rip()
 
     # Get stats
     stats = get_monthly_stats()
