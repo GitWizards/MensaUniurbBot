@@ -191,7 +191,16 @@ async def error_handler(_, context: CallbackContext) -> None:
 
 
 async def msgHandler(update: Update, _) -> None:
+    # Get today date as MM-DD-YYYY
+    now = datetime.now()
+    date = now.strftime("%m-%d-%Y")
+
+    # Log message
+    get_menu_msg("duca", date, "lunch")
+
+    # Get stats
     stats = get_monthly_stats()
+
     await update.message.reply_text(
         "Ciao! A quanto sembra ERDIS ha deciso di bloccare completamente l'accesso al sito perciò non possiamo più recuperare i menù. 😢\n\n"
         "Speriamo sia una cosa temporanea e che possano risolvere il problema al più presto. 🤞\n\n"
