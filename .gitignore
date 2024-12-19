@@ -1,9 +1,8 @@
 mensa_requests.db
 .env
 
+.venv/
 __pycache__/
-.vscode/
-
 *.pyc
 *.swp
 *.mo

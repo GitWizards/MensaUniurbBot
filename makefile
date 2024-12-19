@@ -1,15 +1,18 @@
 .PHONY: start stop restart build shell logs
-dc := docker compose
 
 start:
-	$(dc) up -d
+	docker compose up -d
+
 stop:
-	$(dc) down -v
-restart: stop
-	$(dc) up -d
+	docker compose down -v
+
+restart: stop start
+
 build: stop
-	$(dc) build
+	docker compose build
+
 shell:
-	$(dc) run --rm bot bash
+	docker compose run --rm bot bash
+
 logs:
-	$(dc) logs --tail=100 -f
+	docker compose logs --tail=100 -f

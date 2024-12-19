@@ -1,15 +1,11 @@
-[tool.poetry]
-name = "mensa-uniurb-bot"
+[project]
+name = "bot"
 version = "1.0.0"
 description = ""
 authors = ["Dawid Weglarz <dawid.weglarz95@gmail.com>"]
-readme = "README.md"
+requires-python = ">=3.12"
 
-[tool.poetry.dependencies]
-python = "^3.12"
-python-telegram-bot = "^21.6"
-requests = "^2.32.3"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+dependencies = [
+    "python-telegram-bot>=21.9",
+    "requests>=2.32.3",
+]

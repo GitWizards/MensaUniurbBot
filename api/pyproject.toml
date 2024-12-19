@@ -1,18 +1,14 @@
-[tool.poetry]
-name = "mensa-uniurb-api"
+[project]
+name = "api"
 version = "1.0.0"
 description = ""
 authors = ["Dawid Weglarz <dawid.weglarz95@gmail.com>"]
-readme = "README.md"
+requires-python = ">=3.12"
 
-[tool.poetry.dependencies]
-python = "^3.12"
-beautifulsoup4 = "^4.12.3"
-flask = "^3.0.3"
-flask-restful = "^0.3.10"
-requests = "^2.32.2"
-waitress = "^3.0.1"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+dependencies = [
+    "beautifulsoup4>=4.12.3",
+    "flask>=3.1.0",
+    "flask-restful>=0.3.10",
+    "requests>=2.32.3",
+    "waitress>=3.0.2",
+]
