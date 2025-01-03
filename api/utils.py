@@ -130,7 +130,7 @@ def get_menu(place, date, meal):
     # Request the raw data
     try:
         r = requests.get(
-            f"https://www.erdis.it/menu/MENSA_{place_upper}/Menu_Del_Giorno_{date}_{place}.html"
+            f"https://menu.erdis.it/MENSA_{place_upper}/Menu_Del_Giorno_{date}_{place}.html"
         )
     except requests.exceptions.ConnectionError:
         print("> Connection error...")
@@ -185,10 +185,10 @@ def get_menu(place, date, meal):
             elif text not in not_wanted and target != "":
                 # Remove all non alphabetic characters
                 text = pattern.sub("", text)
-                
+
                 # Remove some unwanted stuff :)
                 text = text.replace("erdis", "")
-                
+
                 # Clean the text
                 text = text.capitalize().strip()
 

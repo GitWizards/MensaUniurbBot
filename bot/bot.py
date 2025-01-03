@@ -11,22 +11,11 @@ import signal
 from datetime import datetime
 from random import randint
 
-from telegram import (
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
-    ReplyKeyboardMarkup,
-    ReplyKeyboardRemove,
-    Update,
-)
+from telegram import (InlineKeyboardButton, InlineKeyboardMarkup,
+                      ReplyKeyboardMarkup, ReplyKeyboardRemove, Update)
 from telegram.error import Conflict
-from telegram.ext import (
-    Application,
-    CallbackContext,
-    CommandHandler,
-    ConversationHandler,
-    MessageHandler,
-    filters,
-)
+from telegram.ext import (Application, CallbackContext, CommandHandler,
+                          ConversationHandler, MessageHandler, filters)
 
 from utils import get_menu_msg, get_monthly_stats, prepare_week_keyboard
 
@@ -142,7 +131,7 @@ async def send_stats(update: Update, _) -> None:
 async def send_timetable(update: Update, _) -> None:
     await update.message.reply_text(
         "🍝 *Duca*\nAperta tutti i giorni feriali "
-        "dalle *12:00* alle *14:30* "
+        "dalle *12:00* alle *14:15* "
         "e dalle *19:00* alle *21:00*.\n"
         "*Posizione*: /posizione\\_duca\n\n"
         "🍖 *Tridente*\n"
