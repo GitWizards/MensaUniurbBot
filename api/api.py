@@ -19,12 +19,6 @@ class Tridente(Resource):
         return get_menu("tridente", date, meal)
 
 
-class RIP(Resource):
-    def get(self):
-        logger.log_request("RIP", "-")
-        return
-
-
 class RequestStats(Resource):
     def get(self):
         return logger.get_stats()
@@ -42,7 +36,6 @@ if __name__ == "__main__":
     api.add_resource(Duca, "/duca/<date>/<meal>")
     api.add_resource(Tridente, "/tridente/<date>/<meal>")
     api.add_resource(RequestStats, "/stats/")
-    api.add_resource(RIP, "/rip")
 
     # Init database
     logger = Logger("mensa_requests.db")

@@ -5,11 +5,6 @@ from datetime import datetime, timedelta
 import requests
 
 
-def rip() -> None:
-    requests.get(f"http://api:9543/rip")
-    return
-
-
 def get_menu_msg(place, date, meal) -> str:
     r = requests.get(f"http://api:9543/{place}/{date}/{meal}")
     data = json.loads(r.text)
@@ -46,6 +41,7 @@ def get_menu_msg(place, date, meal) -> str:
             rv += "\n🍨 *Frutta/Dolci:*\n"
             for dish in menu["fruit"]:
                 rv += f" • {dish}\n"
+
 
         rv += "\n⚠️ _Il menù potrebbe subire delle variazioni_ ⚠️"
 
