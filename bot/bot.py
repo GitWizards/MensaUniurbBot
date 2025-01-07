@@ -88,14 +88,14 @@ async def send_menu(update: Update, context: CallbackContext) -> int:
 
     if msg == "NO_DATA":
         await update.message.reply_text(
-            "*Non ho trovato nulla 🤷🏻‍♂️ *\n\nControlla gli /orari\n\nOppure il [link ufficiale](https://www.erdis.it/menu/template/OpenMenuWeek.html)\n",
+            "*Non ho trovato nulla 🤷🏻‍♂️ *\n\nControlla gli /orari\n\nOppure il [link ufficiale](https://menu.erdis.it/)\n",
             reply_markup=ReplyKeyboardRemove(),
             parse_mode="Markdown",
         )
     elif msg == "ERROR":
         await update.message.reply_text(
             "🔧 Qualcosa è andato nella comunicazione con il sito ERDIS 🔧\n\n"
-            "Riprova più tardi o direttamente sul loro [sito](http://menu.ersurb.it/menum/ricercamenu.asp)",
+            "Riprova più tardi o direttamente sul loro [sito](https://menu.erdis.it/)",
             reply_markup=ReplyKeyboardRemove(),
             parse_mode="Markdown",
         )
