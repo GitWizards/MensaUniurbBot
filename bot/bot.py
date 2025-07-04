@@ -144,7 +144,7 @@ async def send_timetable(update: Update, _) -> None:
 
 async def send_duca_location(update: Update, _) -> None:
     await update.message.reply_location(
-        "43.72640143124929", "12.63739407389494", quote=True
+        "43.72640143124929", "12.63739407389494"
     )
     await update.message.reply_text(
         "📍 *Indirizzo*: Via F. Budassi 3", parse_mode="Markdown"
@@ -152,7 +152,7 @@ async def send_duca_location(update: Update, _) -> None:
 
 
 async def send_tridente_location(update: Update, _) -> None:
-    await update.message.reply_location("43.720036", "12.623293", quote=True)
+    await update.message.reply_location("43.720036", "12.623293")
     await update.message.reply_text(
         "📍 *Indirizzo*: Via Giancarlo De Carlo 7", parse_mode="Markdown"
     )
