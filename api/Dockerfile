@@ -10,7 +10,7 @@ ENV UV_PROJECT_ENVIRONMENT=/usr/local/
 WORKDIR /app/
 
 # Install uv
-COPY --from=ghcr.io/astral-sh/uv:0.6.4 /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:0.7.19 /uv /uvx /bin/
 
 # Install python requirements
 COPY pyproject.toml uv.lock ./
