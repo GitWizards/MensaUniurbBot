@@ -3,9 +3,9 @@ name = "bot"
 version = "1.0.0"
 description = ""
 authors = ["Dawid Weglarz <dawid.weglarz95@gmail.com>"]
-requires-python = ">=3.13"
+requires-python = ">=3.14"
 
 dependencies = [
-    "python-telegram-bot>=21.9",
-    "requests>=2.32.3",
+    "python-telegram-bot>=22.5",
+    "requests>=2.32.5",
 ]

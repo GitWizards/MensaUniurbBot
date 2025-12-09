@@ -1,4 +1,4 @@
-FROM python:3.13-slim-bookworm
+FROM python:3.14-slim-trixie
 
 ENV PYTHONUNBUFFERED 1
 
@@ -10,7 +10,7 @@ ENV UV_PROJECT_ENVIRONMENT=/usr/local/
 WORKDIR /app/
 
 # Install uv
-COPY --from=ghcr.io/astral-sh/uv:0.7.19 /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:0.9.16 /uv /uvx /bin/
 
 # Generate Italian locales
 RUN apt update && apt install locales -y && rm -rf /var/lib/apt/lists/*
