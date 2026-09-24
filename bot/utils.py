@@ -26,12 +26,12 @@ def get_menu_msg(place, date, meal) -> str:
                 rv += f" • {dish}\n"
 
         if menu["second"]:
-            rv += "\n🍖 *Secondo:*\n"
+            rv += "\n🍽️ *Secondo:*\n"
             for dish in menu["second"]:
                 rv += f" • {dish}\n"
 
         if menu["side"]:
-            rv += "\n🍟 *Contorno:*\n"
+            rv += "\n🥗 *Contorno:*\n"
             for dish in menu["side"]:
                 rv += f" • {dish}\n"
 
@@ -41,7 +41,7 @@ def get_menu_msg(place, date, meal) -> str:
                 rv += f" • {dish}\n"
 
         if menu["fruit"]:
-            rv += "\n🍨 *Frutta/Dolci:*\n"
+            rv += "\n🍎 *Frutta/Dolci:*\n"
             for dish in menu["fruit"]:
                 rv += f" • {dish}\n"
 

@@ -9,7 +9,6 @@ import logging
 import os
 import signal
 from datetime import datetime
-from random import randint
 
 from telegram import (InlineKeyboardButton, InlineKeyboardMarkup,
                       ReplyKeyboardMarkup, ReplyKeyboardRemove, Update)
@@ -100,13 +99,6 @@ async def send_menu(update: Update, context: CallbackContext) -> int:
             parse_mode="Markdown",
         )
     else:
-        # Randomly add paypal link to donate or link to playstore app
-        if randint(1, 3) == 1:
-            msg += (
-                "\n\n-----------------------------\n\n💙 Aiutaci a sostenere le spese di @MensaUniurb\\_Bot.\n"
-                "[Clicca qui](https://paypal.me/Radeox/) e decidi una somma. Grazie!"
-            )
-
         # Send menu to user
         await update.message.reply_text(
             msg, reply_markup=ReplyKeyboardRemove(), parse_mode="Markdown"
