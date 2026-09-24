@@ -1,4 +1,3 @@
-import json
 import locale
 from datetime import datetime, timedelta
 
@@ -6,8 +5,12 @@ import requests
 
 
 def get_menu_msg(place, date, meal) -> str:
-    r = requests.get(f"http://api:9543/{place}/{date}/{meal}")
-    data = json.loads(r.text)
+    try:
+        r = requests.get(f"http://api:9543/{place}/{date}/{meal}", timeout=10)
+        data = r.json()
+    except requests.exceptions.RequestException:
+        return "ERROR"
+
     rv = ""
 
     if data["error"]:
@@ -55,10 +58,11 @@ def get_monthly_stats() -> str:
     day = now.strftime("%-d")
 
     # Requests statistics from the API
-    r = requests.get("http://api:9543/stats/")
-
-    # Convert the data to Json
-    data = json.loads(r.text)
+    try:
+        r = requests.get("http://api:9543/stats/", timeout=10)
+        data = r.json()
+    except requests.exceptions.RequestException:
+        return "Errore nel recupero delle statistiche."
 
     rv = (
         f"Richieste totali: {data['total']}\n"

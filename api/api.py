@@ -7,16 +7,10 @@ from waitress import serve
 from utils import Logger, get_menu
 
 
-class Duca(Resource):
-    def get(self, date, meal):
-        logger.log_request("duca", meal)
-        return get_menu("duca", date, meal)
-
-
-class Tridente(Resource):
-    def get(self, date, meal):
-        logger.log_request("tridente", meal)
-        return get_menu("tridente", date, meal)
+class Menu(Resource):
+    def get(self, place, date, meal):
+        logger.log_request(place.lower(), meal)
+        return get_menu(place.lower(), date, meal)
 
 
 class RequestStats(Resource):
@@ -33,8 +27,7 @@ if __name__ == "__main__":
     api = Api(app)
 
     # Routes configuration
-    api.add_resource(Duca, "/duca/<date>/<meal>")
-    api.add_resource(Tridente, "/tridente/<date>/<meal>")
+    api.add_resource(Menu, "/<place>/<date>/<meal>")
     api.add_resource(RequestStats, "/stats/")
 
     # Init database

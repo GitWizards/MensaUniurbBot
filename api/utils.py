@@ -48,56 +48,46 @@ class Logger:
 
     def get_stats(self):
         # Get today's date
-        month = datetime.now().month
-        year = datetime.now().year
+        now = datetime.now()
+        month = now.month
+        year = now.year
 
-        results = {}
+        results = {
+            "total": 0,
+            "requests": {
+                year: {
+                    month: {}
+                }
+            }
+        }
+
+        # Initialize all days of the month with 0
+        month_days = calendar.monthrange(year, month)[1]
+        for day in range(1, month_days + 1):
+            results["requests"][year][month][day] = 0
 
         with sqlite3.connect(self.DATABASE) as conn:
             cursor = conn.cursor()
 
             # Count total amount of requests
-            query = "SELECT count(*) FROM request"
-            cursor.execute(query)
+            cursor.execute("SELECT count(*) FROM request")
             results["total"] = cursor.fetchone()[0]
 
-            results["requests"] = {}
+            # Aggregate requests for the current month in a single query
+            month_str = f"{year}-{month:02d}"
+            cursor.execute(
+                "SELECT CAST(strftime('%d', date) AS INTEGER), count(*) "
+                "FROM request WHERE strftime('%Y-%m', date) = ? "
+                "GROUP BY 1",
+                (month_str,)
+            )
 
-            results["requests"][year] = {}
-
-            # Total requests in the current month
             month_total = 0
+            for day, count in cursor.fetchall():
+                results["requests"][year][month][day] = count
+                month_total += count
 
-            # Struct to store the data
-            results["requests"][year][month] = {}
-
-            # Check how many days are in current month
-            month_days = calendar.monthrange(int(year), month)[1] + 1
-
-            # Loop through month days
-            for day in range(1, month_days):
-                # Prepare data for query
-                curr_month = str(month).zfill(2)
-                next_day = str(day + 1).zfill(2)
-                today = str(day).zfill(2)
-                data = (
-                    "{0}-{1}-{2}".format(year, curr_month, today),
-                    "{0}-{1}-{2}".format(year, curr_month, next_day),
-                )
-
-                # Create query to get requests in given day
-                query = "SELECT count(*) FROM request WHERE " "date BETWEEN ? AND ?"
-                cursor.execute(query, data)
-
-                # Put the result in the dict
-                req = cursor.fetchone()[0]
-                results["requests"][year][month][day] = req
-
-                # Sum the requests
-                month_total += req
-
-                # Store the total in the result
-                results["requests"][year][month]["total"] = month_total
+            results["requests"][year][month]["total"] = month_total
 
         return results
 
@@ -130,9 +120,10 @@ def get_menu(place, date, meal):
     # Request the raw data
     try:
         r = requests.get(
-            f"https://menu.erdis.it/MENSA_{place_upper}/Menu_Del_Giorno_{date}_{place}.html"
+            f"https://menu.erdis.it/MENSA_{place_upper}/Menu_Del_Giorno_{date}_{place}.html",
+            timeout=10,
         )
-    except requests.exceptions.ConnectionError:
+    except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
         print("> Connection error...")
         data["error"] = True
         return data
