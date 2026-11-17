@@ -15,3 +15,12 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 # Install python requirements
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev
+
+COPY . .
+
+EXPOSE 9543
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:9543/stats/')" || exit 1
+
+CMD ["python", "api.py"]

@@ -1,5 +1,5 @@
 __pycache__
 assets
-bot.py
 Dockerfile
-utils.py
+.dockerignore
+README.md

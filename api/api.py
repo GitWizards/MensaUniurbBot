@@ -31,7 +31,7 @@ if __name__ == "__main__":
     api.add_resource(RequestStats, "/stats/")
 
     # Init database
-    logger = Logger("mensa_requests.db")
+    logger = Logger(os.environ.get("DB_PATH", "mensa_requests.db"))
 
     if DEBUG:
         print("Starting API (Debug mode)")

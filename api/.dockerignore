@@ -1,5 +1,5 @@
 __pycache__
-api.py
 Dockerfile
+.dockerignore
 README.md
-utils.py
+*.db
